@@ -5,5 +5,5 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},
-	"cSpell.words": ["ezbill", "iconify", "primevue", "VITE"]
+	"cSpell.words": ["ezbill", "iconify", "primevue", "supabase", "VITE"]
 }

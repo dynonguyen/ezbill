@@ -1,7 +1,7 @@
 import { PATH } from '@/constants/path'
-import MainLayout from '@/layouts/MainLayout.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { APP_NAME } from '../constants/common'
+import AppLayout from '../layouts/AppLayout.vue'
 
 // -----------------------------
 const HomePage = () => import('@/pages/HomePage.vue')
@@ -10,7 +10,7 @@ const HomePage = () => import('@/pages/HomePage.vue')
 const routes: Readonly<RouteRecordRaw[]> = [
 	{
 		path: '',
-		component: MainLayout,
+		component: AppLayout,
 		children: [
 			{ path: PATH.HOME, name: 'Home', component: HomePage },
 			{ path: '', name: 'Home', component: HomePage },
@@ -24,9 +24,8 @@ const router = createRouter({
 	routes,
 })
 
-router.beforeEach((to, _, next) => {
+router.afterEach((to, _) => {
 	document.title = to.name ? `${APP_NAME} | ${to.name as string}` : APP_NAME
-	next()
 })
 
 export default router

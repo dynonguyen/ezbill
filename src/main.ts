@@ -1,5 +1,7 @@
 import './main.css'
 
+import { VueQueryPlugin } from '@tanstack/vue-query'
+import { createPinia } from 'pinia'
 import PrimeVue, { type PrimeVueConfiguration } from 'primevue/config'
 import { createApp } from 'vue'
 import App from './App.vue'
@@ -18,5 +20,7 @@ app.use(PrimeVue, {
 } as PrimeVueConfiguration)
 
 app.use(router)
+app.use(createPinia())
+app.use(VueQueryPlugin)
 
 app.mount('#app')

@@ -15,7 +15,7 @@ onErrorCaptured((err) => {
 	<slot v-if="Boolean(error)" name="fallback">
 		<div class="max-w-md mx-auto my-12">
 			<img :src="getAssetUrl('img/server-error.svg')" />
-			<div class="text-center text-2xl md:text-3xl font-semibold mt-6">
+			<div class="text-center text-xl md:text-2xl font-semibold mt-6">
 				Something went wrong.<br />Refresh to try again
 			</div>
 		</div>

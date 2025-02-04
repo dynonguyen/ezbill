@@ -1,5 +1,6 @@
 import materialSymbolIcons from '@iconify-json/material-symbols/icons.json'
 import { addIconSelectors } from '@iconify/tailwind'
+import primePlugin from 'tailwindcss-primeui'
 import plugin from 'tailwindcss/plugin'
 
 const iconifyPlugin = addIconSelectors({
@@ -19,15 +20,5 @@ const utilitiesPlugin = plugin(function ({ addUtilities }) {
 export default {
 	content: ['./index.html', './src/**/*.{vue,ts}'],
 
-	plugins: [iconifyPlugin, utilitiesPlugin],
-
-	theme: {
-		screens: {
-			sm: '576px',
-			md: '768px',
-			lg: '992px',
-			xl: '1200px',
-			'2xl': '1920px',
-		},
-	},
+	plugins: [primePlugin, iconifyPlugin, utilitiesPlugin],
 }
