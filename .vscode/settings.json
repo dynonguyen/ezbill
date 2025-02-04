@@ -1,6 +1,9 @@
 {
 	"editor.formatOnSave": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"cSpell.words": ["ezbill", "VITE"],
-	"material-icon-theme.activeIconPack": "vue"
+	"material-icon-theme.activeIconPack": "vue",
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": "explicit"
+	},
+	"cSpell.words": ["ezbill", "iconify", "primevue", "VITE"]
 }

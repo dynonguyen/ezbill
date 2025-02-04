@@ -11,9 +11,17 @@
 		"commit": "node ./node_modules/cz-customizable/standalone.js"
 	},
 	"dependencies": {
-		"vue": "^3.5.13"
+		"@primevue/themes": "^4.2.5",
+		"@tailwindcss/vite": "^4.0.3",
+		"primevue": "^4.2.5",
+		"tailwindcss": "^4.0.3",
+		"tailwindcss-primeui": "^0.4.0",
+		"vue": "^3.5.13",
+		"vue-router": "^4.5.0"
 	},
 	"devDependencies": {
+		"@iconify-json/material-symbols": "^1.2.8",
+		"@iconify/tailwind": "^1.2.0",
 		"@tsconfig/node22": "^22.0.0",
 		"@types/node": "^22.10.7",
 		"@vitejs/plugin-vue": "^5.2.1",

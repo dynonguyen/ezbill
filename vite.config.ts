@@ -1,5 +1,6 @@
 import 'dotenv/config'
 
+import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, PluginOption } from 'vite'
@@ -14,7 +15,7 @@ const injectData = {
 	favicon: BASE_URL + '/img/logo.png',
 }
 
-const plugins: PluginOption[] = [vue(), ViteEjsPlugin(injectData)]
+const plugins: PluginOption[] = [vue(), ViteEjsPlugin(injectData), tailwindcss()]
 
 if (process.env.ENABLE_VUE_DEVTOOL === 'true') {
 	plugins.push(vueDevTools())

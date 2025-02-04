@@ -51,6 +51,7 @@ export default defineConfigWithVueTs(
 				},
 			],
 			'no-warning-comments': ['error', { terms: ['MOCK', 'BUG', 'FIXME'], location: 'start' }],
+			'vue/multi-word-component-names': 'off',
 		},
 	},
 )
