@@ -8,7 +8,6 @@ html {
 		-apple-system,
 		Arial,
 		sans-serif;
-	line-height: normal;
 }
 
 * ::-webkit-scrollbar {
@@ -22,4 +21,8 @@ html {
 
 * ::-webkit-scrollbar-thumb {
 	@apply bg-neutral-400 border-none rounded-lg;
+}
+
+.p-button {
+	font-weight: 500;
 }

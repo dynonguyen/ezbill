@@ -22,7 +22,7 @@ const variants = {
 	displaySemiBold: 'text-2xl font-semibold',
 }
 
-interface TypographyProps extends /* @vue-ignore */ HTMLAttributes {
+export interface TypographyProps extends /* @vue-ignore */ HTMLAttributes {
 	as?: keyof HTMLElementTagNameMap
 	variant?: keyof typeof variants
 }
