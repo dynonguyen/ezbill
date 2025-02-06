@@ -16,6 +16,9 @@ export const NoirPreset = definePreset(Aura, {
 			900: '{surface.900}',
 			950: '{surface.950}',
 		},
+		error: {
+			500: '{red.400}',
+		},
 		colorScheme: {
 			light: {
 				primary: {

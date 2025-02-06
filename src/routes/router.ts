@@ -5,6 +5,7 @@ import AppLayout from '../layouts/AppLayout.vue'
 
 // -----------------------------
 const HomePage = () => import('@/pages/HomePage.vue')
+const GroupPage = () => import('@/pages/GroupPage.vue')
 
 // -----------------------------
 const routes: Readonly<RouteRecordRaw[]> = [
@@ -13,6 +14,7 @@ const routes: Readonly<RouteRecordRaw[]> = [
 		component: AppLayout,
 		children: [
 			{ path: PATH.HOME, name: 'Home', component: HomePage },
+			{ path: PATH.GROUP, name: 'Group', component: GroupPage },
 			{ path: '', name: 'Home', component: HomePage },
 			{ path: '/:p*', redirect: PATH.HOME },
 		],

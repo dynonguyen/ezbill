@@ -8,7 +8,7 @@ interface FlexProps extends /* @vue-ignore */ HTMLAttributes {
 	center?: boolean
 }
 
-const props = withDefaults(defineProps<FlexProps>(), {
+withDefaults(defineProps<FlexProps>(), {
 	wrap: false,
 	stack: false,
 	center: false,
@@ -20,16 +20,15 @@ defineOptions({ inheritAttrs: false })
 
 <template>
 	<component
-		:is="props.as"
+		:is="$props.as"
 		class="flex"
 		:class="{
-			'flex-wrap': props.wrap,
-			'flex-col': props.stack,
+			'flex-wrap': $props.wrap,
+			'flex-col': $props.stack,
 			'items-center': !stack && !center,
-			'items-center justify-center': props.center,
+			'items-center justify-center': $props.center,
 		}"
-		v-bind="$attrs"
-	>
+		v-bind="$attrs">
 		<slot></slot>
 	</component>
 </template>

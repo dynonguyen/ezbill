@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { getAssetUrl } from '@/utils/get-asset'
+import { Button } from 'primevue'
 import { onErrorCaptured, ref } from 'vue'
+import Flex from './Flex.vue'
+import Typography from './Typography.vue'
 
 const error = ref<Error | null>(null)
 
@@ -9,16 +12,24 @@ onErrorCaptured((err) => {
 	console.error('ErrorBoundary:', error)
 	return false
 })
+
+const handleReload = () => {
+	window.location.reload()
+}
 </script>
 
 <template>
 	<slot v-if="Boolean(error)" name="fallback">
-		<div class="max-w-md mx-auto my-12">
+		<Flex stack class="max-w-md mx-auto my-12 gap-6">
 			<img :src="getAssetUrl('img/server-error.svg')" />
-			<div class="text-center text-xl md:text-2xl font-semibold mt-6">
-				Something went wrong.<br />Refresh to try again
-			</div>
-		</div>
+			<Typography variant="displayMedium" class="text-center">
+				Something went wrong!
+				<Typography variant="lgMedium" class="text-gray-600"> Refresh to try again </Typography>
+			</Typography>
+			<Flex center class="w-full">
+				<Button icon="icon msi-refresh-rounded" label="Reload" @click="handleReload" />
+			</Flex>
+		</Flex>
 	</slot>
 	<slot v-else></slot>
 </template>

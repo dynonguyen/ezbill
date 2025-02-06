@@ -26,3 +26,7 @@ html {
 .p-button {
 	font-weight: 500;
 }
+
+@theme {
+	--color-error: var(--color-red-500);
+}

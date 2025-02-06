@@ -1,6 +1,5 @@
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import prettier from 'eslint-plugin-prettier'
 import pluginVue from 'eslint-plugin-vue'
 
 export default defineConfigWithVueTs(
@@ -13,8 +12,6 @@ export default defineConfigWithVueTs(
 		name: 'app/files-to-ignore',
 		ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**'],
 	},
-
-	{ plugins: { prettier } },
 
 	pluginVue.configs['flat/essential'],
 	vueTsConfigs.recommended,
@@ -37,7 +34,6 @@ export default defineConfigWithVueTs(
 			'@typescript-eslint/no-empty-function': 'warn',
 			'import/no-named-as-default-member': 'off',
 			'import/no-named-as-default': 'off',
-			'prettier/prettier': ['warn'],
 
 			'no-console': ['warn', { allow: ['error', 'warn'] }],
 

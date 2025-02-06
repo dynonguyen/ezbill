@@ -2,14 +2,14 @@
 import Flex from '@/components/Flex.vue'
 import GroupInvitation from '@/features/group-invitation/GroupInvitation.vue'
 import NewGroupButton from '@/features/new-group/NewGroupButton.vue'
-import RecentlyViewed from '@/features/recently-viewed/RecentlyViewed.vue'
+import RecentGroups from '@/features/recent-groups/RecentGroups.vue'
 </script>
 
 <template>
-	<Flex stack class="gap-6">
+	<Flex stack class="gap-6 h-full">
 		<GroupInvitation />
-		<RecentlyViewed />
-		<div class="absolute bottom-12 right-4">
+		<RecentGroups />
+		<div class="mt-auto mx-auto">
 			<NewGroupButton />
 		</div>
 	</Flex>

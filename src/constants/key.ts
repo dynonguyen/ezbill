@@ -1,3 +1,3 @@
-export const STORE_KEY = {
-	USER: 'user',
+export const LS_KEY = {
+	RECENT_GROUP: 'recent-group',
 }

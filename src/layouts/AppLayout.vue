@@ -3,7 +3,9 @@ import ErrorBoundary from '@/components/ErrorBoundary.vue'
 </script>
 
 <template>
-	<div class="mx-auto max-w-120 lg:max-w-140 p-4 lg:p-8 h-screen overflow-hidden relative">
+	<div
+		class="mx-auto md:max-w-140 p-4 md:p-6 h-screen overflow-hidden relative md:border-x md:border-gray-300"
+	>
 		<ErrorBoundary>
 			<RouterView />
 		</ErrorBoundary>

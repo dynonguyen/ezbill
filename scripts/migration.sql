@@ -24,7 +24,7 @@ create table
   public.groups (
     id uuid not null default gen_random_uuid (),
     "createdAt" timestamp with time zone not null default now(),
-    name text not null,
+    name varchar(512) not null,
     members text[] null,
     constraint groups_pkey primary key (id)
   ) tablespace pg_default;
@@ -35,7 +35,7 @@ create table
     "createdAt" timestamp with time zone not null default now(),
     "groupId" uuid not null,
     amount bigint not null,
-    note text null,
+    note varchar(1024) null,
     "createdBy" text not null,
     inclusion text[] null,
     exclusion text[] null,

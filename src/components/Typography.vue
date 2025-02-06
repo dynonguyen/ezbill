@@ -27,7 +27,7 @@ export interface TypographyProps extends /* @vue-ignore */ HTMLAttributes {
 	variant?: keyof typeof variants
 }
 
-const props = withDefaults(defineProps<TypographyProps>(), {
+withDefaults(defineProps<TypographyProps>(), {
 	as: 'div',
 	variant: 'mdRegular',
 })
@@ -36,7 +36,7 @@ defineOptions({ inheritAttrs: false })
 </script>
 
 <template>
-	<component :is="props.as" :class="variants[props.variant]" v-bind="$attrs">
+	<component :is="$props.as" :class="variants[$props.variant!]" v-bind="$attrs">
 		<slot></slot>
 	</component>
 </template>
