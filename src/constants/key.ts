@@ -1,3 +1,7 @@
 export const LS_KEY = {
-	RECENT_GROUP: 'recent-group',
+	JOINED_GROUP: 'joined-group',
+}
+
+export const STORE_KEY = {
+	LOCAL_DB: 'local-db',
 }

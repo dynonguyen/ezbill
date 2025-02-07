@@ -4,10 +4,10 @@ export const generateUUID = () => {
 	return uuidv4()
 }
 
-export function safeJSONParse<T = unknown>(data: T, fallback?: T): T {
+export function safeJSONParse<T = unknown>(data: string | T, fallback?: T): T {
 	try {
 		return (typeof data === 'string' ? JSON.parse(data) : data) as T
 	} catch {
-		return fallback || data
+		return (fallback || data) as T
 	}
 }

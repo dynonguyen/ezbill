@@ -17,6 +17,7 @@
 		"@tanstack/vue-query": "^5.66.0",
 		"@vee-validate/zod": "^4.15.0",
 		"await-to-js": "^3.0.0",
+		"pinia": "^2.3.1",
 		"primevue": "^4.2.5",
 		"qrcode": "^1.5.4",
 		"tailwindcss": "^4.0.3",

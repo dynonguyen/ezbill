@@ -93,4 +93,6 @@ begin
 end;
 $$ language plpgsql security definer;
 
--- NOTE: After running this script, you need to enable RLS on the tables
+-- Enable row level security
+alter table "public"."bills" enable row level security;
+alter table "public"."groups" enable row level security;

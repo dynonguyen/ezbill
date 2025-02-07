@@ -2,9 +2,13 @@
 import Feedback from '@/components/Feedback.vue'
 import Flex from '@/components/Flex.vue'
 import Typography from '@/components/Typography.vue'
+import { useLocalDBStore } from '@/stores/local-db'
+import { Group } from '@/types/entities'
 import { getImgUrl } from '@/utils/get-asset'
+import { ref } from 'vue'
 
-const groups: string[] = []
+const localStore = useLocalDBStore()
+const groups = ref<Group[]>([])
 </script>
 
 <template>
@@ -13,11 +17,10 @@ const groups: string[] = []
 
 		<div class="overflow-auto">
 			<Feedback
-				v-if="!groups.length"
+				v-if="!localStore.joinedGroups.length"
 				:img="getImgUrl('no-groups-found.svg')"
 				title="No groups found"
-				:attrs="{ img: { class: 'w-1/2' } }"
-			/>
+				:attrs="{ img: { class: 'w-1/2' } }" />
 			<div v-else class="h-400">Hello</div>
 		</div>
 	</Flex>

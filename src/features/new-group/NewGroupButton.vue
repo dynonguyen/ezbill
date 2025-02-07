@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Flex from '@/components/Flex.vue'
 import Loading from '@/components/Loading.vue'
-import { storeRecentGroup } from '@/utils/recent-group'
+import type { Group } from '@/types/entities'
 import { Button, Dialog } from 'primevue'
 import { defineAsyncComponent, ref } from 'vue'
 
@@ -16,9 +16,8 @@ const handleCloseInviteLink = () => {
 	inviteGroupId.value = ''
 }
 
-const handleNewGroupAdded = (id: string) => {
-	inviteGroupId.value = id
-	storeRecentGroup(id)
+const handleNewGroupAdded = (group: Pick<Group, 'id'>) => {
+	inviteGroupId.value = group.id
 }
 </script>
 

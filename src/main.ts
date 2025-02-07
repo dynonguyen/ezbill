@@ -1,6 +1,7 @@
 import './main.css'
 
 import { VueQueryPlugin } from '@tanstack/vue-query'
+import { createPinia } from 'pinia'
 import PrimeVue, { type PrimeVueConfiguration } from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
@@ -24,6 +25,7 @@ app.use(PrimeVue, {
 app.use(router)
 app.use(VueQueryPlugin)
 app.use(ToastService)
+app.use(createPinia())
 
 app.directive('tooltip', Tooltip)
 
