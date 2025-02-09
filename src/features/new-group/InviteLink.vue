@@ -54,19 +54,19 @@ watch(copied, () => {
 
 <template>
 	<Flex class="gap-2 items-end">
-		<FormControl class="grow" label="Invite link">
+		<FormControl class="grow" label="Link mời tham gia">
 			<InputText :value="inviteLink" readonly fluid />
 		</FormControl>
 		<Button
 			:icon="copied ? 'icon msi-check-rounded' : 'icon msi-content-copy-outline'"
-			:label="copied ? 'Copied' : 'Copy'"
+			:label="copied ? 'Đã sao chép' : 'Sao chép'"
 			:severity="copied ? 'success' : 'primary'"
 			variant="outlined"
 			@click="copyToClipboard" />
 	</Flex>
 
 	<Divider align="center">
-		<strong>OR share QR code</strong>
+		<strong>OR chia sẻ mã QR</strong>
 	</Divider>
 
 	<Flex stack center>
@@ -75,7 +75,7 @@ watch(copied, () => {
 	</Flex>
 
 	<Flex class="justify-end gap-2 mt-4">
-		<Button variant="outlined" label="Close" @click="$emit('close')" />
-		<Button label="View group" icon="icon msi-open-in-new" icon-pos="right" @click="viewGroup" />
+		<Button variant="outlined" label="Đóng" @click="$emit('close')" />
+		<Button label="Xem nhóm" icon="icon msi-open-in-new" icon-pos="right" @click="viewGroup" />
 	</Flex>
 </template>

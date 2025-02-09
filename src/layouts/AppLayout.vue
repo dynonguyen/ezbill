@@ -4,7 +4,8 @@ import ErrorBoundary from '@/components/ErrorBoundary.vue'
 
 <template>
 	<div
-		class="mx-auto md:max-w-140 p-4 md:p-6 h-dvh overflow-hidden relative md:border-x md:border-gray-300">
+		id="app-layout"
+		class="mx-auto md:max-w-140 py-4 h-dvh overflow-hidden relative md:border-x md:border-gray-300">
 		<ErrorBoundary>
 			<RouterView />
 		</ErrorBoundary>

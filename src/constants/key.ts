@@ -6,6 +6,10 @@ export const STORE_KEY = {
 	LOCAL_DB: 'local-db',
 }
 
+export const CONTEXT_KEY = {
+	GROUP: 'group',
+}
+
 export const QUERY_KEY = {
 	GROUP: 'group',
 }

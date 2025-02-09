@@ -4,6 +4,6 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
-	<Toast position="top-center" />
+	<Toast position="bottom-center" />
 	<RouterView />
 </template>

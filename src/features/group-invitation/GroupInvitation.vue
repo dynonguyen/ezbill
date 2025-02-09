@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import Flex from '@/components/Flex.vue'
 import { PATH } from '@/constants/path'
+import { useToast } from '@/hooks/useToast'
 import { getEnv } from '@/utils/get-env'
-import { Button, InputText, useToast } from 'primevue'
+import { Button, InputText } from 'primevue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -19,10 +20,9 @@ const handleJoinGroup = async () => {
 	if (linkOrId.startsWith(baseUrl)) {
 		const isValid = linkOrId.includes(`${baseUrl}${PATH.GROUP.replace(':id', '')}`)
 		if (!isValid) {
-			toast.add({
-				severity: 'error',
-				summary: 'Invalid link',
-				detail: 'Please enter a valid group invite link',
+			toast.error({
+				summary: 'Link không hợp lệ',
+				detail: 'Vui lòng nhập link hoặc id nhóm hợp lệ',
 			})
 			return
 		}
@@ -35,8 +35,12 @@ const handleJoinGroup = async () => {
 </script>
 
 <template>
-	<Flex class="gap-4">
-		<InputText v-model="inviteLink" autofocus placeholder="Enter group id or invite link" fluid />
-		<Button class="shrink-0" @click="handleJoinGroup">Join group</Button>
+	<Flex class="gap-4 px-4">
+		<InputText
+			v-model="inviteLink"
+			autofocus
+			placeholder="Nhập link mời tham gia hoặc ID nhóm"
+			fluid />
+		<Button class="shrink-0" @click="handleJoinGroup">Tham gia</Button>
 	</Flex>
 </template>

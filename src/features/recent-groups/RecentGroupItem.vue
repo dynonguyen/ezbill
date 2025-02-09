@@ -31,7 +31,9 @@ const MAX_AVATAR = 5
 				{{ group.name }}
 			</Typography>
 
-			<Typography v-if="!group.members.length" class="text-muted-color">No members</Typography>
+			<Typography v-if="!group.members.length" class="text-muted-color">
+				Chưa có thành viên
+			</Typography>
 			<Flex v-else class="gap-2">
 				<AvatarGroup>
 					<MemberAvatar
@@ -47,7 +49,7 @@ const MAX_AVATAR = 5
 			</Flex>
 
 			<Typography variant="smRegular" class="text-muted-color">
-				<span class="font-medium">Created at:</span>
+				<span class="font-medium">Ngày tạo:</span>
 				{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm:ss') }}
 			</Typography>
 		</Flex>

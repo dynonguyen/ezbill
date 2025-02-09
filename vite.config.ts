@@ -12,7 +12,7 @@ const BASE_URL = process.env.VITE_BASE_URL || ''
 const injectData = {
 	baseUrl: BASE_URL,
 	appName: 'Ezbill',
-	favicon: BASE_URL + '/img/logo.png',
+	favicon: BASE_URL + '/img/logo.svg',
 }
 
 const plugins: PluginOption[] = [vue(), ViteEjsPlugin(injectData), tailwindcss()]

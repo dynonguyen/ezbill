@@ -19,5 +19,16 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 
 	watch([joinedGroups], persistToLocalStorage)
 
-	return { joinedGroups }
+	const joinGroup = (groupId: string, userId: string) => {
+		joinedGroups.value = [
+			...joinedGroups.value.filter((group) => group.groupId !== groupId),
+			{ groupId, userId },
+		]
+	}
+
+	const removeFromGroup = (groupId: string) => {
+		joinedGroups.value = joinedGroups.value.filter((group) => group.groupId !== groupId)
+	}
+
+	return { joinedGroups, joinGroup, removeFromGroup }
 })

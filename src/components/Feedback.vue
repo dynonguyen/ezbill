@@ -15,5 +15,6 @@ const props = defineProps<FeedbackProps>()
 	<Flex stack class="gap-3" center>
 		<img :src="props.img" v-bind="$props.attrs?.img" />
 		<Typography class="text-gray-400" v-bind="$props.attrs?.title">{{ props.title }}</Typography>
+		<slot name="action"></slot>
 	</Flex>
 </template>

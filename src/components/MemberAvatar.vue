@@ -16,7 +16,7 @@ withDefaults(defineProps<Member & AvatarProps & { showTooltip?: boolean }>(), {
 		v-tooltip.bottom="$props.showTooltip ? $props.name : null" />
 	<Avatar
 		v-else-if="$props.name"
-		:label="$props.name[0]"
+		:label="$props.name[0].toUpperCase()"
 		shape="circle"
 		v-tooltip.bottom="$props.showTooltip ? $props.name : null" />
 </template>

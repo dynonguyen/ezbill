@@ -2,12 +2,13 @@
 import { createGroup } from '@/apis/supabase'
 import Flex from '@/components/Flex.vue'
 import FormControl from '@/components/FormControl.vue'
+import { useToast } from '@/hooks/useToast'
 import type { Group } from '@/types/entities'
 import { generateUUID } from '@/utils/helpers'
 import { useMutation } from '@tanstack/vue-query'
 import { toTypedSchema } from '@vee-validate/zod'
 import to from 'await-to-js'
-import { Button, InputText, useToast } from 'primevue'
+import { Button, InputText } from 'primevue'
 import { useForm } from 'vee-validate'
 import { z } from 'zod'
 
@@ -18,7 +19,7 @@ const MAX = {
 }
 
 const schema = z.object({
-	name: z.string().trim().nonempty('Name is required').default(''),
+	name: z.string().trim().nonempty('Bắt buộc').default(''),
 })
 
 type GroupForm = z.infer<typeof schema>
@@ -38,12 +39,7 @@ const handleAddGroup = handleSubmit(async (form) => {
 	const [error] = await to(mutateAsync({ name, id: groupId }))
 
 	if (error) {
-		return toast.add({
-			severity: 'error',
-			summary: 'Failed to create group',
-			detail: error?.message,
-			life: 3000,
-		})
+		return toast.error({ summary: 'Tạo nhóm thất bại', detail: error?.message })
 	}
 
 	emit('success', { id: groupId })
@@ -56,20 +52,20 @@ const [name, nameProps] = defineField('name')
 	<Flex stack class="gap-4" as="form" @submit="handleAddGroup">
 		<FormControl
 			html-for="name"
-			label="Name"
+			label="Tên nhóm"
 			:error="Boolean(errors.name)"
 			:helper-text="errors.name">
 			<InputText
 				id="name"
-				placeholder="Enter group name"
+				placeholder="Nhập tên nhóm"
 				v-model="name"
 				v-bind="nameProps"
 				:maxlength="MAX.NAME" />
 		</FormControl>
 
 		<Flex class="justify-end gap-2">
-			<Button variant="outlined" label="Close" @click="$emit('close')" />
-			<Button type="submit" label="Submit" :loading="isPending" />
+			<Button variant="outlined" label="Đóng" @click="$emit('close')" />
+			<Button class="min-w-20" type="submit" label="Tạo" :loading="isPending" />
 		</Flex>
 	</Flex>
 </template>

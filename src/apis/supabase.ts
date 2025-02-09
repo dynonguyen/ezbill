@@ -1,8 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Group } from '../types/entities'
+import to from 'await-to-js'
+import type { Group, Member } from '../types/entities'
 import { getEnv } from '../utils/get-env'
 
 export const supabase = createClient(getEnv('VITE_SUPABASE_URL'), getEnv('VITE_SUPABASE_KEY'))
+
+const getGroupView = (groupId: string) => `group_${groupId}`
 
 export const createGroup = async (group: Pick<Group, 'name' | 'id'>) => {
 	const gData = await supabase.from('groups').insert(group)
@@ -16,9 +19,33 @@ export const createGroup = async (group: Pick<Group, 'name' | 'id'>) => {
 }
 
 export const fetchGroup = async (id: string): Promise<Group> => {
-	const { data, error } = await supabase.from(`group_${id}`).select().single()
+	const { data, error } = await supabase.from(getGroupView(id)).select().single()
 
 	if (error) throw error
 
 	return data as Group
+}
+
+export const addMember = async (data: { groupId: Group['id']; member: Member }) => {
+	const { groupId, member } = data
+
+	const [error, currentGroup] = await to(fetchGroup(groupId))
+
+	if (error) {
+		throw new Error('Không thể tham gia nhóm')
+	}
+
+	const { name } = member
+	const isExist = currentGroup.members.some((member) => member.name === name)
+
+	if (isExist) {
+		throw new Error('Thành viên đã tồn tại trong nhóm. Vui lòng nhập một tên khác')
+	}
+
+	const resp = await supabase
+		.from(getGroupView(groupId))
+		.update({ members: [...currentGroup.members, member] })
+		.eq('id', groupId)
+
+	if (resp.error) throw resp.error
 }

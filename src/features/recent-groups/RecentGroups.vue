@@ -10,14 +10,14 @@ const localStore = useLocalDBStore()
 </script>
 
 <template>
-	<Flex stack class="gap-4 grow overflow-hidden">
-		<Typography variant="xlSemiBold">Recent groups</Typography>
+	<div class="grow overflow-auto">
+		<Flex stack class="gap-4 px-4">
+			<Typography variant="xlSemiBold">Nhóm đã tham gia</Typography>
 
-		<div class="overflow-auto grow">
 			<Feedback
 				v-if="!localStore.joinedGroups.length"
 				:img="getImgUrl('no-groups-found.svg')"
-				title="No groups found"
+				title="Không có nhóm nào"
 				:attrs="{ img: { class: 'w-1/2' } }" />
 			<Flex v-else class="gap-4" stack>
 				<RecentGroupItem
@@ -25,6 +25,6 @@ const localStore = useLocalDBStore()
 					:key="group.groupId"
 					:id="group.groupId" />
 			</Flex>
-		</div>
-	</Flex>
+		</Flex>
+	</div>
 </template>

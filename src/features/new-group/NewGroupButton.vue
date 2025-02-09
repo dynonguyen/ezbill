@@ -23,7 +23,7 @@ const handleNewGroupAdded = (group: Pick<Group, 'id'>) => {
 
 <template>
 	<Button
-		v-tooltip.top="'New group'"
+		v-tooltip.top="'Tạo nhóm mới'"
 		icon="icon msi-add-2-rounded shrink-0 size-5"
 		rounded
 		size="large"
@@ -34,7 +34,7 @@ const handleNewGroupAdded = (group: Pick<Group, 'id'>) => {
 		:draggable="false"
 		v-model:visible="open"
 		modal
-		:header="inviteGroupId ? 'Invite people to your group' : 'New group'"
+		:header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm mới'"
 		class="w-100 max-w-full">
 		<Suspense>
 			<NewGroupForm
