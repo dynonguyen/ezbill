@@ -1,6 +1,6 @@
 import './main.css'
 
-import { VueQueryPlugin } from '@tanstack/vue-query'
+import { QueryClient, VueQueryPlugin, type VueQueryPluginOptions } from '@tanstack/vue-query'
 import { createPinia } from 'pinia'
 import PrimeVue, { type PrimeVueConfiguration } from 'primevue/config'
 import ToastService from 'primevue/toastservice'
@@ -23,8 +23,13 @@ app.use(PrimeVue, {
 } as PrimeVueConfiguration)
 
 app.use(router)
-app.use(VueQueryPlugin)
+
+app.use(VueQueryPlugin, {
+	queryClient: new QueryClient({ defaultOptions: { queries: { retry: 0 } } }),
+} as VueQueryPluginOptions)
+
 app.use(ToastService)
+
 app.use(createPinia())
 
 app.directive('tooltip', Tooltip)

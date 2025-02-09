@@ -24,8 +24,9 @@ if (process.env.ENABLE_VUE_DEVTOOL === 'true') {
 export default defineConfig({
 	plugins,
 	envPrefix: 'VITE_',
+	base: BASE_URL,
 	resolve: {
 		alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
 	},
-	server: { open: true, port: 8888 },
+	server: { open: true, port: 8888, host: '0.0.0.0' },
 })

@@ -14,3 +14,11 @@ export const createGroup = async (group: Pick<Group, 'name' | 'id'>) => {
 	const bvData = await supabase.rpc('create_bill_view', { group_id: group.id })
 	if (bvData.error) throw bvData.error
 }
+
+export const fetchGroup = async (id: string): Promise<Group> => {
+	const { data, error } = await supabase.from(`group_${id}`).select().single()
+
+	if (error) throw error
+
+	return data as Group
+}

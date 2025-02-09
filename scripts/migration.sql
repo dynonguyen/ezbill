@@ -25,7 +25,7 @@ create table
     id uuid not null default gen_random_uuid (),
     "createdAt" timestamp with time zone not null default now(),
     name varchar(512) not null,
-    members text[] null,
+    members jsonb[] not null default '{}'::jsonb[],
     constraint groups_pkey primary key (id)
   ) tablespace pg_default;
 
@@ -37,8 +37,7 @@ create table
     amount bigint not null,
     note varchar(1024) null,
     "createdBy" text not null,
-    inclusion text[] null,
-    exclusion text[] null,
+		members jsonb not null default '{}'::jsonb,
     constraint bills_pkey primary key (id),
     constraint bills_groupid_fkey foreign key ("groupId") references groups (id) on delete cascade
   ) tablespace pg_default;

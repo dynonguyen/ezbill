@@ -4,8 +4,8 @@ import { LS_KEY, STORE_KEY } from '../constants/key'
 import { safeJSONParse } from '../utils/helpers'
 
 type JoinedGroup = {
-	id: string
-	name: string
+	groupId: string
+	userId: string
 }
 
 export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {

@@ -10,7 +10,7 @@ const inviteLink = ref('')
 const router = useRouter()
 const toast = useToast()
 
-const handleJoinGroup = () => {
+const handleJoinGroup = async () => {
 	const linkOrId = inviteLink.value.trim()
 	if (!linkOrId) return
 
