@@ -21,7 +21,7 @@ const copied = ref(false)
 const router = useRouter()
 
 const copyToClipboard = () => {
-	navigator.clipboard.writeText(inviteLink.value)
+	navigator.clipboard?.writeText(inviteLink.value)
 	copied.value = true
 }
 
@@ -33,7 +33,7 @@ const viewGroup = () => {
 watch(
 	inviteLink,
 	async () => {
-		navigator.clipboard.writeText(inviteLink.value)
+		navigator.clipboard?.writeText(inviteLink.value)
 		qrBase64.value = await QRCode.toDataURL(inviteLink.value)
 	},
 	{ immediate: true },

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue'
-import MemberAvatar from '@/components/MemberAvatar.vue'
-import Typography from '@/components/Typography.vue'
-import type { Member } from '@/types/entities'
-import { useGroupContext } from '../hooks/useGroupContext'
+import Flex from '@/components/Flex.vue';
+import MemberAvatar from '@/components/MemberAvatar.vue';
+import Typography from '@/components/Typography.vue';
+import type { Member } from '@/types/entities';
+import { useGroupContext } from '../hooks/useGroupContext';
 
-defineEmits<{ select: [member: Member] }>()
+defineEmits<{ select: [member: Member] }>();
 
-const group = useGroupContext()
+const { group } = useGroupContext();
 </script>
 
 <template>

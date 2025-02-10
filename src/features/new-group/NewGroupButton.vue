@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue'
-import Loading from '@/components/Loading.vue'
-import type { Group } from '@/types/entities'
-import { Button, Dialog } from 'primevue'
-import { defineAsyncComponent, ref } from 'vue'
+import Flex from '@/components/Flex.vue';
+import Loading from '@/components/Loading.vue';
+import type { Group } from '@/types/entities';
+import { Button, Dialog } from 'primevue';
+import { defineAsyncComponent, ref } from 'vue';
 
-const NewGroupForm = defineAsyncComponent(() => import('./NewGroupForm.vue'))
-const InviteLink = defineAsyncComponent(() => import('./InviteLink.vue'))
+const NewGroupForm = defineAsyncComponent(() => import('./NewGroupForm.vue'));
+const InviteLink = defineAsyncComponent(() => import('./InviteLink.vue'));
 
-const open = ref(false)
-const inviteGroupId = ref('')
+const open = ref(false);
+const inviteGroupId = ref('');
 
 const handleCloseInviteLink = () => {
-	open.value = false
-	inviteGroupId.value = ''
-}
+	open.value = false;
+	inviteGroupId.value = '';
+};
 
 const handleNewGroupAdded = (group: Pick<Group, 'id'>) => {
-	inviteGroupId.value = group.id
-}
+	inviteGroupId.value = group.id;
+};
 </script>
 
 <template>

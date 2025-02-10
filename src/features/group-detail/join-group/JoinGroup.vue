@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue'
-import GoHomeArrow from '@/components/GoHomeArrow.vue'
-import Typography from '@/components/Typography.vue'
-import { QUERY_KEY } from '@/constants/key'
-import { useLocalDBStore } from '@/stores/local-db'
-import type { Member } from '@/types/entities'
-import { useQueryClient } from '@tanstack/vue-query'
-import { Tab, TabList, Tabs } from 'primevue'
-import { ref } from 'vue'
-import { useAppLayout } from '../hooks/useAppLayout'
-import { useGroupContext } from '../hooks/useGroupContext'
-import ExistingMember from './ExistingMember.vue'
-import NewMember from './NewMember.vue'
+import Flex from '@/components/Flex.vue';
+import GoHomeArrow from '@/components/GoHomeArrow.vue';
+import Typography from '@/components/Typography.vue';
+import { QUERY_KEY } from '@/constants/key';
+import { useLocalDBStore } from '@/stores/local-db';
+import type { Member } from '@/types/entities';
+import { useQueryClient } from '@tanstack/vue-query';
+import { Tab, TabList, Tabs } from 'primevue';
+import { ref } from 'vue';
+import { useAppLayout } from '../hooks/useAppLayout';
+import { useGroupContext } from '../hooks/useGroupContext';
+import ExistingMember from './ExistingMember.vue';
+import NewMember from './NewMember.vue';
 
 enum TabValue {
 	New = '0',
 	Existed = '1',
 }
-const group = useGroupContext()
-const tab = ref(TabValue.New)
-const queryClient = useQueryClient()
-const localDBStore = useLocalDBStore()
+const { group } = useGroupContext();
+const tab = ref(TabValue.New);
+const queryClient = useQueryClient();
+const localDBStore = useLocalDBStore();
 
-useAppLayout({ overflow: true })
+useAppLayout({ overflow: true });
 
 const handleJoinGroupSuccess = (member: Member) => {
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] })
-	localDBStore.joinGroup(group.value.id, member.id)
-}
+	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
+	localDBStore.joinGroup(group.value.id, member.id);
+};
 
 const handleSelectMember = (member: Member) => {
-	localDBStore.joinGroup(group.value.id, member.id)
-}
+	localDBStore.joinGroup(group.value.id, member.id);
+};
 </script>
 
 <template>

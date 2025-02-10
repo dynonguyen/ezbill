@@ -8,14 +8,17 @@ html {
 		-apple-system,
 		Arial,
 		sans-serif;
+	background-color: #fafafa;
 }
 
 * ::-webkit-scrollbar {
 	width: 8px;
+	height: 8px;
 }
 
 * ::-webkit-scrollbar-track {
 	width: 8px;
+	height: 8px;
 	background-color: transparent;
 }
 

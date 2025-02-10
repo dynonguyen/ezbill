@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { fetchGroup } from '@/apis/supabase'
-import Flex from '@/components/Flex.vue'
-import MemberAvatar from '@/components/MemberAvatar.vue'
-import Typography from '@/components/Typography.vue'
-import { QUERY_KEY } from '@/constants/key'
-import { PATH } from '@/constants/path'
-import type { Group } from '@/types/entities'
-import { useQuery } from '@tanstack/vue-query'
-import dayjs from 'dayjs'
-import { Avatar, AvatarGroup, Skeleton } from 'primevue'
-import { computed } from 'vue'
+import { fetchGroup } from '@/apis/supabase';
+import Flex from '@/components/Flex.vue';
+import MemberAvatar from '@/components/MemberAvatar.vue';
+import Typography from '@/components/Typography.vue';
+import { QUERY_KEY } from '@/constants/key';
+import { PATH } from '@/constants/path';
+import type { Group } from '@/types/entities';
+import { useQuery } from '@tanstack/vue-query';
+import dayjs from 'dayjs';
+import { Avatar, AvatarGroup, Skeleton } from 'primevue';
+import { computed } from 'vue';
 
-const props = defineProps<{ id: Group['id'] }>()
+const props = defineProps<{ id: Group['id'] }>();
 
-const queryKey = computed(() => [QUERY_KEY.GROUP, props.id])
-const { data: group, isPending } = useQuery({ queryKey, queryFn: () => fetchGroup(props.id) })
+const queryKey = computed(() => [QUERY_KEY.GROUP, props.id]);
+const { data: group, isPending } = useQuery({ queryKey, queryFn: () => fetchGroup(props.id) });
 
-const MAX_AVATAR = 5
+const MAX_AVATAR = 5;
 </script>
 
 <template>
 	<Skeleton v-if="isPending" height="144px" border-radius="12px" />
 	<Flex
 		v-else-if="group"
-		class="rounded-2xl bg-neutral-50/20 hover:bg-neutral-100/50 p-4 cursor-pointer border border-neutral-200"
+		class="rounded-2xl p-4 bg-white shadow-lg shadow-neutral-200/25 w-full cursor-pointer hover:shadow-neutral-200 transition-shadow"
 		@click="$router.push(PATH.GROUP.replace(':id', group.id))"
 		stack>
 		<Flex class="gap-2" stack>

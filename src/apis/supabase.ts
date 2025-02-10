@@ -36,7 +36,7 @@ export const addMember = async (data: { groupId: Group['id']; member: Member }) 
 	}
 
 	const { name } = member
-	const isExist = currentGroup.members.some((member) => member.name === name)
+	const isExist = currentGroup.members?.some((member) => member.name === name)
 
 	if (isExist) {
 		throw new Error('Thành viên đã tồn tại trong nhóm. Vui lòng nhập một tên khác')

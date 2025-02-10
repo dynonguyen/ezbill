@@ -1,65 +1,67 @@
 <script setup lang="ts">
-import { addMember } from '@/apis/supabase'
-import Flex from '@/components/Flex.vue'
-import FormControl from '@/components/FormControl.vue'
-import MemberAvatar from '@/components/MemberAvatar.vue'
-import Typography from '@/components/Typography.vue'
-import { useToast } from '@/hooks/useToast'
-import type { Member } from '@/types/entities'
-import { generateUUID } from '@/utils/helpers'
-import { useMutation } from '@tanstack/vue-query'
-import { toTypedSchema } from '@vee-validate/zod'
-import to from 'await-to-js'
-import { Button, InputText } from 'primevue'
-import { useForm } from 'vee-validate'
-import { ref } from 'vue'
-import { z } from 'zod'
-import AvatarSelect from '../AvatarSelect.vue'
-import { useGroupContext } from '../hooks/useGroupContext'
+import { addMember } from '@/apis/supabase';
+import Flex from '@/components/Flex.vue';
+import FormControl from '@/components/FormControl.vue';
+import MemberAvatar from '@/components/MemberAvatar.vue';
+import Typography from '@/components/Typography.vue';
+import { useToast } from '@/hooks/useToast';
+import type { Member } from '@/types/entities';
+import { generateUUID } from '@/utils/helpers';
+import { useMutation } from '@tanstack/vue-query';
+import { toTypedSchema } from '@vee-validate/zod';
+import to from 'await-to-js';
+import { Button, InputText } from 'primevue';
+import { useForm } from 'vee-validate';
+import { ref } from 'vue';
+import { z } from 'zod';
+import AvatarSelect from '../AvatarSelect.vue';
+import { useGroupContext } from '../hooks/useGroupContext';
+
+withDefaults(defineProps<{ submitLabel?: string }>(), { submitLabel: 'Tham gia' });
 
 const emit = defineEmits<{
-	success: [member: Member]
-}>()
+	success: [member: Member];
+}>();
 
 const MAX = {
 	NAME: 512,
-}
+};
 
 const schema = z.object({
 	name: z.string().trim().nonempty('Bắt buộc').default(''),
 	avatar: z.string().optional(),
-})
-type FormData = z.infer<typeof schema>
-const validationSchema = toTypedSchema(schema)
+});
+type FormData = z.infer<typeof schema>;
+const validationSchema = toTypedSchema(schema);
 
 const { errors, handleSubmit, values, defineField, setFieldValue } = useForm<FormData>({
 	validationSchema,
-})
-const { mutateAsync } = useMutation({ mutationFn: addMember })
+});
+const { mutateAsync } = useMutation({ mutationFn: addMember });
 
-const group = useGroupContext()
-const toast = useToast()
+const { group } = useGroupContext();
+const toast = useToast();
 
-const openAvatarSelect = ref(false)
+const openAvatarSelect = ref(false);
 
 const handleAddMember = handleSubmit(async (form) => {
-	const newMember: Member = { id: generateUUID(), ...form }
+	const newMember: Member = { id: generateUUID(), ...form };
 
-	const [error] = await to(mutateAsync({ groupId: group.value.id, member: newMember }))
+	const [error] = await to(mutateAsync({ groupId: group.value.id, member: newMember }));
 
 	if (error) {
-		return toast.error({ detail: error.message })
+		return toast.error({ detail: error.message });
 	}
 
-	emit('success', newMember)
-})
+	emit('success', newMember);
+});
 
 const handleChangeAvatar = (index: string) => {
-	setFieldValue('avatar', index)
-	openAvatarSelect.value = false
-}
+	setFieldValue('avatar', index);
+	openAvatarSelect.value = false;
+};
 
-const [name, nameProps] = defineField('name')
+const [name, nameProps] = defineField('name');
 </script>
 
 <template>
@@ -95,7 +97,7 @@ const [name, nameProps] = defineField('name')
 			</FormControl>
 		</Flex>
 
-		<Button type="submit" label="Tham gia" :loading="false" />
+		<Button type="submit" :label="$props.submitLabel" :loading="false" />
 	</Flex>
 
 	<AvatarSelect v-model:visible="openAvatarSelect" @change="handleChangeAvatar" />
