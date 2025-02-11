@@ -30,7 +30,7 @@ const items = computed<MenuItem[]>(
 
 <template>
 	<MemberAvatar
-		class="shrink-0 cursor-pointer"
+		class="shrink-0 cursor-pointer !size-12"
 		v-if="user"
 		v-bind="user"
 		@click="toggle"
@@ -38,7 +38,7 @@ const items = computed<MenuItem[]>(
 
 	<Menu ref="op" :model="items" popup :pt="{ list: { class: 'max-h-80 overflow-auto' } }">
 		<template #start>
-			<Typography variant="mdMedium" class="px-3 pt-2 break-words max-w-40 line-clamp-1">
+			<Typography variant="mdSemiBold" class="px-3 pt-2 break-words max-w-40 line-clamp-1">
 				{{ user?.name }}
 			</Typography>
 			<Typography variant="mdMedium" class="px-3 pt-2 text-neutral-500">Đổi thành viên</Typography>

@@ -14,6 +14,7 @@ import { storeToRefs } from 'pinia';
 import { Button } from 'primevue';
 import { computed, provide } from 'vue';
 import { useRoute } from 'vue-router';
+import BillList from './bills/BillList.vue';
 import NewBillButton from './bills/NewBillButton.vue';
 import JoinGroup from './join-group/JoinGroup.vue';
 import MemberList from './members/MemberList.vue';
@@ -83,9 +84,14 @@ provide(CONTEXT_KEY.GROUP_USER, user);
 					<UserSwitcher />
 				</Flex>
 
-				<Flex class="gap-6 mt-6" stack>
+				<Flex class="gap-8 mt-6" stack>
 					<Statistics />
 					<MemberList />
+
+					<Flex stack class="gap-4">
+						<Typography variant="displaySemiBold">Bills</Typography>
+						<BillList />
+					</Flex>
 				</Flex>
 			</div>
 

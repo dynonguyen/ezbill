@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import Flex from './Flex.vue'
-import Typography from './Typography.vue'
+import type { LabelHTMLAttributes } from 'vue';
+import Flex from './Flex.vue';
+import Typography from './Typography.vue';
 
 type FormControlProps = {
-	label?: string
-	helperText?: string
-	error?: boolean
-	htmlFor?: string
-}
+	label?: string;
+	helperText?: string;
+	error?: boolean;
+	htmlFor?: string;
+	size?: 'small' | 'large';
+	pt?: { label?: LabelHTMLAttributes };
+};
 
-defineProps<FormControlProps>()
+defineProps<FormControlProps>();
 </script>
 
 <template>
@@ -17,14 +20,15 @@ defineProps<FormControlProps>()
 		stack
 		class="gap-1"
 		:class="{
-			'[&>.p-inputtext]:!border-error': $props.error,
+			'[&_.p-inputtext]:!border-error': $props.error,
 		}">
 		<Typography
 			as="label"
 			v-if="$props.label"
-			variant="smSemiBold"
+			:variant="$props.size === 'large' ? 'mdSemiBold' : 'smSemiBold'"
 			:for="$props.htmlFor"
-			:class="{ 'text-error': $props.error }">
+			:class="{ 'text-error': $props.error }"
+			v-bind="$props.pt?.label">
 			{{ $props.label }}
 		</Typography>
 

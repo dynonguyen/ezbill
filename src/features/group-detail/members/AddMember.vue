@@ -24,7 +24,7 @@ const handleAddMemberSuccess = () => {
 <template>
 	<Flex
 		center
-		class="size-10 border border-dashed border-neutral-500 rounded-full cursor-pointer hover:border-neutral-800 hover:bg-neutral-100 shrink-0"
+		class="size-12 border border-dashed border-neutral-500 rounded-full cursor-pointer hover:border-neutral-800 hover:bg-neutral-100 shrink-0"
 		@click="open = true">
 		<span class="icon msi-add-2-rounded text-neutral-800" />
 	</Flex>

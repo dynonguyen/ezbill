@@ -11,7 +11,7 @@ const { group, user } = useGroupContext();
 
 <template>
 	<ContainerBox :label="`Thành viên (${group.members.length})`">
-		<Flex class="gap-2 py-2 overflow-auto items-start">
+		<Flex class="gap-1 py-2 overflow-auto items-start">
 			<AddMember />
 			<Flex
 				v-for="member in group.members.map((m) => ({
@@ -21,8 +21,8 @@ const { group, user } = useGroupContext();
 				:key="member.id"
 				stack
 				center
-				class="gap-2 size-16 justify-start shrink-0">
-				<MemberAvatar v-bind="member" :show-tooltip="false" class="!size-10 shrink-0" />
+				class="gap-2 size-20 justify-start shrink-0">
+				<MemberAvatar v-bind="member" :show-tooltip="false" class="!size-12 shrink-0" />
 				<Typography
 					variant="smRegular"
 					class="text-center break-all line-clamp-1"

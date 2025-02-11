@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { Button } from 'primevue';
-import { ref } from 'vue';
+import { Button, Dialog } from 'primevue';
+import { defineAsyncComponent, ref } from 'vue';
 
-const open = ref(false);
+const NewBillForm = defineAsyncComponent(() => import('./NewBillForm.vue'));
+
+const open = ref(true);
 </script>
 
 <template>
@@ -13,4 +15,16 @@ const open = ref(false);
 		size="large"
 		class="!size-14"
 		@click="open = true" />
+
+	<Dialog
+		:draggable="false"
+		v-model:visible="open"
+		modal
+		header="Tạo bill mới"
+		class="w-120 max-w-full"
+		:pt="{ content: { class: '!p-0' } }">
+		<Suspense>
+			<NewBillForm v-if="open" @close="open = false" />
+		</Suspense>
+	</Dialog>
 </template>
