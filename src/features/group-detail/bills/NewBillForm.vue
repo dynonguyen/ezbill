@@ -4,11 +4,12 @@ import FormControl from '@/components/FormControl.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import type { Member } from '@/types/entities';
 import { toTypedSchema } from '@vee-validate/zod';
-import { Button, Divider, InputNumber, Select, Textarea, type InputNumberProps } from 'primevue';
+import { Button, Divider, Select, Textarea, type InputNumberProps } from 'primevue';
 import { useForm } from 'vee-validate';
 import { ref, watch } from 'vue';
 import { z } from 'zod';
 import { useGroupContext } from '../hooks/useGroupContext';
+import CustomInputNumber from './CustomInputNumber.vue';
 
 defineEmits<{ close: [] }>();
 
@@ -50,19 +51,44 @@ const handleAddBill = handleSubmit(async (form) => {
 });
 
 const handleMemberAmountChange = (memberId: Member['id'], amount: number) => {
-	console.log(memberId, amount);
+	const remainingAmount = Object.values(memberAmounts.value).reduce(
+		(acc, { amount, edited }) => (edited ? acc - amount : acc),
+		values.amount,
+	);
+
+	const editedMember = Object.values(memberAmounts.value).filter((m) => m.edited).length;
+	const sharedAmount = remainingAmount / (group.value.members.length - editedMember);
+
+	console.log(
+		`☕ DYNO LOG ~ NewBillForm.vue:62 🥺`,
+		amount,
+		remainingAmount,
+		editedMember,
+		sharedAmount,
+	);
+
+	if (amount !== memberAmounts.value[memberId].amount) {
+		memberAmounts.value[memberId] = { amount, edited: true };
+	}
+
+	Object.entries(memberAmounts.value)
+		.filter(([_, { edited }]) => !edited)
+		.forEach(([id, m]) => {
+			memberAmounts.value[id] = { ...m, amount: sharedAmount };
+		});
 };
 
 watch(
 	() => values.amount,
 	() => {
 		const totalMembers = group.value.members.length;
-		const amount = values.amount / totalMembers;
+		const amount = values.amount / totalMembers || 0;
 		memberAmounts.value = group.value.members.reduce((acc, member) => {
 			acc[member.id] = { amount, edited: false };
 			return acc;
 		}, {} as MemberAmounts);
 	},
+	{ immediate: true },
 );
 
 const inputNumberProps: InputNumberProps = {
@@ -87,20 +113,13 @@ const inputNumberProps: InputNumberProps = {
 					label="Số tiền"
 					:error="Boolean(errors.amount)"
 					:helper-text="errors.amount">
-					<InputNumber
+					<CustomInputNumber
 						input-id="amount"
 						placeholder="Nhập số tiền (VND)"
 						fluid
 						input-class="!py-2"
 						v-bind="{ ...inputNumberProps, ...amountProps }"
-						v-model="amountField">
-						<template #decrementicon>
-							<span class="icon msi-remove-rounded"></span>
-						</template>
-						<template #incrementicon>
-							<span class="icon msi-add-2-rounded"></span>
-						</template>
-					</InputNumber>
+						v-model="amountField" />
 				</FormControl>
 
 				<FormControl html-for="createdBy" label="Người trả">
@@ -153,8 +172,9 @@ const inputNumberProps: InputNumberProps = {
 							:label="member.name"
 							class="w-full"
 							:html-for="member.id"
-							:pt="{ label: { class: 'break-all line-clamp-1' } }">
-							<InputNumber
+							:pt="{ label: { class: 'break-all line-clamp-1' } }"
+							:error="Boolean(memberAmounts[member.id]?.amount < 0)">
+							<CustomInputNumber
 								placeholder="Nhập số tiền"
 								fluid
 								:input-id="member.id"
