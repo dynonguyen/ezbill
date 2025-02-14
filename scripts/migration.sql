@@ -52,15 +52,6 @@ with check (
 	true
 );
 
-create policy "Allow insert for all users"
-on "public"."bills"
-as PERMISSIVE
-for INSERT
-to public
-with check (
-	true
-);
-
 -- Create functions
 create or replace function create_group_view(group_id uuid)
 returns void as $$

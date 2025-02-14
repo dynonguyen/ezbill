@@ -4,7 +4,7 @@ import { defineAsyncComponent, ref } from 'vue';
 
 const NewBillForm = defineAsyncComponent(() => import('./NewBillForm.vue'));
 
-const open = ref(true);
+const open = ref(false);
 </script>
 
 <template>
