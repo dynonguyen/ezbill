@@ -3,6 +3,7 @@ import './main.css';
 
 import { QueryClient, VueQueryPlugin, type VueQueryPluginOptions } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
+import { ConfirmationService } from 'primevue';
 import PrimeVue, { type PrimeVueConfiguration } from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
@@ -38,6 +39,8 @@ app.use(Toast, {
 	timeout: 5000,
 	position: POSITION.TOP_CENTER,
 } as ToastOptions);
+
+app.use(ConfirmationService);
 
 app.directive('tooltip', Tooltip);
 

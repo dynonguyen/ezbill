@@ -51,16 +51,33 @@ export const addMember = async (data: { groupId: Group['id']; member: Member }) 
 	if (resp.error) throw resp.error;
 };
 
-export const createBill = async (bill: Omit<Bill, 'id' | 'createdAt'>) => {
-	const resp = await supabase.from(getBillView(bill.groupId)).insert(bill);
-
-	if (resp.error) throw resp.error;
-};
-
 export const fetchBills = async (groupId: string): Promise<Bill[]> => {
 	const { data, error } = await supabase.from(getBillView(groupId)).select();
 
 	if (error) throw error;
 
 	return data as Bill[];
+};
+
+export const createBill = async (bill: Omit<Bill, 'id' | 'createdAt'>) => {
+	const resp = await supabase.from(getBillView(bill.groupId)).insert(bill);
+
+	if (resp.error) throw resp.error;
+};
+
+export const updateBill = async (updated: Omit<Bill, 'createdAt'>) => {
+	const resp = await supabase
+		.from(getBillView(updated.groupId))
+		.update(updated)
+		.eq('id', updated.id);
+
+	if (resp.error) throw resp.error;
+};
+
+export const deleteBill = async (data: { groupId: Group['id']; billId: Bill['id'] }) => {
+	const { groupId, billId } = data;
+
+	const resp = await supabase.from(getBillView(groupId)).delete().eq('id', billId);
+
+	if (resp.error) throw resp.error;
 };

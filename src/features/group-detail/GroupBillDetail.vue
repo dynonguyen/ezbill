@@ -10,7 +10,7 @@ import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
 import { provide, watch } from 'vue';
 import BillList from './bills/BillList.vue';
-import NewBillButton from './bills/NewBillButton.vue';
+import NewBill from './bills/NewBill.vue';
 import { useGroupContext } from './hooks/useGroupContext';
 import MemberList from './members/MemberList.vue';
 import UserSwitcher from './members/UserSwitcher.vue';
@@ -69,7 +69,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 		</div>
 
 		<Flex center class="shrink-0">
-			<NewBillButton />
+			<NewBill />
 		</Flex>
 	</Flex>
 </template>

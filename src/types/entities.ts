@@ -17,7 +17,7 @@ export type Bill = {
 	name: string;
 	groupId: Group['id'];
 	amount: number;
-	note?: string;
+	note?: string | null;
 	createdAt: string;
 	members: BillMember;
 	createdBy: Member['id'];

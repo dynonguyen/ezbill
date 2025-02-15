@@ -48,7 +48,7 @@ const splitWith = computed(() => {
 					<Flex class="gap-2 flex-wrap">
 						<MemberAvatar v-bind="createdBy" :show-tooltip="false" class="shrink-0 !size-7" />
 						<Typography>
-							{{ createdBy.name + (user.id === props.bill.createdBy ? ' (bạn)' : '') }} đã trả cho
+							{{ createdBy.name + (user.id === props.bill.createdBy ? ' (bạn)' : '') }} đã trả
 						</Typography>
 					</Flex>
 

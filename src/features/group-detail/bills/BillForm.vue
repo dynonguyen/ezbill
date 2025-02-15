@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import { createBill } from '@/apis/supabase';
 import Flex from '@/components/Flex.vue';
 import FormControl from '@/components/FormControl.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Typography from '@/components/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
-import type { BillMember, Member } from '@/types/entities';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { Bill, BillMember, Member } from '@/types/entities';
 import { toTypedSchema } from '@vee-validate/zod';
-import to from 'await-to-js';
 import {
 	Button,
 	Checkbox,
@@ -27,13 +23,12 @@ import { z } from 'zod';
 import { useGroupContext } from '../hooks/useGroupContext';
 import CustomInputNumber from './CustomInputNumber.vue';
 
-const emit = defineEmits<{ close: [] }>();
+type BillFormProps = { mode: 'new' | 'view-detail'; defaultBill?: Bill };
 
-const MAX = {
-	AMOUNT: 1000_000_000_000,
-	NOTE: 1000,
-	NAME: 250,
-};
+const emit = defineEmits<{ close: []; submit: [form: Omit<Bill, 'id' | 'createdAt'>] }>();
+const props = withDefaults(defineProps<BillFormProps>(), { mode: 'new' });
+
+const MAX = { AMOUNT: 1000_000_000_000, NOTE: 1000, NAME: 250 };
 
 const { group, user } = useGroupContext();
 
@@ -47,7 +42,7 @@ const schema = z.object({
 		.nonempty('Nhập tên sự kiện')
 		.max(MAX.NAME, `Tối đa ${MAX.NAME}`),
 	createdBy: z.string().nonempty('Chọn người trả bill'),
-	note: z.string().max(MAX.NOTE).optional(),
+	note: z.string().max(MAX.NOTE).optional().nullable(),
 });
 
 type BillForm = z.infer<typeof schema>;
@@ -55,12 +50,20 @@ type MemberAmounts = { [key: Member['id']]: { amount: number } };
 
 const validationSchema = toTypedSchema(schema);
 
+const initialValues = computed<Partial<BillForm>>(() => {
+	if (props.mode === 'new') return { createdBy: user.value?.id };
+	if (!props.defaultBill) return {};
+
+	const { amount, createdBy, name, note } = props.defaultBill;
+
+	return { amount, createdBy, name, note };
+});
+
 const { errors, values, handleSubmit, defineField, setValues } = useForm<BillForm>({
 	validationSchema,
-	initialValues: { createdBy: user.value?.id },
+	initialValues: initialValues.value,
 });
-const { isPending, mutateAsync } = useMutation({ mutationFn: createBill });
-const queryClient = useQueryClient();
+
 const toast = useToast();
 
 const [amountField, amountProps] = defineField('amount');
@@ -68,34 +71,38 @@ const [noteField, noteProps] = defineField('note');
 const [nameField, nameProps] = defineField('name');
 const [createdByField, createdByProps] = defineField('createdBy');
 
+const getDefaultMemberAmounts = () => {
+	if (props.mode === 'new')
+		return group.value.members.reduce((acc, member) => {
+			acc[member.id] = { amount: 0 };
+			return acc;
+		}, {} as MemberAmounts);
+
+	return Object.fromEntries(
+		Object.entries(props.defaultBill!.members).map(([id, amount]) => [id, { amount }]),
+	);
+};
+
 const openDetail = ref(false);
 const isDivEqually = ref(true);
-const memberAmounts = ref<MemberAmounts>(
-	group.value.members.reduce((acc, member) => {
-		acc[member.id] = { amount: 0 };
-		return acc;
-	}, {} as MemberAmounts),
-);
+const memberAmounts = ref<MemberAmounts>(getDefaultMemberAmounts());
 const selectMemberAnchor = ref<PopoverMethods>();
+
 const totalMembers = computed(() => Object.keys(memberAmounts.value).length);
 
-const handleAddBill = handleSubmit(async (form) => {
+const handleSubmitBill = handleSubmit(async (form) => {
 	const { amount, createdBy, note, name } = form;
 	const billMembers: BillMember = Object.fromEntries(
-		Object.entries(memberAmounts.value).map(([id, { amount }]) => [id, amount]),
+		Object.entries(memberAmounts.value)
+			.filter(([_, { amount }]) => amount > 0)
+			.map(([id, { amount }]) => [id, amount]),
 	);
 
-	const [error] = await to(
-		mutateAsync({ groupId: group.value.id, name, amount, createdBy, note, members: billMembers }),
-	);
-
-	if (error) {
-		return toast.error(error?.message || 'Tạo bill thất bại');
+	if (Object.keys(billMembers).length === 0) {
+		return toast.error('Số tiền của thành viên không hợp lệ');
 	}
 
-	toast.success('Tạo bill thành công');
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
-	emit('close');
+	emit('submit', { groupId: group.value.id, amount, createdBy, note, name, members: billMembers });
 });
 
 const calculateTotalAmount = () => {
@@ -159,7 +166,7 @@ const inputNumberProps: InputNumberProps = {
 </script>
 
 <template>
-	<Flex stack class="gap-4 max-h-140 overflow-hidden pb-4" as="form" @submit="handleAddBill">
+	<Flex stack class="gap-4 max-h-160 overflow-hidden pb-4" as="form" @submit="handleSubmitBill">
 		<Flex stack class="gap-2 overflow-auto px-4">
 			<!-- Form -->
 			<Flex stack class="gap-3">
@@ -199,7 +206,7 @@ const inputNumberProps: InputNumberProps = {
 						option-value="id"
 						option-label="name"
 						placeholder="Chọn người trả bill này"
-						:default-value="user?.id"
+						:default-value="$props.mode === 'new' ? user?.id : $props.defaultBill?.createdBy"
 						v-model="createdByField"
 						v-bind="createdByProps" />
 				</FormControl>
@@ -318,8 +325,9 @@ const inputNumberProps: InputNumberProps = {
 
 		<!-- Action buttons -->
 		<Flex class="justify-end gap-2 px-4 mt-auto shrink-0">
+			<slot name="other-actions"></slot>
 			<Button label="Đóng" variant="outlined" @click="$emit('close')" />
-			<Button type="submit" label="Tạo" class="min-w-20" :loading="isPending" />
+			<slot name="submit-button"></slot>
 		</Flex>
 	</Flex>
 </template>
