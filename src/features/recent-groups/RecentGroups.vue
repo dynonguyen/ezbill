@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import Feedback from '@/components/Feedback.vue'
-import Flex from '@/components/Flex.vue'
-import Typography from '@/components/Typography.vue'
-import { useLocalDBStore } from '@/stores/local-db'
-import { getImgUrl } from '@/utils/get-asset'
-import RecentGroupItem from './RecentGroupItem.vue'
+import Feedback from '@/components/Feedback.vue';
+import Flex from '@/components/Flex.vue';
+import Typography from '@/components/Typography.vue';
+import { useLocalDBStore } from '@/stores/local-db';
+import { getImgUrl } from '@/utils/get-asset';
+import RecentGroupItem from './RecentGroupItem.vue';
 
-const localStore = useLocalDBStore()
+const localStore = useLocalDBStore();
 </script>
 
 <template>
@@ -16,7 +16,7 @@ const localStore = useLocalDBStore()
 
 			<Feedback
 				v-if="!localStore.joinedGroups.length"
-				:img="getImgUrl('no-groups-found.svg')"
+				:img="getImgUrl('no-groups.svg')"
 				title="Không có nhóm nào"
 				:attrs="{ img: { class: 'w-1/2' } }" />
 			<Flex v-else class="gap-4" stack>

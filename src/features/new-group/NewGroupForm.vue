@@ -1,51 +1,51 @@
 <script setup lang="ts">
-import { createGroup } from '@/apis/supabase'
-import Flex from '@/components/Flex.vue'
-import FormControl from '@/components/FormControl.vue'
-import { useToast } from '@/hooks/useToast'
-import type { Group } from '@/types/entities'
-import { generateUUID } from '@/utils/helpers'
-import { useMutation } from '@tanstack/vue-query'
-import { toTypedSchema } from '@vee-validate/zod'
-import to from 'await-to-js'
-import { Button, InputText } from 'primevue'
-import { useForm } from 'vee-validate'
-import { z } from 'zod'
+import { createGroup } from '@/apis/supabase';
+import Flex from '@/components/Flex.vue';
+import FormControl from '@/components/FormControl.vue';
+import type { Group } from '@/types/entities';
+import { generateUUID } from '@/utils/helpers';
+import { useMutation } from '@tanstack/vue-query';
+import { toTypedSchema } from '@vee-validate/zod';
+import to from 'await-to-js';
+import { Button, InputText } from 'primevue';
+import { useForm } from 'vee-validate';
+import { useToast } from 'vue-toastification';
+import { z } from 'zod';
 
-const emit = defineEmits<{ close: []; success: [group: Pick<Group, 'id'>] }>()
+const emit = defineEmits<{ close: []; success: [group: Pick<Group, 'id'>] }>();
 
 const MAX = {
 	NAME: 512,
-}
+};
 
 const schema = z.object({
 	name: z.string().trim().nonempty('Bắt buộc').default(''),
-})
+});
 
-type GroupForm = z.infer<typeof schema>
+type GroupForm = z.infer<typeof schema>;
 
-const validationSchema = toTypedSchema(schema)
+const validationSchema = toTypedSchema(schema);
 
-const { errors, handleSubmit, defineField } = useForm<GroupForm>({ validationSchema })
+const { errors, handleSubmit, defineField } = useForm<GroupForm>({ validationSchema });
 
-const toast = useToast()
+const toast = useToast();
 
-const { isPending, mutateAsync } = useMutation({ mutationFn: createGroup })
+const { isPending, mutateAsync } = useMutation({ mutationFn: createGroup });
 
 const handleAddGroup = handleSubmit(async (form) => {
-	const { name } = form
-	const groupId = generateUUID()
+	const { name } = form;
+	const groupId = generateUUID();
 
-	const [error] = await to(mutateAsync({ name, id: groupId }))
+	const [error] = await to(mutateAsync({ name, id: groupId }));
 
 	if (error) {
-		return toast.error({ summary: 'Tạo nhóm thất bại', detail: error?.message })
+		return toast.error(error?.message || 'Tạo nhóm thất bại');
 	}
 
-	emit('success', { id: groupId })
-})
+	emit('success', { id: groupId });
+});
 
-const [name, nameProps] = defineField('name')
+const [name, nameProps] = defineField('name');
 </script>
 
 <template>

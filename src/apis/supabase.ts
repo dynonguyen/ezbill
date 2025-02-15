@@ -52,9 +52,15 @@ export const addMember = async (data: { groupId: Group['id']; member: Member }) 
 };
 
 export const createBill = async (bill: Omit<Bill, 'id' | 'createdAt'>) => {
-	const billView = getBillView(bill.groupId);
-
-	const resp = await supabase.from(billView).insert(bill);
+	const resp = await supabase.from(getBillView(bill.groupId)).insert(bill);
 
 	if (resp.error) throw resp.error;
+};
+
+export const fetchBills = async (groupId: string): Promise<Bill[]> => {
+	const { data, error } = await supabase.from(getBillView(groupId)).select();
+
+	if (error) throw error;
+
+	return data as Bill[];
 };

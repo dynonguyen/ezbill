@@ -4,7 +4,6 @@ import Flex from '@/components/Flex.vue';
 import FormControl from '@/components/FormControl.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Typography from '@/components/Typography.vue';
-import { useToast } from '@/hooks/useToast';
 import type { Member } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
@@ -13,6 +12,7 @@ import to from 'await-to-js';
 import { Button, InputText } from 'primevue';
 import { useForm } from 'vee-validate';
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 import { z } from 'zod';
 import AvatarSelect from '../AvatarSelect.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
@@ -50,7 +50,7 @@ const handleAddMember = handleSubmit(async (form) => {
 	const [error] = await to(mutateAsync({ groupId: group.value.id, member: newMember }));
 
 	if (error) {
-		return toast.error({ detail: error.message });
+		return toast.error(error.message || 'Thêm thành viên thất bại');
 	}
 
 	emit('success', newMember);

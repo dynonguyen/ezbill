@@ -1,37 +1,34 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue'
-import { PATH } from '@/constants/path'
-import { useToast } from '@/hooks/useToast'
-import { getEnv } from '@/utils/get-env'
-import { Button, InputText } from 'primevue'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import Flex from '@/components/Flex.vue';
+import { PATH } from '@/constants/path';
+import { getEnv } from '@/utils/get-env';
+import { Button, InputText } from 'primevue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 
-const inviteLink = ref('')
-const router = useRouter()
-const toast = useToast()
+const inviteLink = ref('');
+const router = useRouter();
+const toast = useToast();
 
 const handleJoinGroup = async () => {
-	const linkOrId = inviteLink.value.trim()
-	if (!linkOrId) return
+	const linkOrId = inviteLink.value.trim();
+	if (!linkOrId) return;
 
-	const baseUrl = getEnv('VITE_BASE_URL')
+	const baseUrl = getEnv('VITE_BASE_URL');
 
 	if (linkOrId.startsWith(baseUrl)) {
-		const isValid = linkOrId.includes(`${baseUrl}${PATH.GROUP.replace(':id', '')}`)
+		const isValid = linkOrId.includes(`${baseUrl}${PATH.GROUP.replace(':id', '')}`);
 		if (!isValid) {
-			toast.error({
-				summary: 'Link không hợp lệ',
-				detail: 'Vui lòng nhập link hoặc id nhóm hợp lệ',
-			})
-			return
+			toast.error('Link hoặc id nhóm hợp lệ');
+			return;
 		}
 
-		router.push(`${linkOrId.replace(baseUrl, '')}`)
+		router.push(`${linkOrId.replace(baseUrl, '')}`);
 	} else {
-		router.push(`${PATH.GROUP.replace(':id', linkOrId)}`)
+		router.push(`${PATH.GROUP.replace(':id', linkOrId)}`);
 	}
-}
+};
 </script>
 
 <template>

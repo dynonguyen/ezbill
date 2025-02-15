@@ -5,6 +5,14 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports": "explicit"
 	},
-	"cSpell.words": ["ezbill", "iconify", "primevue", "supabase", "tanstack", "VITE"],
+	"cSpell.words": [
+		"ezbill",
+		"iconify",
+		"primevue",
+		"supabase",
+		"tanstack",
+		"toastification",
+		"VITE"
+	],
 	"vue.server.hybridMode": true
 }

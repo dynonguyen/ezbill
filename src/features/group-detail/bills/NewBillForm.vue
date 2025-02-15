@@ -5,7 +5,6 @@ import FormControl from '@/components/FormControl.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Typography from '@/components/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
-import { useToast } from '@/hooks/useToast';
 import type { BillMember, Member } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { toTypedSchema } from '@vee-validate/zod';
@@ -14,6 +13,7 @@ import {
 	Button,
 	Checkbox,
 	Divider,
+	InputText,
 	Popover,
 	Select,
 	Textarea,
@@ -22,6 +22,7 @@ import {
 } from 'primevue';
 import { useForm } from 'vee-validate';
 import { computed, nextTick, ref, watch } from 'vue';
+import { useToast } from 'vue-toastification';
 import { z } from 'zod';
 import { useGroupContext } from '../hooks/useGroupContext';
 import CustomInputNumber from './CustomInputNumber.vue';
@@ -31,6 +32,7 @@ const emit = defineEmits<{ close: [] }>();
 const MAX = {
 	AMOUNT: 1000_000_000_000,
 	NOTE: 1000,
+	NAME: 250,
 };
 
 const { group, user } = useGroupContext();
@@ -40,6 +42,10 @@ const schema = z.object({
 		.number({ message: 'Số tiền không hợp lệ' })
 		.min(1, 'Số tiền không hợp lệ')
 		.max(MAX.AMOUNT, `Tối đa ${MAX.AMOUNT}`),
+	name: z
+		.string({ message: 'Nhập tên sự kiện' })
+		.nonempty('Nhập tên sự kiện')
+		.max(MAX.NAME, `Tối đa ${MAX.NAME}`),
 	createdBy: z.string().nonempty('Chọn người trả bill'),
 	note: z.string().max(MAX.NOTE).optional(),
 });
@@ -59,6 +65,7 @@ const toast = useToast();
 
 const [amountField, amountProps] = defineField('amount');
 const [noteField, noteProps] = defineField('note');
+const [nameField, nameProps] = defineField('name');
 const [createdByField, createdByProps] = defineField('createdBy');
 
 const openDetail = ref(false);
@@ -73,20 +80,20 @@ const selectMemberAnchor = ref<PopoverMethods>();
 const totalMembers = computed(() => Object.keys(memberAmounts.value).length);
 
 const handleAddBill = handleSubmit(async (form) => {
-	const { amount, createdBy, note } = form;
+	const { amount, createdBy, note, name } = form;
 	const billMembers: BillMember = Object.fromEntries(
 		Object.entries(memberAmounts.value).map(([id, { amount }]) => [id, amount]),
 	);
 
 	const [error] = await to(
-		mutateAsync({ groupId: group.value.id, amount, createdBy, note, members: billMembers }),
+		mutateAsync({ groupId: group.value.id, name, amount, createdBy, note, members: billMembers }),
 	);
 
 	if (error) {
-		return toast.error({ summary: 'Tạo bill thất bại', detail: error?.message });
+		return toast.error(error?.message || 'Tạo bill thất bại');
 	}
 
-	toast.success({ summary: 'Tạo bill thành công' });
+	toast.success('Tạo bill thành công');
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
 	emit('close');
 });
@@ -170,6 +177,18 @@ const inputNumberProps: InputNumberProps = {
 						v-model="amountField"
 						:disabled="!isDivEqually"
 						:show-buttons="isDivEqually" />
+				</FormControl>
+
+				<FormControl
+					html-for="createdBy"
+					label="Tên sự kiện"
+					:error="Boolean(errors.name)"
+					:helper-text="errors.name">
+					<InputText
+						placeholder="Nhập tên sự kiện"
+						v-model="nameField"
+						v-bind="nameProps"
+						:maxlength="MAX.NAME" />
 				</FormControl>
 
 				<FormControl html-for="createdBy" label="Người trả">
@@ -267,7 +286,7 @@ const inputNumberProps: InputNumberProps = {
 							@click="selectMemberAnchor?.toggle" />
 
 						<Popover ref="selectMemberAnchor">
-							<div stack class="grid grid-cols-4 gap-4 w-106">
+							<div stack class="grid grid-cols-4 gap-4 w-106 max-h-100 overflow-auto">
 								<Flex
 									v-for="member in group.members.filter((m) => !memberAmounts[m.id])"
 									:key="member.id"

@@ -9,6 +9,7 @@ export const STORE_KEY = {
 export const CONTEXT_KEY = {
 	GROUP: 'group',
 	GROUP_USER: 'group-user',
+	BILLS: 'bills',
 };
 
 export const QUERY_KEY = {

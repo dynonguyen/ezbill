@@ -5,18 +5,30 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Typography from '@/components/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
+import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { useQuery } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { Avatar, AvatarGroup, Skeleton } from 'primevue';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 const props = defineProps<{ id: Group['id'] }>();
+const localDBStore = useLocalDBStore();
 
 const queryKey = computed(() => [QUERY_KEY.GROUP, props.id]);
-const { data: group, isPending } = useQuery({ queryKey, queryFn: () => fetchGroup(props.id) });
+const {
+	data: group,
+	isPending,
+	error,
+} = useQuery({ queryKey, queryFn: () => fetchGroup(props.id) });
 
 const MAX_AVATAR = 5;
+
+watch(error, () => {
+	if (error.value) {
+		localDBStore.removeFromGroup(props.id);
+	}
+});
 </script>
 
 <template>
@@ -27,7 +39,7 @@ const MAX_AVATAR = 5;
 		@click="$router.push(PATH.GROUP.replace(':id', group.id))"
 		stack>
 		<Flex class="gap-2" stack>
-			<Typography variant="xlSemiBold" class="break-words">
+			<Typography variant="lgSemiBold" class="break-words">
 				{{ group.name }}
 			</Typography>
 
@@ -45,12 +57,12 @@ const MAX_AVATAR = 5;
 						:label="`+${group.members.length - MAX_AVATAR}`"
 						shape="circle" />
 				</AvatarGroup>
-				<Typography variant="mdMedium">{{ group.members.length }} members</Typography>
+				<Typography>{{ group.members.length }} thành viên</Typography>
 			</Flex>
 
 			<Typography variant="smRegular" class="text-muted-color">
 				<span class="font-medium">Ngày tạo:</span>
-				{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm:ss') }}
+				{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm') }}
 			</Typography>
 		</Flex>
 	</Flex>

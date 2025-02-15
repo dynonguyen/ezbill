@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import GroupDetail from '@/features/group-detail/GroupDetail.vue'
+import GroupDetail from '@/features/group-detail/GroupDetail.vue';
 </script>
 
 <template>

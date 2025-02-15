@@ -11,9 +11,10 @@ export type Group = {
 	createdAt: string;
 };
 
-export type BillMember = Record<Group['id'], number>;
+export type BillMember = Record<Member['id'], number>;
 export type Bill = {
 	id: number;
+	name: string;
 	groupId: Group['id'];
 	amount: number;
 	note?: string;

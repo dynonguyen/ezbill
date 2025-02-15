@@ -26,10 +26,14 @@ html {
 	@apply bg-neutral-400 border-none rounded-lg;
 }
 
+@theme {
+	--color-error: var(--color-red-500);
+}
+
 .p-button {
 	font-weight: 500;
 }
 
-@theme {
-	--color-error: var(--color-red-500);
+.Vue-Toastification__toast {
+	max-width: 400px;
 }

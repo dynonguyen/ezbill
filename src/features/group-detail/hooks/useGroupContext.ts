@@ -4,9 +4,7 @@ import { inject, type Ref } from 'vue';
 
 export function useGroupContext() {
 	const group = inject<Ref<Group>>(CONTEXT_KEY.GROUP, { value: {} } as Ref<Group>);
-	const user = inject<Ref<Member | undefined>>(CONTEXT_KEY.GROUP_USER, { value: {} } as Ref<
-		Member | undefined
-	>);
+	const user = inject<Ref<Member>>(CONTEXT_KEY.GROUP_USER, { value: {} } as Ref<Member>);
 
 	return { group, user };
 }

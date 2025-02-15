@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Flex from '@/components/Flex.vue';
 import { QUERY_KEY } from '@/constants/key';
-import { useToast } from '@/hooks/useToast';
 import { useQueryClient } from '@tanstack/vue-query';
 import { Dialog } from 'primevue';
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 import { useGroupContext } from '../hooks/useGroupContext';
 import NewMember from '../join-group/NewMember.vue';
 
@@ -17,7 +17,7 @@ const toast = useToast();
 const handleAddMemberSuccess = () => {
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
 	open.value = false;
-	toast.success({ detail: 'Thêm thành viên thành công', summary: 'Thành công' });
+	toast.success('Thêm thành viên thành công');
 };
 </script>
 
