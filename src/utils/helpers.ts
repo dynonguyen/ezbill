@@ -16,8 +16,8 @@ export function toVND(amount: number): string {
 	return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
-export const saveFileAs = (blob: Blob, filename: string) => {
-	const url = URL.createObjectURL(blob);
+export const saveFileAs = (data: Blob | string, filename: string) => {
+	const url = typeof data === 'string' ? data : URL.createObjectURL(data);
 	const a = document.createElement('a');
 
 	a.download = filename;

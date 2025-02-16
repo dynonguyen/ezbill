@@ -5,6 +5,7 @@ import Loading from '@/components/Loading.vue';
 import { PATH } from '@/constants/path';
 import type { Group } from '@/types/entities';
 import { getEnv } from '@/utils/get-env';
+import { saveFileAs } from '@/utils/helpers';
 import { Button, Divider, InputText } from 'primevue';
 import QRCode from 'qrcode';
 import { computed, onWatcherCleanup, ref, watch } from 'vue';
@@ -30,11 +31,15 @@ const viewGroup = () => {
 	emit('close');
 };
 
+const downloadQR = () => {
+	saveFileAs(qrBase64.value, 'QR.jpeg');
+};
+
 watch(
 	inviteLink,
 	async () => {
 		navigator.clipboard?.writeText(inviteLink.value);
-		qrBase64.value = await QRCode.toDataURL(inviteLink.value);
+		qrBase64.value = await QRCode.toDataURL(inviteLink.value, { width: 500, type: 'image/jpeg' });
 	},
 	{ immediate: true },
 );
@@ -70,7 +75,16 @@ watch(copied, () => {
 	</Divider>
 
 	<Flex stack center>
-		<img v-if="qrBase64" :src="qrBase64" class="size-44 mx-auto" />
+		<Flex v-if="qrBase64" stack class="gap-1">
+			<img :src="qrBase64" class="size-44 mx-auto" />
+			<Button
+				variant="link"
+				label="Tải xuống"
+				severity="help"
+				icon="icon msi-download size-5"
+				class="!p-0 !text-blue-500"
+				@click="downloadQR" />
+		</Flex>
 		<Loading v-else />
 	</Flex>
 
