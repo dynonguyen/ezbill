@@ -132,7 +132,7 @@ const generateDetailSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 			width: 20,
 			style: { ...COL_COMMON_STYLE, numFmt: CURRENCY_FMT },
 		},
-		{ key: 'createdBy', header: 'Trả bởi', width: 15, style: { ...COL_COMMON_STYLE } },
+		{ key: 'createdBy', header: 'Trả bởi', width: 24, style: { ...COL_COMMON_STYLE } },
 	];
 
 	const headerRow = ws.getRow(1);
