@@ -18,6 +18,7 @@
 		"@vee-validate/zod": "^4.15.0",
 		"await-to-js": "^3.0.0",
 		"dayjs": "^1.11.13",
+		"exceljs": "^4.4.0",
 		"pinia": "^2.3.1",
 		"primevue": "^4.2.5",
 		"qrcode": "^1.5.4",

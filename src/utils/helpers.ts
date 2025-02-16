@@ -15,3 +15,15 @@ export function safeJSONParse<T = unknown>(data: string | T, fallback?: T): T {
 export function toVND(amount: number): string {
 	return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
+
+export const saveFileAs = (blob: Blob, filename: string) => {
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+
+	a.download = filename;
+	a.href = url;
+	document.body.appendChild(a);
+
+	a.click();
+	a.remove();
+};

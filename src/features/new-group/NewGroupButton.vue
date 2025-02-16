@@ -6,7 +6,7 @@ import { Button, Dialog } from 'primevue';
 import { defineAsyncComponent, ref } from 'vue';
 
 const NewGroupForm = defineAsyncComponent(() => import('./NewGroupForm.vue'));
-const InviteLink = defineAsyncComponent(() => import('./InviteLink.vue'));
+const InviteLink = defineAsyncComponent(() => import('@/components/InviteLink.vue'));
 
 const open = ref(false);
 const inviteGroupId = ref('');

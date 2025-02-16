@@ -14,8 +14,7 @@ const { user } = useGroupContext();
 const amount = computed(() => {
 	let group = 0,
 		self = 0,
-		paid = 0,
-		needToPay = 0;
+		paid = 0;
 
 	bills.value.forEach((bill) => {
 		const userId = user.value.id;
@@ -28,14 +27,10 @@ const amount = computed(() => {
 			paid += bill.amount;
 		}
 
-		if (bill.members?.[userId] && bill.createdBy !== userId) {
-			needToPay += bill.members[userId];
-		}
-
 		group += bill.amount;
 	});
 
-	return { group, self, paid, needToPay };
+	return { group, self, paid, needToPay: paid - self };
 });
 </script>
 
@@ -53,8 +48,10 @@ const amount = computed(() => {
 				</Typography>
 				<Divider layout="vertical" />
 				<Typography variant="mdMedium" class="text-neutral-500">
-					Cần trả:
-					<span class="text-red-600">{{ toVND(amount.needToPay) }}</span>
+					{{ amount.needToPay > 0 ? 'Cần nhận lại' : 'Cần trả thêm' }}:
+					<span :class="amount.needToPay > 0 ? 'text-green-600' : 'text-red-600'">
+						{{ toVND(Math.abs(amount.needToPay)) }}
+					</span>
 				</Typography>
 			</Flex>
 		</Flex>

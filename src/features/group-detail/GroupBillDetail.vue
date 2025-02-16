@@ -2,7 +2,6 @@
 import { fetchBills } from '@/apis/supabase';
 import Feedback from '@/components/Feedback.vue';
 import Flex from '@/components/Flex.vue';
-import GoHomeArrow from '@/components/GoHomeArrow.vue';
 import Loading from '@/components/Loading.vue';
 import Typography from '@/components/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
@@ -11,6 +10,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { provide, watch } from 'vue';
 import BillList from './bills/BillList.vue';
 import NewBill from './bills/NewBill.vue';
+import GroupMenu from './GroupMenu.vue';
 import { useGroupContext } from './hooks/useGroupContext';
 import MemberList from './members/MemberList.vue';
 import UserSwitcher from './members/UserSwitcher.vue';
@@ -41,7 +41,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 		<div class="grow overflow-auto max-h-full px-4">
 			<Flex class="justify-between gap-2">
 				<Flex class="gap-4">
-					<GoHomeArrow />
+					<GroupMenu />
 					<Typography variant="xlMedium" class="break-all whitespace-pre-wrap">
 						{{ group.name }}
 					</Typography>

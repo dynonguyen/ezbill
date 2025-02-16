@@ -136,6 +136,13 @@ const handleAddMember = (memberId: Member['id']) => {
 	}
 };
 
+const handleAddAllMember = () => {
+	group.value.members.forEach((member) => {
+		if (!memberAmounts.value[member.id]) memberAmounts.value[member.id] = { amount: 0 };
+	});
+	selectMemberAnchor.value?.hide();
+};
+
 const handleDeleteMember = (memberId: Member['id']) => {
 	memberAmounts.value = Object.fromEntries(
 		Object.entries(memberAmounts.value).filter(([id]) => id !== memberId),
@@ -293,20 +300,29 @@ const inputNumberProps: InputNumberProps = {
 							@click="selectMemberAnchor?.toggle" />
 
 						<Popover ref="selectMemberAnchor">
-							<div stack class="grid grid-cols-4 gap-4 w-106 max-h-100 overflow-auto">
-								<Flex
-									v-for="member in group.members.filter((m) => !memberAmounts[m.id])"
-									:key="member.id"
-									stack
-									center
-									class="gap-2 p-2 border border-neutral-200 rounded-xl cursor-pointer hover:bg-neutral-100 h-full justify-start"
-									@click="handleAddMember(member.id)">
-									<MemberAvatar v-bind="member" :show-tooltip="false" />
-									<Typography variant="xsMedium" class="break-all text-center line-clamp-1">
-										{{ member.name }}
-									</Typography>
-								</Flex>
-							</div>
+							<Flex stack class="gap-3">
+								<Button
+									size="small"
+									severity="secondary"
+									label="Thêm tất cả"
+									class="mr-auto"
+									@click="handleAddAllMember" />
+
+								<div stack class="grid grid-cols-4 gap-4 w-106 max-h-100 overflow-auto">
+									<Flex
+										v-for="member in group.members.filter((m) => !memberAmounts[m.id])"
+										:key="member.id"
+										stack
+										center
+										class="gap-2 p-2 border border-neutral-200 rounded-xl cursor-pointer hover:bg-neutral-100 h-full justify-start"
+										@click="handleAddMember(member.id)">
+										<MemberAvatar v-bind="member" :show-tooltip="false" />
+										<Typography variant="xsMedium" class="break-all text-center line-clamp-1">
+											{{ member.name }}
+										</Typography>
+									</Flex>
+								</div>
+							</Flex>
 						</Popover>
 					</template>
 
