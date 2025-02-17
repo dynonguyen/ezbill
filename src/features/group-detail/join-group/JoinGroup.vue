@@ -17,8 +17,9 @@ enum TabValue {
 	New = '0',
 	Existed = '1',
 }
+
 const { group } = useGroupContext();
-const tab = ref(TabValue.New);
+const tab = ref(group.value.members.length ? TabValue.Existed : TabValue.New);
 const queryClient = useQueryClient();
 const localDBStore = useLocalDBStore();
 

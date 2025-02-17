@@ -11,7 +11,7 @@ const { group, user } = useGroupContext();
 
 <template>
 	<ContainerBox :label="`Thành viên (${group.members.length})`">
-		<Flex class="gap-1 py-2 overflow-auto items-start">
+		<Flex class="gap-1 overflow-auto items-start">
 			<AddMember />
 			<Flex
 				v-for="member in group.members.map((m) => ({

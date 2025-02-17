@@ -36,7 +36,7 @@ const amount = computed(() => {
 
 <template>
 	<ContainerBox label="Tổng chi tiêu của bạn">
-		<Flex stack class="gap-2 py-2">
+		<Flex stack class="gap-2">
 			<Typography class="text-neutral-600 text-2xl font-semibold">
 				{{ toVND(amount.self) }}
 			</Typography>
@@ -58,7 +58,7 @@ const amount = computed(() => {
 	</ContainerBox>
 
 	<ContainerBox label="Tổng chi tiêu nhóm">
-		<Flex stack class="gap-4 py-2">
+		<Flex stack class="gap-4">
 			<Typography class="text-neutral-600 text-2xl font-semibold">
 				{{ toVND(amount.group) }}
 			</Typography>

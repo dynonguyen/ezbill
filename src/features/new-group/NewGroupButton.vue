@@ -1,23 +1,41 @@
 <script setup lang="ts">
+import { createGroup } from '@/apis/supabase';
 import Flex from '@/components/Flex.vue';
 import Loading from '@/components/Loading.vue';
 import type { Group } from '@/types/entities';
+import { generateUUID } from '@/utils/helpers';
+import { useMutation } from '@tanstack/vue-query';
+import to from 'await-to-js';
 import { Button, Dialog } from 'primevue';
 import { defineAsyncComponent, ref } from 'vue';
+import { useToast } from 'vue-toastification';
 
-const NewGroupForm = defineAsyncComponent(() => import('./NewGroupForm.vue'));
+const GroupForm = defineAsyncComponent(() => import('./GroupForm.vue'));
 const InviteLink = defineAsyncComponent(() => import('@/components/InviteLink.vue'));
 
 const open = ref(false);
 const inviteGroupId = ref('');
+
+const { isPending, mutateAsync } = useMutation({ mutationFn: createGroup });
+const toast = useToast();
 
 const handleCloseInviteLink = () => {
 	open.value = false;
 	inviteGroupId.value = '';
 };
 
-const handleNewGroupAdded = (group: Pick<Group, 'id'>) => {
-	inviteGroupId.value = group.id;
+const handleAddGroup = async (form: Pick<Group, 'name'>) => {
+	const { name } = form;
+	const groupId = generateUUID();
+
+	const [error] = await to(mutateAsync({ name, id: groupId }));
+
+	if (error) {
+		return toast.error(error?.message || 'Tạo nhóm thất bại');
+	}
+
+	toast.success('Tạo nhóm thành công');
+	inviteGroupId.value = groupId;
 };
 </script>
 
@@ -37,10 +55,12 @@ const handleNewGroupAdded = (group: Pick<Group, 'id'>) => {
 		:header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm mới'"
 		class="w-100 max-w-full">
 		<Suspense>
-			<NewGroupForm
-				v-if="open && !inviteGroupId"
-				@close="open = false"
-				@success="handleNewGroupAdded" />
+			<GroupForm v-if="open && !inviteGroupId" @close="open = false" @submit="handleAddGroup">
+				<template #submit-btn>
+					<Button class="min-w-20" type="submit" label="Tạo" :loading="isPending" />
+				</template>
+			</GroupForm>
+
 			<InviteLink
 				v-else-if="open && inviteGroupId"
 				:id="inviteGroupId"

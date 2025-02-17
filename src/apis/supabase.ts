@@ -27,6 +27,14 @@ export const fetchGroup = async (id: string): Promise<Group> => {
 	return data as Group;
 };
 
+export const updateGroup = async (data: { id: string; updated: Partial<Group> }) => {
+	const { id, updated } = data;
+
+	const resp = await supabase.from(getGroupView(id)).update(updated).eq('id', id);
+
+	if (resp.error) throw resp.error;
+};
+
 export const addMember = async (data: { groupId: Group['id']; member: Member }) => {
 	const { groupId, member } = data;
 

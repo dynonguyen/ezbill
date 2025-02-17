@@ -8,7 +8,7 @@ const generateOverviewSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 		CURRENCY_FMT = '#,##0 [$₫-vi-VN]',
 		COL_COMMON_STYLE: { font: Partial<Font> } = { font: { name: 'Arial', size: 12 } };
 
-	const ws = wb.addWorksheet('Tỗng quan');
+	const ws = wb.addWorksheet('Tổng quan');
 
 	// Define columns
 	ws.columns = [

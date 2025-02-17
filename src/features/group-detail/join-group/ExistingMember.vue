@@ -11,8 +11,10 @@ const { group } = useGroupContext();
 </script>
 
 <template>
-	<Typography v-if="!group.members.length" class="text-muted-color">Chưa có thành viên</Typography>
-	<div v-else stack class="grid grid-cols-4 gap-4">
+	<Typography v-if="!group.members.length" class="text-muted-color text-center">
+		Chưa có thành viên
+	</Typography>
+	<div v-else stack class="grid grid-cols-3 md:grid-cols-4 gap-4">
 		<Flex
 			v-for="member in group.members"
 			:key="member.id"
