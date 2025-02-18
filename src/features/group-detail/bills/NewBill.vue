@@ -46,7 +46,7 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 		v-model:visible="open"
 		modal
 		header="Tạo bill mới"
-		class="w-120 max-w-full"
+		class="!w-120"
 		:pt="{ content: { class: '!p-0' } }">
 		<Suspense>
 			<BillForm v-if="open" @close="open = false" mode="new" @submit="handleAddBill">

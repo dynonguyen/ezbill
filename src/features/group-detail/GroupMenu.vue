@@ -72,12 +72,7 @@ const items = ref<MenuItem[]>([
 
 	<Menu ref="menu" :model="items" popup />
 
-	<Dialog
-		:draggable="false"
-		v-model:visible="openShareGroup"
-		modal
-		header="Mời tham gia nhóm"
-		class="w-100 max-w-full">
+	<Dialog :draggable="false" v-model:visible="openShareGroup" modal header="Mời tham gia nhóm">
 		<Suspense>
 			<InviteLink
 				v-if="openShareGroup"
@@ -87,14 +82,12 @@ const items = ref<MenuItem[]>([
 		</Suspense>
 	</Dialog>
 
-	<Dialog
-		:draggable="false"
-		v-model:visible="openEditGroupName"
-		modal
-		header="Sửa tên nhóm"
-		class="w-100 max-w-full">
+	<Dialog :draggable="false" v-model:visible="openEditGroupName" modal header="Sửa tên nhóm">
 		<Suspense>
-			<GroupForm v-if="openEditGroupName" @submit="handleEditGroup">
+			<GroupForm
+				v-if="openEditGroupName"
+				@submit="handleEditGroup"
+				@close="openEditGroupName = false">
 				<template #submit-btn>
 					<Button class="min-w-20" type="submit" label="Lưu" :loading="isPending" />
 				</template>

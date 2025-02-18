@@ -34,6 +34,10 @@ html {
 	font-weight: 500;
 }
 
+.p-dialog {
+	@apply max-w-full w-100;
+}
+
 .Vue-Toastification__toast {
 	max-width: 400px;
 }

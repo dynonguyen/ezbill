@@ -4,15 +4,25 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Typography from '@/components/Typography.vue';
 import ContainerBox from '../ContainerBox.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
-import AddMember from './AddMember.vue';
+import MemberEditing from './MemberEditing.vue';
+import NewMember from './NewMember.vue';
 
 const { group, user } = useGroupContext();
 </script>
 
 <template>
-	<ContainerBox :label="`Thành viên (${group.members.length})`">
+	<ContainerBox>
+		<template #label>
+			<Flex class="justify-between mb-4">
+				<Typography variant="lgSemiBold">
+					{{ `Thành viên (${group.members.length})` }}
+				</Typography>
+				<MemberEditing />
+			</Flex>
+		</template>
+
 		<Flex class="gap-1 overflow-auto items-start">
-			<AddMember />
+			<NewMember />
 			<Flex
 				v-for="member in group.members.map((m) => ({
 					...m,

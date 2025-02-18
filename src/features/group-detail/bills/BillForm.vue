@@ -285,7 +285,7 @@ const inputNumberProps: InputNumberProps = {
 							@value-change="(val) => handleMemberAmountChange(member.id, val)" />
 					</FormControl>
 					<span
-						class="icon msi-delete-forever-outline-rounded mt-5 size-8 text-neutral-500 hover:text-red-400 cursor-pointer"
+						class="icon msi-delete-outline-rounded mt-5 size-8 text-neutral-500 hover:text-red-400 cursor-pointer"
 						@click="handleDeleteMember(member.id)" />
 				</Flex>
 
@@ -328,7 +328,7 @@ const inputNumberProps: InputNumberProps = {
 
 					<Button
 						v-if="totalMembers"
-						icon="icon msi-delete-forever-outline-rounded"
+						icon="icon msi-delete-outline-rounded"
 						variant="text"
 						severity="danger"
 						label="Xoá tất cả"

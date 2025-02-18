@@ -13,6 +13,5 @@
 		"tanstack",
 		"toastification",
 		"VITE"
-	],
-	"vue.server.hybridMode": true
+	]
 }

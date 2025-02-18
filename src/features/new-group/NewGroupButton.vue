@@ -52,8 +52,7 @@ const handleAddGroup = async (form: Pick<Group, 'name'>) => {
 		:draggable="false"
 		v-model:visible="open"
 		modal
-		:header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm mới'"
-		class="w-100 max-w-full">
+		:header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm mới'">
 		<Suspense>
 			<GroupForm v-if="open && !inviteGroupId" @close="open = false" @submit="handleAddGroup">
 				<template #submit-btn>

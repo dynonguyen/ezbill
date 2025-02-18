@@ -1,23 +1,23 @@
 <script setup lang="ts">
 import { addMember } from '@/apis/supabase';
+import Flex from '@/components/Flex.vue';
 import { QUERY_KEY } from '@/constants/key';
-import { useLocalDBStore } from '@/stores/local-db';
 import type { Member } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { Button } from 'primevue';
+import { Button, Dialog } from 'primevue';
+import { ref } from 'vue';
 import { useToast } from 'vue-toastification';
 import { useGroupContext } from '../hooks/useGroupContext';
-import MemberForm, { type MemberFormData } from '../members/MemberForm.vue';
+import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
-withDefaults(defineProps<{ submitLabel?: string }>(), { submitLabel: 'Tham gia' });
+const open = ref(false);
 
-const { isPending, mutateAsync } = useMutation({ mutationFn: addMember });
 const queryClient = useQueryClient();
-const localDBStore = useLocalDBStore();
 const { group } = useGroupContext();
 const toast = useToast();
+const { isPending, mutateAsync } = useMutation({ mutationFn: addMember });
 
 const handleAddMember = async (form: MemberFormData) => {
 	const id = generateUUID();
@@ -30,14 +30,24 @@ const handleAddMember = async (form: MemberFormData) => {
 	}
 
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
-	localDBStore.joinGroup(group.value.id, id);
+	open.value = false;
+	toast.success('Thêm thành viên thành công');
 };
 </script>
 
 <template>
-	<MemberForm @submit="handleAddMember">
-		<template #bottom-submit-btn>
-			<Button type="submit" label="Tham gia" :loading="isPending" />
-		</template>
-	</MemberForm>
+	<Flex
+		center
+		class="size-12 border border-dashed border-neutral-500 rounded-full cursor-pointer hover:border-neutral-800 hover:bg-neutral-100 shrink-0"
+		@click="open = true">
+		<span class="icon msi-add-2-rounded text-neutral-800" />
+	</Flex>
+
+	<Dialog :draggable="false" v-model:visible="open" modal :header="'Thêm thành viên'">
+		<MemberForm @submit="handleAddMember">
+			<template #bottom-submit-btn>
+				<Button type="submit" label="Thêm" :loading="isPending" />
+			</template>
+		</MemberForm>
+	</Dialog>
 </template>

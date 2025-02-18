@@ -103,7 +103,7 @@ const deleteConfirm = (event: MouseEvent) => {
 		:visible="Boolean(detailId)"
 		modal
 		:header="`Bill &quot;${bills.find((b) => b.id === detailId)?.name}&quot; `"
-		class="w-120 max-w-full"
+		class="!w-120"
 		:pt="{ content: { class: '!p-0' } }"
 		@hide="detailId = null"
 		@update:visible="

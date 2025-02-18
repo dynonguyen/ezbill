@@ -8,6 +8,7 @@ export const supabase = createClient(getEnv('VITE_SUPABASE_URL'), getEnv('VITE_S
 const getGroupView = (groupId: string) => `group_${groupId}`;
 const getBillView = (groupId: string) => `bill_${groupId}`;
 
+// Group
 export const createGroup = async (group: Pick<Group, 'name' | 'id'>) => {
 	const gData = await supabase.from('groups').insert(group);
 	if (gData.error) throw gData.error;
@@ -35,6 +36,7 @@ export const updateGroup = async (data: { id: string; updated: Partial<Group> })
 	if (resp.error) throw resp.error;
 };
 
+// Member
 export const addMember = async (data: { groupId: Group['id']; member: Member }) => {
 	const { groupId, member } = data;
 
@@ -59,6 +61,52 @@ export const addMember = async (data: { groupId: Group['id']; member: Member }) 
 	if (resp.error) throw resp.error;
 };
 
+export const removeMember = async (data: { groupId: Group['id']; memberId: Member['id'] }) => {
+	const { groupId, memberId } = data;
+
+	const [gError, group] = await to(fetchGroup(groupId));
+	const [bError, bills] = await to(fetchBills(groupId));
+
+	if (gError || bError) {
+		throw new Error('Không thể xóa thành viên');
+	}
+
+	if (bills.some((bill) => bill.createdBy === memberId || bill.members[memberId])) {
+		throw new Error(
+			'Thành viên đã tạo hoặc tham gia vào một số bill. Vui lòng xóa bill trước khi xóa thành viên',
+		);
+	}
+
+	const newMembers = group.members?.filter((member) => member.id !== memberId);
+
+	const resp = await supabase
+		.from(getGroupView(groupId))
+		.update({ members: newMembers })
+		.eq('id', groupId);
+
+	if (resp.error) throw resp.error;
+};
+
+export const updateMember = async (data: { groupId: Group['id']; updated: Member }) => {
+	const { groupId, updated } = data;
+
+	const [error, group] = await to(fetchGroup(groupId));
+
+	if (error) {
+		throw new Error('Không thể cập nhật thành viên');
+	}
+
+	const newMembers = group.members?.map((member) => (member.id === updated.id ? updated : member));
+
+	const resp = await supabase
+		.from(getGroupView(groupId))
+		.update({ members: newMembers })
+		.eq('id', groupId);
+
+	if (resp.error) throw resp.error;
+};
+
+// Bill
 export const fetchBills = async (groupId: string): Promise<Bill[]> => {
 	const { data, error } = await supabase.from(getBillView(groupId)).select();
 
