@@ -6,10 +6,8 @@ import { Button, InputText } from 'primevue';
 import { useForm } from 'vee-validate';
 import { z } from 'zod';
 
-const emit = defineEmits<{
-	close: [];
-	submit: [form: GroupForm];
-}>();
+const emit = defineEmits<{ close: []; submit: [form: GroupForm] }>();
+const props = defineProps<{ initialValues?: GroupForm }>();
 
 const MAX = {
 	NAME: 512,
@@ -23,7 +21,10 @@ type GroupForm = z.infer<typeof schema>;
 
 const validationSchema = toTypedSchema(schema);
 
-const { errors, handleSubmit, defineField } = useForm<GroupForm>({ validationSchema });
+const { errors, handleSubmit, defineField } = useForm<GroupForm>({
+	validationSchema,
+	initialValues: props.initialValues,
+});
 
 const handleAddGroup = handleSubmit(async (form) => {
 	emit('submit', form);
@@ -44,6 +45,7 @@ const [name, nameProps] = defineField('name');
 				placeholder="Nhập tên nhóm"
 				v-model="name"
 				v-bind="nameProps"
+				autofocus
 				:maxlength="MAX.NAME" />
 		</FormControl>
 

@@ -87,7 +87,8 @@ const items = ref<MenuItem[]>([
 			<GroupForm
 				v-if="openEditGroupName"
 				@submit="handleEditGroup"
-				@close="openEditGroupName = false">
+				@close="openEditGroupName = false"
+				:initial-values="{ name: group.name }">
 				<template #submit-btn>
 					<Button class="min-w-20" type="submit" label="Lưu" :loading="isPending" />
 				</template>

@@ -6,12 +6,13 @@ import Typography from '@/components/Typography.vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { InputText } from 'primevue';
 import { useForm } from 'vee-validate';
-import { ref } from 'vue';
+import { onMounted, ref, useId } from 'vue';
 import { z } from 'zod';
 import AvatarSelect from '../AvatarSelect.vue';
 
 const emit = defineEmits<{ submit: [form: MemberFormData] }>();
 const props = defineProps<{ initialValues?: MemberFormData }>();
+const nameInputId = useId();
 
 const MAX = { NAME: 512 };
 
@@ -39,6 +40,8 @@ const handleChangeAvatar = (avt: string) => {
 };
 
 const [name, nameProps] = defineField('name');
+
+onMounted(() => document.getElementById(nameInputId)?.focus());
 </script>
 
 <template>
@@ -68,8 +71,10 @@ const [name, nameProps] = defineField('name');
 				<InputText
 					placeholder="Nhập tên của bạn"
 					fluid
+					:id="nameInputId"
 					v-model="name"
 					v-bind="nameProps"
+					autofocus
 					:maxlength="MAX.NAME" />
 			</FormControl>
 
