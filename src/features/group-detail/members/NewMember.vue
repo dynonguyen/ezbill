@@ -7,10 +7,12 @@ import { generateUUID } from '@/utils/helpers';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { Button, Dialog } from 'primevue';
-import { ref } from 'vue';
+import { defineAsyncComponent, ref } from 'vue';
 import { useToast } from 'vue-toastification';
 import { useGroupContext } from '../hooks/useGroupContext';
-import MemberForm, { type MemberFormData } from './MemberForm.vue';
+import { type MemberFormData } from './MemberForm.vue';
+
+const MemberForm = defineAsyncComponent(() => import('./MemberForm.vue'));
 
 const open = ref(false);
 
@@ -36,18 +38,22 @@ const handleAddMember = async (form: MemberFormData) => {
 </script>
 
 <template>
-	<Flex
-		center
-		class="size-12 border border-dashed border-neutral-500 rounded-full cursor-pointer hover:border-neutral-800 hover:bg-neutral-100 shrink-0"
-		@click="open = true">
-		<span class="icon msi-add-2-rounded text-neutral-800" />
-	</Flex>
+	<slot name="new-btn" :handleOpen="() => (open = true)">
+		<Flex
+			center
+			class="size-12 border border-dashed border-neutral-500 rounded-full cursor-pointer hover:border-neutral-800 hover:bg-neutral-100 shrink-0"
+			@click="open = true">
+			<span class="icon msi-add-2-rounded text-neutral-800" />
+		</Flex>
+	</slot>
 
 	<Dialog :draggable="false" v-model:visible="open" modal :header="'Thêm thành viên'">
-		<MemberForm @submit="handleAddMember">
-			<template #bottom-submit-btn>
-				<Button type="submit" label="Thêm" :loading="isPending" />
-			</template>
-		</MemberForm>
+		<Suspense>
+			<MemberForm @submit="handleAddMember">
+				<template #bottom-submit-btn>
+					<Button type="submit" label="Thêm" :loading="isPending" />
+				</template>
+			</MemberForm>
+		</Suspense>
 	</Dialog>
 </template>

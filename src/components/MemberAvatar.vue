@@ -50,7 +50,7 @@ const AVATAR_COLOR: Record<string, string> = {
 <template>
 	<Avatar
 		v-if="$props.avatar"
-		:image="getImgUrl(`avatar/avt-${$props.avatar}.png`)"
+		:image="getImgUrl(`avatar/${$props.avatar}`)"
 		shape="circle"
 		v-tooltip.bottom="$props.showTooltip ? $props.name : null" />
 	<Avatar

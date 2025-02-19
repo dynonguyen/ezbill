@@ -4,6 +4,7 @@ import { Button, Dialog, Message } from 'primevue';
 import { ref } from 'vue';
 import { useGroupContext } from '../hooks/useGroupContext';
 import MemberEditingItem from './MemberEditingItem.vue';
+import NewMember from './NewMember.vue';
 
 const { group } = useGroupContext();
 
@@ -16,8 +17,8 @@ const open = ref(false);
 		icon="icon msi-edit-outline-rounded"
 		label="Chỉnh sửa"
 		icon-pos="right"
-		severity="secondary"
 		size="small"
+		class="!text-neutral-600"
 		@click="open = true" />
 
 	<Dialog
@@ -38,6 +39,18 @@ const open = ref(false);
 				:key="member.id"
 				:member="member"
 				:index="index" />
+
+			<NewMember>
+				<template v-slot:new-btn="slotProps">
+					<Button
+						icon="icon msi-add-2-rounded"
+						severity="secondary"
+						label="Thêm thành viên"
+						class="mt-4"
+						size="small"
+						@click="slotProps.handleOpen" />
+				</template>
+			</NewMember>
 		</Flex>
 
 		<Flex class="justify-end mt-2 p-4">

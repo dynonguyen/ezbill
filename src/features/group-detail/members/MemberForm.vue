@@ -33,8 +33,8 @@ const handleAddMember = handleSubmit(async (form) => {
 	emit('submit', form);
 });
 
-const handleChangeAvatar = (index: string) => {
-	setFieldValue('avatar', index);
+const handleChangeAvatar = (avt: string) => {
+	setFieldValue('avatar', avt);
 	openAvatarSelect.value = false;
 };
 

@@ -15,7 +15,7 @@ import { useGroupContext } from '../hooks/useGroupContext';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
-const { group } = useGroupContext();
+const { group, user } = useGroupContext();
 const bills = useBillsContext();
 const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
 	mutationFn: removeMember,
@@ -85,7 +85,7 @@ const handleUpdate = async (form: MemberFormData) => {
 			<MemberAvatar v-bind="$props.member" :show-tooltip="false" class="shrink-0 !size-11" />
 
 			<Typography class="line-clamp-1 break-all grow">
-				{{ $props.member.name }}
+				{{ $props.member.name + ($props.member.id === user.id ? ' (Bạn)' : '') }}
 			</Typography>
 
 			<Flex class="gap-2 shrink-0">
