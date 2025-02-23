@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { fetchGroup } from '@/apis/supabase';
 import Feedback from '@/components/Feedback.vue';
-import Flex from '@/components/Flex.vue';
 import Loading from '@/components/Loading.vue';
+import Flex from '@/components/ui/Flex.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { useLocalDBStore } from '@/stores/local-db';

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-
 const variants = {
 	xsRegular: 'text-xs font-normal',
 	xsMedium: 'text-xs font-medium',
@@ -20,19 +18,19 @@ const variants = {
 	displayRegular: 'text-2xl font-normal',
 	displayMedium: 'text-2xl font-medium',
 	displaySemiBold: 'text-2xl font-semibold',
-}
+};
 
-export interface TypographyProps extends /* @vue-ignore */ HTMLAttributes {
-	as?: keyof HTMLElementTagNameMap
-	variant?: keyof typeof variants
-}
+export type TypographyProps = {
+	as?: keyof HTMLElementTagNameMap;
+	variant?: keyof typeof variants;
+};
 
 withDefaults(defineProps<TypographyProps>(), {
 	as: 'div',
 	variant: 'mdRegular',
-})
+});
 
-defineOptions({ inheritAttrs: false })
+defineOptions({ inheritAttrs: false });
 </script>
 
 <template>

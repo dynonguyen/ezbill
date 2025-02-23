@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Feedback from '@/components/Feedback.vue';
-import Flex from '@/components/Flex.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import RecentGroupItem from './RecentGroupItem.vue';

@@ -2,8 +2,8 @@
 import { getAssetUrl } from '@/utils/get-asset';
 import { Button } from 'primevue';
 import { onErrorCaptured, ref } from 'vue';
-import Flex from './Flex.vue';
-import Typography from './Typography.vue';
+import Flex from './ui/Flex.vue';
+import Typography from './ui/Typography.vue';
 
 const error = ref<Error | null>(null);
 

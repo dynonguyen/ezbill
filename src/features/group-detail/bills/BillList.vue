@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { deleteBill, updateBill } from '@/apis/supabase';
-import Flex from '@/components/Flex.vue';
+import Flex from '@/components/ui/Flex.vue';
 import { QUERY_KEY } from '@/constants/key';
 import { type Bill } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';

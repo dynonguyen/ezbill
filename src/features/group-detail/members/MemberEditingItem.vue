@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { removeMember, updateMember } from '@/apis/supabase';
-import Flex from '@/components/Flex.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
 import type { Member } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Typography from '@/components/Typography.vue';
+import Typography from '@/components/ui/Typography.vue';
 
 defineProps<{ label?: string }>();
 </script>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { fetchBills } from '@/apis/supabase';
 import Feedback from '@/components/Feedback.vue';
-import Flex from '@/components/Flex.vue';
 import Loading from '@/components/Loading.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';

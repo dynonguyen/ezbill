@@ -20,7 +20,7 @@ defineProps<FormControlProps>();
 		stack
 		class="gap-1"
 		:class="{
-			'[&_.p-inputtext]:!border-error': $props.error,
+			'[&_.input]:!border-error [&_.input]:!outline-error': $props.error,
 		}">
 		<Typography
 			as="label"

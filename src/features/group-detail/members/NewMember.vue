@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { addMember } from '@/apis/supabase';
-import Flex from '@/components/Flex.vue';
+import Flex from '@/components/ui/Flex.vue';
 import { QUERY_KEY } from '@/constants/key';
 import type { Member } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';

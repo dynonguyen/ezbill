@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
+import Flex from '@/components/ui/Flex.vue';
 import { PATH } from '@/constants/path';
 import { getEnv } from '@/utils/get-env';
 import { Button, InputText } from 'primevue';

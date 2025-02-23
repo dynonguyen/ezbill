@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
-import FormControl from '@/components/FormControl.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import FormControl from '@/components/ui/FormControl.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { InputText } from 'primevue';
 import { useForm } from 'vee-validate';

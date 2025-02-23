@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { fetchGroup } from '@/apis/supabase';
-import Flex from '@/components/Flex.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { useLocalDBStore } from '@/stores/local-db';

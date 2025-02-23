@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
 import GoHomeArrow from '@/components/GoHomeArrow.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { useLocalDBStore } from '@/stores/local-db';
 import type { Member } from '@/types/entities';
 import { Tab, TabList, Tabs } from 'primevue';

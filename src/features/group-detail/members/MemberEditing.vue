@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
+import Flex from '@/components/ui/Flex.vue';
 import { Button, Dialog, Message } from 'primevue';
 import { ref } from 'vue';
 import { useGroupContext } from '../hooks/useGroupContext';

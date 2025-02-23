@@ -5,10 +5,13 @@
 @layer base {
 	html {
 		font-family:
-			'Open Sans',
+			'Inter',
 			-apple-system,
 			Arial,
 			sans-serif;
+	}
+	body {
+		background-color: #000;
 	}
 }
 
@@ -29,4 +32,8 @@
 
 .Vue-Toastification__toast {
 	max-width: 400px;
+}
+
+.input {
+	background-color: #fff;
 }

@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
-import FormControl from '@/components/FormControl.vue';
+import Flex from '@/components/ui/Flex.vue';
+import FormControl from '@/components/ui/FormControl.vue';
 import { toTypedSchema } from '@vee-validate/zod';
-import { Button, InputText } from 'primevue';
 import { useForm } from 'vee-validate';
 import { z } from 'zod';
 
-const emit = defineEmits<{ close: []; submit: [form: GroupForm] }>();
+const emit = defineEmits<{ submit: [form: GroupForm] }>();
 const props = defineProps<{ initialValues?: GroupForm }>();
 
 const MAX = {
@@ -35,12 +34,10 @@ const [name, nameProps] = defineField('name');
 
 <template>
 	<Flex stack class="gap-4" as="form" @submit="handleAddGroup">
-		<FormControl
-			html-for="name"
-			label="Tên nhóm"
-			:error="Boolean(errors.name)"
-			:helper-text="errors.name">
-			<InputText
+		<FormControl html-for="name" :error="Boolean(errors.name)" :helper-text="errors.name">
+			<input
+				type="text"
+				class="input input-bordered w-full"
 				id="name"
 				placeholder="Nhập tên nhóm"
 				v-model="name"
@@ -49,9 +46,6 @@ const [name, nameProps] = defineField('name');
 				:maxlength="MAX.NAME" />
 		</FormControl>
 
-		<Flex class="justify-end gap-2">
-			<Button variant="outlined" label="Đóng" @click="$emit('close')" />
-			<slot name="submit-btn"></slot>
-		</Flex>
+		<slot name="form-action"></slot>
 	</Flex>
 </template>

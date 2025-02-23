@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { useLocalDBStore } from '@/stores/local-db';
 import { Menu } from 'primevue';
 import type { MenuItem } from 'primevue/menuitem';
