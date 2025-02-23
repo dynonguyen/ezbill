@@ -3,6 +3,7 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import NewGroupPopup from '@/features/new-group/NewGroupPopup.vue';
+import RecentGroups from '@/features/recent-groups/RecentGroups.vue';
 import { ref } from 'vue';
 
 const openNewGroup = ref(false);
@@ -27,9 +28,11 @@ const openNewGroup = ref(false);
 				<Typography variant="xsRegular">Tham gia nhóm</Typography>
 			</Button>
 		</Flex>
+
+		<NewGroupPopup v-model="openNewGroup" />
 	</div>
 
-	<NewGroupPopup v-model="openNewGroup" />
+	<RecentGroups />
 </template>
 
 <style module>

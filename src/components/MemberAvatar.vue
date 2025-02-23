@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { Member } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
-import { Avatar, type AvatarProps } from 'primevue';
+import Typography from './ui/Typography.vue';
 
-withDefaults(defineProps<Member & AvatarProps & { showTooltip?: boolean }>(), {
-	showTooltip: true,
-});
+type MemberAvatarProps = Member & { size?: 'sm' | 'md' | 'lg' };
+
+withDefaults(defineProps<MemberAvatarProps>(), { showTooltip: true, size: 'md' });
 
 const AVATAR_COLOR: Record<string, string> = {
 	'0': '#D32F2F',
@@ -45,22 +45,26 @@ const AVATAR_COLOR: Record<string, string> = {
 	y: '#D81B60',
 	z: '#D50000',
 };
+
+const sizes: Record<NonNullable<MemberAvatarProps['size']>, string> = {
+	sm: 'w-5 h-5',
+	md: 'w-7 h-7',
+	lg: 'w-10 h-10',
+};
 </script>
 
 <template>
-	<Avatar
-		v-if="$props.avatar"
-		:image="getImgUrl(`avatar/${$props.avatar}`)"
-		shape="circle"
-		v-tooltip.bottom="$props.showTooltip ? $props.name : null" />
-	<Avatar
-		v-else-if="$props.name"
-		:label="$props.name[0].toUpperCase()"
-		shape="circle"
-		class="font-semibold"
-		:style="{
-			color: '#FFF',
-			backgroundColor: AVATAR_COLOR[$props.name[0].toLowerCase()] || '#697182',
-		}"
-		v-tooltip.bottom="$props.showTooltip ? $props.name : null" />
+	<div class="avatar" v-if="avatar">
+		<div :class="[sizes[size]]" class="rounded-full">
+			<img :src="getImgUrl(`avatar/${avatar}`)" />
+		</div>
+	</div>
+	<div v-else-if="name" class="avatar placeholder">
+		<div
+			class="text-neutral-content bg-white rounded-full"
+			:class="[sizes[size]]"
+			:style="{ backgroundColor: AVATAR_COLOR[name[0].toLowerCase()] || '#697182' }">
+			<Typography variant="smRegular">{{ name[0].toUpperCase() }}</Typography>
+		</div>
+	</div>
 </template>
