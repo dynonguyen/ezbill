@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { PATH } from '@/constants/path';
+import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
@@ -22,6 +23,7 @@ const inviteGroupId = ref('');
 const { isPending, mutateAsync } = useMutation({ mutationFn: createGroup });
 const toast = useToast();
 const router = useRouter();
+const localDBStore = useLocalDBStore();
 
 const handleClose = () => {
 	open.value = false;
@@ -38,6 +40,7 @@ const handleAddGroup = async (form: Pick<Group, 'name'>) => {
 		return toast.error(error?.message || 'Tạo nhóm thất bại');
 	}
 
+	localDBStore.joinGroup(groupId);
 	inviteGroupId.value = groupId;
 };
 

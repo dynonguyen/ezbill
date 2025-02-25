@@ -2,7 +2,6 @@ import materialSymbolIcons from '@iconify-json/material-symbols/icons.json';
 import { addIconSelectors } from '@iconify/tailwind';
 import daisyui from 'daisyui';
 import themes from 'daisyui/src/theming/themes';
-import colors from 'tailwindcss/colors';
 import plugin from 'tailwindcss/plugin';
 
 const iconifyPlugin = addIconSelectors({
@@ -24,14 +23,6 @@ export default {
 
 	plugins: [daisyui, iconifyPlugin, utilitiesPlugin],
 
-	theme: {
-		extend: {
-			colors: {
-				'primary-focus': colors.indigo[800],
-			},
-		},
-	},
-
 	daisyui: {
 		themes: [
 			{
@@ -40,6 +31,8 @@ export default {
 					primary: '#4338CA',
 					'primary-content': '#C7D2FE',
 					'base-100': '#F3F4F6',
+					'base-300': '#D1D5DB',
+					'base-content': '#1F2937',
 				},
 			},
 		],

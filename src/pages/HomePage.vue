@@ -2,11 +2,13 @@
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
+import JoinGroupPopup from '@/features/join-group/JoinGroupPopup.vue';
 import NewGroupPopup from '@/features/new-group/NewGroupPopup.vue';
 import RecentGroups from '@/features/recent-groups/RecentGroups.vue';
 import { ref } from 'vue';
 
 const openNewGroup = ref(false);
+const openJoinGroup = ref(false);
 </script>
 
 <template>
@@ -14,14 +16,14 @@ const openNewGroup = ref(false);
 		<h1 class="text-2xl font-black text-center py-2.5">EZbill</h1>
 
 		<Flex class="mt-6 gap-2">
-			<Button shape="pill" :class="$style['action-btn']" @click="openNewGroup = !openNewGroup">
+			<Button shape="pill" :class="$style['action-btn']" @click="openNewGroup = true">
 				<Flex :class="$style['icon-wrapper']" center>
 					<span class="icon msi-add-rounded"></span>
 				</Flex>
 				<Typography variant="xsRegular">Tạo nhóm</Typography>
 			</Button>
 
-			<Button shape="pill" :class="$style['action-btn']">
+			<Button shape="pill" :class="$style['action-btn']" @click="openJoinGroup = true">
 				<Flex :class="$style['icon-wrapper']" center>
 					<span class="icon msi-folder-supervised"></span>
 				</Flex>
@@ -30,6 +32,7 @@ const openNewGroup = ref(false);
 		</Flex>
 
 		<NewGroupPopup v-model="openNewGroup" />
+		<JoinGroupPopup v-model="openJoinGroup" />
 	</div>
 
 	<RecentGroups />
@@ -41,7 +44,7 @@ const openNewGroup = ref(false);
 }
 
 .icon-wrapper {
-	@apply rounded-full size-8 bg-primary-focus;
+	@apply rounded-full size-8 bg-indigo-800;
 
 	:global .icon {
 		@apply size-5;

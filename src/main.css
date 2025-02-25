@@ -10,6 +10,7 @@
 			Arial,
 			sans-serif;
 	}
+
 	body {
 		background-color: #000;
 	}
@@ -32,8 +33,21 @@
 
 .Vue-Toastification__toast {
 	max-width: 400px;
+	margin: 0 auto;
 }
 
 .input {
 	background-color: #fff;
+}
+
+html:has(.modal[open]) {
+	scrollbar-gutter: auto !important;
+}
+
+details > summary::-webkit-details-marker {
+	display: none;
+}
+
+details > summary {
+	list-style: none;
 }

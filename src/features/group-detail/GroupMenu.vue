@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { updateGroup } from '@/apis/supabase';
+import Button from '@/components/ui/Button.vue';
+import Dialog from '@/components/ui/Dialog.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
-import { PATH } from '@/constants/path';
+import { vOutsideClick } from '@/directives/v-outside-click';
 import type { Group } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { Button, Dialog, Menu, type PopoverMethods } from 'primevue';
-import type { MenuItem } from 'primevue/menuitem';
-import { defineAsyncComponent, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { defineAsyncComponent, ref, useId } from 'vue';
 import { useToast } from 'vue-toastification';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
@@ -18,14 +19,18 @@ const GroupForm = defineAsyncComponent(() => import('@/features/new-group/GroupF
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
-const router = useRouter();
 const { isPending, mutateAsync } = useMutation({ mutationFn: updateGroup });
 const toast = useToast();
 const queryClient = useQueryClient();
 
-const menu = ref<PopoverMethods>();
+const open = ref(false);
 const openShareGroup = ref(false);
 const openEditGroupName = ref(false);
+const actionId = useId();
+
+const handleClose = () => {
+	open.value = false;
+};
 
 const exportGroup = () => {
 	import('./helpers/export-to-excel').then(({ exportGroupToExcel }) => {
@@ -40,59 +45,89 @@ const handleEditGroup = async (form: Partial<Group>) => {
 		return toast.error(error?.message || 'Chỉnh sửa thất bại');
 	}
 
-	toast.success('Chỉnh sửa thành công');
 	openEditGroupName.value = false;
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
 };
 
-const items = ref<MenuItem[]>([
+const items = ref<
+	Array<{ type: 'item'; label: string; icon: string; action(): void; hasDivider?: boolean }>
+>([
 	{
-		label: 'Về trang chủ',
-		icon: 'icon msi-home-rounded size-5',
-		command: () => router.push(PATH.HOME),
-	},
-	{
+		type: 'item',
 		label: 'Sửa tên nhóm',
 		icon: 'icon msi-edit-rounded size-5',
-		command: () => (openEditGroupName.value = true),
+		hasDivider: true,
+		action: () => (openEditGroupName.value = true),
 	},
 	{
+		type: 'item',
 		label: 'Chia sẻ nhóm',
 		icon: 'icon msi-share size-5',
-		command: () => (openShareGroup.value = true),
+		action: () => (openShareGroup.value = true),
 	},
-	{ label: 'Export excel', icon: 'icon msi-sim-card-download size-5', command: exportGroup },
+	{
+		type: 'item',
+		label: 'Xuất file excel',
+		icon: 'icon msi-file-save-rounded size-5',
+		action: exportGroup,
+	},
 ]);
 </script>
 
 <template>
-	<span
-		class="icon msi-menu-rounded size-7 cursor-pointer text-neutral-500 hover:text-neutral-700"
-		@click="menu?.toggle($event)" />
+	<details class="dropdown dropdown-bottom dropdown-end" :open="open">
+		<summary>
+			<Button
+				variant="soft"
+				color="grey"
+				shape="circle"
+				size="sm"
+				class="bg-base-300 border-base-300 shrink-0"
+				start-icon="icon msi-more-vert"
+				:id="actionId"
+				@click="open = !open" />
+		</summary>
 
-	<Menu ref="menu" :model="items" popup />
+		<ul
+			class="dropdown-content menu bg-gray-50 rounded-box z-[1] w-52 shadow-lg mt-4 p-0 overflow-hidden"
+			v-outside-click:[actionId]="{ enabled: open, trigger: handleClose }">
+			<template v-for="(item, index) in items" :key="index">
+				<Flex
+					class="p-4 justify-between hover:bg-gray-100 cursor-pointer"
+					:class="{ 'border-b border-gray-200': !item.hasDivider && index !== items.length - 1 }"
+					@click="
+						() => {
+							handleClose();
+							item.action();
+						}
+					">
+					<Typography variant="smRegular" class="text-black">{{ item.label }}</Typography>
+					<span :class="item.icon" class="size-5 text-slate-600"></span>
+				</Flex>
+				<div v-if="item.hasDivider" class="h-2 bg-gray-200"></div>
+			</template>
+		</ul>
+	</details>
 
-	<Dialog :draggable="false" v-model:visible="openShareGroup" modal header="Mời tham gia nhóm">
-		<Suspense>
-			<InviteLink
-				v-if="openShareGroup"
-				:id="group.id"
-				:hide-view-group="true"
-				@close="openShareGroup = false" />
-		</Suspense>
-	</Dialog>
-
-	<Dialog :draggable="false" v-model:visible="openEditGroupName" modal header="Sửa tên nhóm">
+	<Dialog v-model:open="openEditGroupName" header="Sửa tên nhóm" @close="openEditGroupName = false">
 		<Suspense>
 			<GroupForm
 				v-if="openEditGroupName"
-				@submit="handleEditGroup"
-				@close="openEditGroupName = false"
-				:initial-values="{ name: group.name }">
-				<template #submit-btn>
-					<Button class="min-w-20" type="submit" label="Lưu" :loading="isPending" />
+				:initial-values="{ name: group.name }"
+				@submit="handleEditGroup">
+				<template #form-action>
+					<Flex class="gap-2" items-fluid>
+						<Button variant="soft" color="grey" @click="openEditGroupName = false">Huỷ</Button>
+						<Button type="submit" :loading="isPending">Cập nhật</Button>
+					</Flex>
 				</template>
 			</GroupForm>
+		</Suspense>
+	</Dialog>
+
+	<Dialog v-model:open="openShareGroup" header="Mời tham gia nhóm" @close="openShareGroup = false">
+		<Suspense>
+			<InviteLink v-if="openShareGroup" :id="group.id" />
 		</Suspense>
 	</Dialog>
 </template>

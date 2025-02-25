@@ -39,7 +39,7 @@ const handleChangeAvatar = (avt: string) => {
 	openAvatarSelect.value = false;
 };
 
-const [name, nameProps] = defineField('name');
+const [inviteLink, nameProps] = defineField('name');
 
 onMounted(() => document.getElementById(nameInputId)?.focus());
 </script>

@@ -24,7 +24,7 @@ const {
 const MAX_AVATAR = 3;
 
 watch(error, () => {
-	if (error.value) {
+	if (error.value?.message?.includes('does not exist')) {
 		localDBStore.removeFromGroup(props.id);
 	}
 });
@@ -37,17 +37,19 @@ watch(error, () => {
 		stack
 		class="gap-2 p-4 rounded-2xl bg-white shadow-lg cursor-pointer"
 		@click="$router.push(PATH.GROUP.replace(':id', group.id))">
-		<Typography variant="xlSemiBold">{{ group.name }}</Typography>
+		<Typography variant="xlSemiBold" class="text-black line-clamp-1 break-all">
+			{{ group.name }}
+		</Typography>
 		<Flex class="justify-between">
 			<Flex class="gap-1">
 				<div :class="$style.tag">
 					<span class="icon msi-calendar-clock-rounded"></span>
-					<span>{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm') }}</span>
+					<span class="tag-content">{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm') }}</span>
 				</div>
 
 				<div :class="$style.tag">
 					<span class="icon msi-group-rounded"></span>
-					<span>{{ group.members.length }}</span>
+					<span class="tag-content">{{ group.members.length }}</span>
 				</div>
 			</Flex>
 
@@ -75,6 +77,10 @@ watch(error, () => {
 
 	:global .icon {
 		@apply size-4;
+	}
+
+	:global .tag-content {
+		@apply text-sm;
 	}
 }
 </style>
