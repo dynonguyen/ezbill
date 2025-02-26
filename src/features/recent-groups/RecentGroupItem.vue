@@ -57,7 +57,6 @@ watch(error, () => {
 				<MemberAvatar
 					v-for="member in group.members.slice(0, MAX_AVATAR)"
 					:key="member.id"
-					show-tooltip
 					v-bind="member" />
 				<div class="avatar placeholder" v-if="group.members.length > MAX_AVATAR">
 					<div class="bg-neutral text-neutral-content w-7 rounded-full">

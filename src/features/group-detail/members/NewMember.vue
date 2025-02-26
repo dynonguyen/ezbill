@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { addMember } from '@/apis/supabase';
+import Button from '@/components/ui/Button.vue';
+import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { QUERY_KEY } from '@/constants/key';
 import type { Member } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { Button, Dialog } from 'primevue';
 import { defineAsyncComponent, ref } from 'vue';
 import { useToast } from 'vue-toastification';
 import { useGroupContext } from '../hooks/useGroupContext';
@@ -33,25 +34,20 @@ const handleAddMember = async (form: MemberFormData) => {
 
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
 	open.value = false;
-	toast.success('Thêm thành viên thành công');
 };
 </script>
 
 <template>
-	<slot name="new-btn" :handleOpen="() => (open = true)">
-		<Flex
-			center
-			class="size-12 border border-dashed border-neutral-500 rounded-full cursor-pointer hover:border-neutral-800 hover:bg-neutral-100 shrink-0"
-			@click="open = true">
-			<span class="icon msi-add-2-rounded text-neutral-800" />
-		</Flex>
-	</slot>
+	<slot name="new-btn" :handleOpen="() => (open = true)"></slot>
 
-	<Dialog :draggable="false" v-model:visible="open" modal :header="'Thêm thành viên'">
+	<Dialog v-model:open="open" header="Thêm thành viên">
 		<Suspense>
 			<MemberForm @submit="handleAddMember">
-				<template #bottom-submit-btn>
-					<Button type="submit" label="Thêm" :loading="isPending" />
+				<template #action-btn>
+					<Flex class="gap-2" items-fluid>
+						<Button variant="soft" color="grey" @click="open = false">Huỷ</Button>
+						<Button type="submit" :loading="isPending">Tạo</Button>
+					</Flex>
 				</template>
 			</MemberForm>
 		</Suspense>

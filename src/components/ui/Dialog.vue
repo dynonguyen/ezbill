@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch, type HTMLAttributes } from 'vue';
 import Flex from './Flex.vue';
 import Typography from './Typography.vue';
 
-defineProps<{ header?: string }>();
+defineProps<{ header?: string; pt?: { body?: HTMLAttributes } }>();
+
 const emit = defineEmits<{ close: [] }>();
 const open = defineModel<boolean>('open');
 
@@ -43,7 +44,7 @@ onUnmounted(() => {
 <template>
 	<dialog ref="dialog" class="modal">
 		<div v-if="open" class="modal-box dialog">
-			<Flex stack class="max-h-[80vh] overfloGw-hidden py-4">
+			<Flex stack class="max-h-[80vh] overflow-hidden py-4">
 				<slot name="header">
 					<Typography v-if="header" variant="displaySemiBold" class="px-4 text-center">
 						{{ header }}
@@ -52,7 +53,8 @@ onUnmounted(() => {
 
 				<div
 					class="grow overflow-auto px-4"
-					:class="{ 'pt-4': $slots.header || header, 'pb-4': $slots.action }">
+					:class="{ 'pt-4': $slots.header || header, 'pb-4': $slots.action }"
+					v-bind="pt?.body">
 					<slot></slot>
 				</div>
 

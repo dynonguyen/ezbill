@@ -7,7 +7,6 @@ import { toVND } from '@/utils/helpers';
 import dayjs from 'dayjs';
 import { Avatar, AvatarGroup } from 'primevue';
 import { computed } from 'vue';
-import ContainerBox from '../ContainerBox.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
 
 const props = defineProps<{ bill: Bill }>();
@@ -33,44 +32,42 @@ const splitWith = computed(() => {
 </script>
 
 <template>
-	<ContainerBox class="cursor-pointer hover:shadow-lg">
-		<Flex stack class="gap-3">
-			<Flex class="justify-between items-start gap-2 flex-wrap">
-				<Typography variant="lgMedium" class="line-clamp-2 break-words">
-					{{ $props.bill.name }}
-				</Typography>
+	<Flex stack class="gap-3">
+		<Flex class="justify-between items-start gap-2 flex-wrap">
+			<Typography variant="lgMedium" class="line-clamp-2 break-words">
+				{{ $props.bill.name }}
+			</Typography>
 
-				<Typography variant="lgMedium" class="shrink-0">{{ toVND($props.bill.amount) }}</Typography>
-			</Flex>
+			<Typography variant="lgMedium" class="shrink-0">{{ toVND($props.bill.amount) }}</Typography>
+		</Flex>
 
-			<Flex class="justify-between items-end">
-				<Flex stack class="gap-1">
-					<Flex class="gap-2 flex-wrap">
-						<MemberAvatar v-bind="createdBy" :show-tooltip="false" class="shrink-0 !size-7" />
-						<Typography>
-							{{ createdBy.name + (user.id === props.bill.createdBy ? ' (bạn)' : '') }} đã trả
-						</Typography>
-					</Flex>
-
-					<Typography class="text-neutral-500">
-						{{ dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm') }}
+		<Flex class="justify-between items-end">
+			<Flex stack class="gap-1">
+				<Flex class="gap-2 flex-wrap">
+					<MemberAvatar v-bind="createdBy" :show-tooltip="false" class="shrink-0 !size-7" />
+					<Typography>
+						{{ createdBy.name + (user.id === props.bill.createdBy ? ' (bạn)' : '') }} đã trả
 					</Typography>
 				</Flex>
 
-				<AvatarGroup class="shrink-0">
-					<MemberAvatar
-						v-for="member in splitWith.members"
-						:key="member.id"
-						v-bind="member"
-						class="!size-7" />
-
-					<Avatar
-						v-if="splitWith.remaining"
-						:label="`+${splitWith.remaining}`"
-						shape="circle"
-						class="!size-7" />
-				</AvatarGroup>
+				<Typography class="text-neutral-500">
+					{{ dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm') }}
+				</Typography>
 			</Flex>
+
+			<AvatarGroup class="shrink-0">
+				<MemberAvatar
+					v-for="member in splitWith.members"
+					:key="member.id"
+					v-bind="member"
+					class="!size-7" />
+
+				<Avatar
+					v-if="splitWith.remaining"
+					:label="`+${splitWith.remaining}`"
+					shape="circle"
+					class="!size-7" />
+			</AvatarGroup>
 		</Flex>
-	</ContainerBox>
+	</Flex>
 </template>

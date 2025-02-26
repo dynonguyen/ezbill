@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { removeMember, updateMember } from '@/apis/supabase';
 import MemberAvatar from '@/components/MemberAvatar.vue';
+import Button from '@/components/ui/Button.vue';
+import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
@@ -46,7 +48,6 @@ const handleDelete = async () => {
 		return toast.error(error.message || 'Không thể xóa thành viên');
 	}
 
-	toast.success('Xóa thành viên thành công');
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
 };
 
@@ -68,23 +69,10 @@ const handleUpdate = async (form: MemberFormData) => {
 	<Flex stack>
 		<Divider v-if="$props.index > 0" class="!my-4" />
 
-		<MemberForm v-if="editing" :initial-values="$props.member" @submit="handleUpdate">
-			<template #right-submit-btn>
-				<Flex class="gap-1 shrink-0 self-start mt-3">
-					<button
-						type="submit"
-						:disabled="isUpdating"
-						class="icon msi-check-rounded size-6 text-green-500 cursor-pointer hover:text-green-600"></button>
-					<span
-						class="icon msi-close-rounded size-6 text-red-500 cursor-pointer hover:text-red-600"
-						@click="editing = false"></span>
-				</Flex>
-			</template>
-		</MemberForm>
-		<Flex v-else class="gap-2 justify-between">
-			<MemberAvatar v-bind="$props.member" :show-tooltip="false" class="shrink-0 !size-11" />
+		<Flex class="gap-2 justify-between">
+			<MemberAvatar v-bind="$props.member" :show-tooltip="false" class="shrink-0" />
 
-			<Typography class="line-clamp-1 break-all grow">
+			<Typography variant="smRegular" class="line-clamp-1 break-all grow">
 				{{ $props.member.name + ($props.member.id === user.id ? ' (Bạn)' : '') }}
 			</Typography>
 
@@ -103,4 +91,15 @@ const handleUpdate = async (form: MemberFormData) => {
 			</Flex>
 		</Flex>
 	</Flex>
+
+	<Dialog v-model:open="editing" header="Chỉnh sửa thành viên">
+		<MemberForm :initial-values="$props.member" @submit="handleUpdate">
+			<template #action-btn>
+				<Flex class="gap-2" items-fluid>
+					<Button variant="soft" color="grey" @click="editing = false">Huỷ</Button>
+					<Button type="submit" :loading="isUpdating">Cập nhật</Button>
+				</Flex>
+			</template>
+		</MemberForm>
+	</Dialog>
 </template>

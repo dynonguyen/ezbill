@@ -1,23 +1,25 @@
 <script setup lang="ts">
 import { createBill } from '@/apis/supabase';
+import Button from '@/components/ui/Button.vue';
+import Dialog from '@/components/ui/Dialog.vue';
+import Flex from '@/components/ui/Flex.vue';
 import { QUERY_KEY } from '@/constants/key';
 import type { Bill } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { Button, Dialog } from 'primevue';
-import { defineAsyncComponent, ref } from 'vue';
+import { defineAsyncComponent } from 'vue';
 import { useToast } from 'vue-toastification';
 import { useGroupContext } from '../hooks/useGroupContext';
 
 const BillForm = defineAsyncComponent(() => import('./BillForm.vue'));
+
+const emit = defineEmits<{ close: [] }>();
 
 const { group } = useGroupContext();
 const { isPending, mutateAsync } = useMutation({ mutationFn: createBill });
 
 const queryClient = useQueryClient();
 const toast = useToast();
-
-const open = ref(false);
 
 const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	const [error] = await to(mutateAsync(form));
@@ -26,34 +28,20 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 		return toast.error(error?.message || 'Tạo bill thất bại');
 	}
 
-	open.value = false;
-	toast.success('Tạo bill thành công');
+	emit('close');
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
 };
 </script>
 
 <template>
-	<Button
-		v-tooltip.top="'Tạo bill mới'"
-		icon="icon msi-add-2-rounded shrink-0 size-5"
-		rounded
-		size="large"
-		class="!size-14"
-		@click="open = true" />
+	<Dialog header="Thêm hoá đơn">
+		<BillForm mode="new" @submit="handleAddBill" id="bill-form" />
 
-	<Dialog
-		:draggable="false"
-		v-model:visible="open"
-		modal
-		header="Tạo bill mới"
-		class="!w-120"
-		:pt="{ content: { class: '!p-0' } }">
-		<Suspense>
-			<BillForm v-if="open" @close="open = false" mode="new" @submit="handleAddBill">
-				<template #submit-button>
-					<Button type="submit" label="Tạo" class="min-w-20" :loading="isPending" />
-				</template>
-			</BillForm>
-		</Suspense>
+		<template #action>
+			<Flex class="gap-2" items-fluid>
+				<Button variant="soft" color="grey" @click="$emit('close')">Huỷ</Button>
+				<Button type="submit" form="bill-form" :loading="isPending">Tạo</Button>
+			</Flex>
+		</template>
 	</Dialog>
 </template>

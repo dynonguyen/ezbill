@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import type { Member } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
-import Typography from './ui/Typography.vue';
+import type { HTMLAttributes } from 'vue';
+import Typography, { type TypographyProps } from './ui/Typography.vue';
 
-type MemberAvatarProps = Member & { size?: 'sm' | 'md' | 'lg' };
+type MemberAvatarProps = Member & {
+	size?: 'sm' | 'md' | 'lg' | 'full';
+	pt?: { avatar?: HTMLAttributes };
+};
 
-withDefaults(defineProps<MemberAvatarProps>(), { showTooltip: true, size: 'md' });
+withDefaults(defineProps<MemberAvatarProps>(), { size: 'md' });
 
 const AVATAR_COLOR: Record<string, string> = {
 	'0': '#D32F2F',
@@ -47,15 +51,23 @@ const AVATAR_COLOR: Record<string, string> = {
 };
 
 const sizes: Record<NonNullable<MemberAvatarProps['size']>, string> = {
-	sm: 'w-5 h-5',
-	md: 'w-7 h-7',
-	lg: 'w-10 h-10',
+	sm: 'size-5',
+	md: 'size-7',
+	lg: 'size-10',
+	full: 'size-full',
+};
+
+const fontSizes: Record<NonNullable<MemberAvatarProps['size']>, TypographyProps['variant']> = {
+	sm: 'smRegular',
+	md: 'smRegular',
+	lg: 'mdRegular',
+	full: 'mdRegular',
 };
 </script>
 
 <template>
 	<div class="avatar" v-if="avatar">
-		<div :class="[sizes[size]]" class="rounded-full">
+		<div :class="[sizes[size]]" class="rounded-full" v-bind="pt?.avatar">
 			<img :src="getImgUrl(`avatar/${avatar}`)" />
 		</div>
 	</div>
@@ -63,8 +75,11 @@ const sizes: Record<NonNullable<MemberAvatarProps['size']>, string> = {
 		<div
 			class="text-neutral-content bg-white rounded-full"
 			:class="[sizes[size]]"
-			:style="{ backgroundColor: AVATAR_COLOR[name[0].toLowerCase()] || '#697182' }">
-			<Typography variant="smRegular">{{ name[0].toUpperCase() }}</Typography>
+			:style="{ backgroundColor: AVATAR_COLOR[name[0].toLowerCase()] || '#697182' }"
+			v-bind="pt?.avatar">
+			<Typography :variant="fontSizes[size]" :class="{ 'text-[length:inherit]': size === 'full' }">
+				{{ name[0].toUpperCase() }}
+			</Typography>
 		</div>
 	</div>
 </template>

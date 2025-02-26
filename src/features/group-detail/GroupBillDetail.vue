@@ -8,9 +8,12 @@ import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { toVND } from '@/utils/helpers';
 import { useQuery } from '@tanstack/vue-query';
-import { computed, provide, watch } from 'vue';
+import { computed, defineAsyncComponent, provide, ref, watch } from 'vue';
 import GroupMenu from './GroupMenu.vue';
 import { useGroupContext } from './hooks/useGroupContext';
+import MemberList from './members/MemberList.vue';
+
+const NewBillPopup = defineAsyncComponent(() => import('./bills/NewBillPopup.vue'));
 
 const { group } = useGroupContext();
 
@@ -22,6 +25,8 @@ const {
 	queryKey: [QUERY_KEY.BILL_LIST, group.value.id],
 	queryFn: () => fetchBills(group.value.id),
 });
+
+const openNewBill = ref(true);
 
 watch(error, () => {
 	if (error.value) throw error.value;
@@ -36,9 +41,9 @@ provide(CONTEXT_KEY.BILLS, bills);
 	<Flex v-if="isPending || error" center class="h-full">
 		<Loading />
 	</Flex>
-	<Flex v-else stack class="px-4 bg-indigo-50 min-h-full">
+	<Flex v-else stack class="bg-indigo-50 min-h-full">
 		<!-- Header -->
-		<Flex class="py-2 gap-2 justify-between">
+		<Flex class="px-4 py-2 gap-2 justify-between">
 			<Button
 				variant="soft"
 				color="grey"
@@ -72,7 +77,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 		</Flex>
 
 		<!-- Group statistic -->
-		<Flex stack class="py-4">
+		<Flex stack class="p-4">
 			<Flex stack class="p-4 gap-2 bg-gray-800">
 				<Typography variant="smRegular" class="text-white">Tổng chi tiêu nhóm:</Typography>
 				<Flex class="gap-1 text-white !items-end">
@@ -88,10 +93,18 @@ provide(CONTEXT_KEY.BILLS, bills);
 			</Flex>
 
 			<Flex stack class="p-4 gap-2 bg-gray-800 rounded-b-2xl shadow-lg">
-				<Button start-icon="icon msi-add-rounded">Thêm hoá đơn</Button>
+				<Button start-icon="icon msi-add-rounded" @click="openNewBill = true">Thêm hoá đơn</Button>
 			</Flex>
 		</Flex>
+
+		<!-- Members -->
+		<MemberList />
 	</Flex>
+
+	<!-- New bill -->
+	<Suspense>
+		<NewBillPopup v-if="openNewBill" v-model:open="openNewBill" @close="openNewBill = false" />
+	</Suspense>
 </template>
 
 <style module>

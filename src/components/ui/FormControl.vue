@@ -25,7 +25,7 @@ defineProps<FormControlProps>();
 		<Typography
 			as="label"
 			v-if="$props.label"
-			:variant="$props.size === 'large' ? 'mdSemiBold' : 'smSemiBold'"
+			:variant="$props.size === 'large' ? 'mdRegular' : 'smRegular'"
 			:for="$props.htmlFor"
 			:class="{ 'text-error': $props.error }"
 			v-bind="$props.pt?.label">

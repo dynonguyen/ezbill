@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Loading from '@/components/Loading.vue';
 import Flex from '@/components/ui/Flex.vue';
-import FormControl from '@/components/ui/FormControl.vue';
 import { PATH } from '@/constants/path';
 import type { Group } from '@/types/entities';
 import { getEnv } from '@/utils/get-env';
@@ -9,6 +8,7 @@ import { saveFileAs } from '@/utils/helpers';
 import QRCode from 'qrcode';
 import { computed, onWatcherCleanup, ref, watch } from 'vue';
 import Button from './ui/Button.vue';
+import FormControl from './ui/FormControl.vue';
 
 const props = defineProps<{ id: Group['id'] }>();
 
@@ -50,9 +50,9 @@ watch(copied, () => {
 </script>
 
 <template>
-	<Flex class="gap-2 !items-end">
+	<Flex class="gap-2 !items-end justify-between">
 		<FormControl class="grow" label="Link mời tham gia">
-			<input class="input input-bordered" :value="inviteLink" readonly fluid />
+			<input class="input input-bordered w-full" :value="inviteLink" readonly />
 		</FormControl>
 		<Button
 			:start-icon="
