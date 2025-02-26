@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MemberAvatar from '@/components/MemberAvatar.vue';
+import CurrencyInput from '@/components/ui/CurrencyInput.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
@@ -18,7 +18,7 @@ const props = withDefaults(defineProps<BillFormProps>(), { mode: 'new' });
 
 const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 
-const { group, user } = useGroupContext();
+const { group } = useGroupContext();
 
 const schema = z.object({
 	amount: z
@@ -39,8 +39,7 @@ type MemberAmounts = { [key: Member['id']]: { amount: number } };
 const validationSchema = toTypedSchema(schema);
 
 const initialValues = computed<Partial<BillForm>>(() => {
-	if (props.mode === 'new') return { createdBy: user.value?.id };
-	if (!props.defaultBill) return {};
+	if (props.mode === 'new' || !props.defaultBill) return { createdBy: '' };
 
 	const { amount, createdBy, name, note } = props.defaultBill;
 
@@ -202,7 +201,7 @@ const tabs = [
 				label="Số tiền tổng hóa đơn"
 				:error="Boolean(errors.amount)"
 				:helper-text="errors.amount">
-				<input
+				<CurrencyInput
 					class="input input-bordered w-full"
 					id="amount"
 					placeholder="Nhập số tiền (VND)"
@@ -210,18 +209,21 @@ const tabs = [
 					v-model="amountField" />
 			</FormControl>
 
-			<FormControl html-for="createdBy" label="Người trả">
+			<FormControl
+				html-for="createdBy"
+				label="Người trả"
+				:error="Boolean(errors.createdBy)"
+				:helper-text="errors.createdBy">
 				<select
-					class="select select-bordered"
-					:options="
-						group.members.map((m) => (m.id === user?.id ? { ...m, name: `${m.name} (Bạn)` } : m))
-					"
-					option-value="id"
-					option-label="name"
-					placeholder="Chọn người trả bill này"
-					:default-value="$props.mode === 'new' ? user?.id : $props.defaultBill?.createdBy"
+					id="createdBy"
+					class="select select-bordered w-full"
 					v-model="createdByField"
-					v-bind="createdByProps" />
+					v-bind="createdByProps">
+					<option disabled value="">Chọn người trả</option>
+					<option v-for="member in group.members" :key="member.id" :value="member.id">
+						{{ member.name }}
+					</option>
+				</select>
 			</FormControl>
 
 			<FormControl html-for="note" label="Mô tả">
@@ -236,6 +238,7 @@ const tabs = [
 			</FormControl>
 		</Flex>
 
+		<!--
 		<Flex stack class="gap-4">
 			<Flex
 				v-for="member in Object.keys(memberAmounts).map(
@@ -312,6 +315,6 @@ const tabs = [
 					class="ml-auto"
 					@click="handleDeleteAllMembers" />
 			</Flex>
-		</Flex>
+		</Flex> -->
 	</Flex>
 </template>

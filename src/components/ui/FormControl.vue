@@ -20,16 +20,16 @@ defineProps<FormControlProps>();
 		stack
 		class="gap-1"
 		:class="{
-			'[&_.input]:!border-error [&_.input]:!outline-error': $props.error,
+			'[&_.input]:!border-error [&_.input]:!outline-error [&_.select]:!outline-error [&_.select]:!border-error':
+				error,
 		}">
 		<Typography
 			as="label"
-			v-if="$props.label"
-			:variant="$props.size === 'large' ? 'mdRegular' : 'smRegular'"
-			:for="$props.htmlFor"
-			:class="{ 'text-error': $props.error }"
-			v-bind="$props.pt?.label">
-			{{ $props.label }}
+			v-if="label"
+			:variant="size === 'large' ? 'mdRegular' : 'smRegular'"
+			:for="htmlFor"
+			v-bind="pt?.label">
+			{{ label }}
 		</Typography>
 
 		<slot></slot>

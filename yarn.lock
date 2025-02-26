@@ -891,16 +891,6 @@
     "@tailwindcss/oxide-win32-arm64-msvc" "4.0.7"
     "@tailwindcss/oxide-win32-x64-msvc" "4.0.7"
 
-"@tailwindcss/typography@^0.5.16":
-  version "0.5.16"
-  resolved "https://registry.yarnpkg.com/@tailwindcss/typography/-/typography-0.5.16.tgz#a926c8f44d5c439b2915e231cad80058850047c6"
-  integrity sha512-0wDLwCVF5V3x3b1SGXPCDcdsbDHMBe+lkFzBRaHeLvNi+nrrnZ1lA18u+OTWO8iSWU2GxUOCvlXtDuqftc1oiA==
-  dependencies:
-    lodash.castarray "^4.4.0"
-    lodash.isplainobject "^4.0.6"
-    lodash.merge "^4.6.2"
-    postcss-selector-parser "6.0.10"
-
 "@tailwindcss/vite@^4.0.3":
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/@tailwindcss/vite/-/vite-4.0.7.tgz#ae71255a4067f71c36051767ba511905c608ae95"
@@ -2968,11 +2958,6 @@ locate-path@^6.0.0:
   dependencies:
     p-locate "^5.0.0"
 
-lodash.castarray@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/lodash.castarray/-/lodash.castarray-4.4.0.tgz#c02513515e309daddd4c24c60cfddcf5976d9115"
-  integrity sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==
-
 lodash.defaults@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/lodash.defaults/-/lodash.defaults-4.2.0.tgz#d09178716ffea4dde9e5fb7b37f6f0802274580c"
@@ -3657,14 +3642,6 @@ postcss-reduce-transforms@^7.0.0:
   integrity sha512-pnt1HKKZ07/idH8cpATX/ujMbtOGhUfE+m8gbqwJE05aTaNw8gbo34a2e3if0xc0dlu75sUOiqvwCGY3fzOHew==
   dependencies:
     postcss-value-parser "^4.2.0"
-
-postcss-selector-parser@6.0.10:
-  version "6.0.10"
-  resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-6.0.10.tgz#79b61e2c0d1bfc2602d549e11d0876256f8df88d"
-  integrity sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==
-  dependencies:
-    cssesc "^3.0.0"
-    util-deprecate "^1.0.2"
 
 postcss-selector-parser@^6.0.15, postcss-selector-parser@^6.1.1, postcss-selector-parser@^6.1.2:
   version "6.1.2"
@@ -4484,6 +4461,11 @@ vscode-uri@^3.0.8:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/vscode-uri/-/vscode-uri-3.1.0.tgz#dd09ec5a66a38b5c3fffc774015713496d14e09c"
   integrity sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==
+
+vue-currency-input@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/vue-currency-input/-/vue-currency-input-3.2.1.tgz#61a6fdf2b80e3f1b21017a1eec614893766cb30f"
+  integrity sha512-Osfxzdu5cdZSCS4Cm0vuk7LwNeSdHWGIWK8gtDBC1kU0UtAKz7iU/8dyJ0KDJKxbAYiKeovoQTRfYxCH82I0EA==
 
 vue-demi@^0.14.10:
   version "0.14.10"
