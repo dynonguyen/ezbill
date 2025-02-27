@@ -27,7 +27,6 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	}
 
 	open.value = false;
-	toast.success('Tạo bill thành công');
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
 };
 </script>

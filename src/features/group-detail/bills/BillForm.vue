@@ -83,8 +83,19 @@ const getDefaultMemberAmounts = () => {
 	);
 };
 
+const getDefaultIsDivEqually = () => {
+	if (props.mode === 'new' || !props.defaultBill) return true;
+
+	const members = Object.entries(props.defaultBill.members);
+
+	if (members.length <= 1) return true;
+
+	const splitAmountEvenly = members[0][1];
+	return members.every(([_, amount]) => amount === splitAmountEvenly);
+};
+
 const openDetail = ref(false);
-const isDivEqually = ref(true);
+const isDivEqually = ref(getDefaultIsDivEqually());
 const memberAmounts = ref<MemberAmounts>(getDefaultMemberAmounts());
 const selectMemberAnchor = ref<PopoverMethods>();
 
@@ -92,14 +103,18 @@ const totalMembers = computed(() => Object.keys(memberAmounts.value).length);
 
 const handleSubmitBill = handleSubmit(async (form) => {
 	const { amount, createdBy, note, name } = form;
-	const billMembers: BillMember = Object.fromEntries(
+	let billMembers: BillMember = Object.fromEntries(
 		Object.entries(memberAmounts.value)
 			.filter(([_, { amount }]) => amount > 0)
 			.map(([id, { amount }]) => [id, amount]),
 	);
 
 	if (Object.keys(billMembers).length === 0) {
-		return toast.error('Số tiền của thành viên không hợp lệ');
+		if (isDivEqually.value) {
+			billMembers = { [createdBy]: amount };
+		} else {
+			return toast.error('Số tiền của thành viên không hợp lệ');
+		}
 	}
 
 	emit('submit', { groupId: group.value.id, amount, createdBy, note, name, members: billMembers });

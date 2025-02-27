@@ -33,7 +33,6 @@ const handleAddMember = async (form: MemberFormData) => {
 
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
 	open.value = false;
-	toast.success('Thêm thành viên thành công');
 };
 </script>
 

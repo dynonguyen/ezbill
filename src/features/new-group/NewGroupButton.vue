@@ -34,7 +34,6 @@ const handleAddGroup = async (form: Pick<Group, 'name'>) => {
 		return toast.error(error?.message || 'Tạo nhóm thất bại');
 	}
 
-	toast.success('Tạo nhóm thành công');
 	inviteGroupId.value = groupId;
 };
 </script>

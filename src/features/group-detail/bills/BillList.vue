@@ -52,7 +52,6 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	}
 
 	detailId.value = null;
-	toast.success('Chỉnh sửa bill thành công');
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
 };
 
@@ -66,7 +65,6 @@ const handleDeleteBill = async () => {
 	}
 
 	detailId.value = null;
-	toast.success('Xoá bill thành công');
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
 };
 

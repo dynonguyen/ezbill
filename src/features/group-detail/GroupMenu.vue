@@ -40,7 +40,6 @@ const handleEditGroup = async (form: Partial<Group>) => {
 		return toast.error(error?.message || 'Chỉnh sửa thất bại');
 	}
 
-	toast.success('Chỉnh sửa thành công');
 	openEditGroupName.value = false;
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
 };

@@ -46,7 +46,6 @@ const handleDelete = async () => {
 		return toast.error(error.message || 'Không thể xóa thành viên');
 	}
 
-	toast.success('Xóa thành viên thành công');
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
 };
 
