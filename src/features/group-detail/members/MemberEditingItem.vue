@@ -17,7 +17,7 @@ import { useGroupContext } from '../hooks/useGroupContext';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
-const { group, user } = useGroupContext();
+const { group } = useGroupContext();
 const bills = useBillsContext();
 const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
 	mutationFn: removeMember,
@@ -67,13 +67,13 @@ const handleUpdate = async (form: MemberFormData) => {
 
 <template>
 	<Flex stack>
-		<Divider v-if="$props.index > 0" class="!my-4" />
+		<Divider v-if="index > 0" class="!my-4" />
 
 		<Flex class="gap-2 justify-between">
-			<MemberAvatar v-bind="$props.member" :show-tooltip="false" class="shrink-0" />
+			<MemberAvatar v-bind="member" :show-tooltip="false" class="shrink-0" />
 
 			<Typography variant="smRegular" class="line-clamp-1 break-all grow">
-				{{ $props.member.name + ($props.member.id === user.id ? ' (Bạn)' : '') }}
+				{{ member.name }}
 			</Typography>
 
 			<Flex class="gap-2 shrink-0">
@@ -93,7 +93,7 @@ const handleUpdate = async (form: MemberFormData) => {
 	</Flex>
 
 	<Dialog v-model:open="editing" header="Chỉnh sửa thành viên">
-		<MemberForm :initial-values="$props.member" @submit="handleUpdate">
+		<MemberForm :initial-values="member" @submit="handleUpdate">
 			<template #action-btn>
 				<Flex class="gap-2" items-fluid>
 					<Button variant="soft" color="grey" @click="editing = false">Huỷ</Button>

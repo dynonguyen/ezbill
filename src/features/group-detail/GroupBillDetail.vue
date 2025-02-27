@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { fetchBills } from '@/apis/supabase';
+import CurrencyText from '@/components/CurrencyText.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
-import { toVND } from '@/utils/helpers';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, defineAsyncComponent, provide, ref, watch } from 'vue';
 import GroupMenu from './GroupMenu.vue';
@@ -26,7 +26,7 @@ const {
 	queryFn: () => fetchBills(group.value.id),
 });
 
-const openNewBill = ref(true);
+const openNewBill = ref(false);
 
 watch(error, () => {
 	if (error.value) throw error.value;
@@ -81,7 +81,10 @@ provide(CONTEXT_KEY.BILLS, bills);
 			<Flex stack class="p-4 gap-2 bg-gray-800">
 				<Typography variant="smRegular" class="text-white">Tổng chi tiêu nhóm:</Typography>
 				<Flex class="gap-1 text-white !items-end">
-					<span class="font-black text-[40px] leading-[43px]">{{ toVND(total) }}</span>
+					<CurrencyText
+						:amount="total"
+						amount-class="font-black text-[40px] leading-[43px]"
+						unit-class="text-2xl" />
 				</Flex>
 			</Flex>
 

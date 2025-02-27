@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CurrencyText from '@/components/CurrencyText.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyInput, { type CurrencyInputProps } from '@/components/ui/CurrencyInput.vue';
@@ -10,12 +11,19 @@ import type { Bill, BillMember, Member } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { computed, nextTick, ref, toRaw, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import { z } from 'zod';
 import { useGroupContext } from '../hooks/useGroupContext';
 
 type BillFormProps = { mode: 'new' | 'view-detail'; defaultBill?: Bill };
+type BillForm = {
+	name: string;
+	amount: number;
+	createdBy: string;
+	note?: string | null | undefined;
+};
+type MemberAmounts = { [key: Member['id']]: { amount: number } };
 
 const emit = defineEmits<{ close: []; submit: [form: Omit<Bill, 'id' | 'createdAt'>] }>();
 const props = withDefaults(defineProps<BillFormProps>(), { mode: 'new' });
@@ -24,11 +32,7 @@ const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 
 const { group } = useGroupContext();
 
-const schema = z.object({
-	amount: z
-		.number({ message: 'Số tiền không hợp lệ' })
-		.min(1, 'Số tiền không hợp lệ')
-		.max(MAX.AMOUNT, `Tối đa ${toVND(MAX.AMOUNT)}`),
+const baseSchema = z.object({
 	name: z
 		.string({ message: 'Nhập tên sự kiện' })
 		.nonempty('Nhập tên sự kiện')
@@ -37,10 +41,33 @@ const schema = z.object({
 	note: z.string().max(MAX.NOTE).optional().nullable(),
 });
 
-type BillForm = z.infer<typeof schema>;
-type MemberAmounts = { [key: Member['id']]: { amount: number } };
+const isDivEqually = ref(
+	(() => {
+		if (props.mode === 'new' || !props.defaultBill) return true;
 
-const validationSchema = toTypedSchema(schema);
+		const members = Object.entries(props.defaultBill.members);
+
+		if (members.length <= 1) return true;
+
+		const splitAmountEvenly = members[0][1];
+		return members.every(([_, amount]) => amount === splitAmountEvenly);
+	})(),
+);
+
+const validationSchema = computed(() => {
+	const schema = isDivEqually.value
+		? baseSchema.merge(
+				z.object({
+					amount: z
+						.number({ message: 'Số tiền không hợp lệ' })
+						.min(1, 'Số tiền không hợp lệ')
+						.max(MAX.AMOUNT, `Tối đa ${toVND(MAX.AMOUNT)}`),
+				}),
+			)
+		: baseSchema;
+
+	return toTypedSchema(schema);
+});
 
 const initialValues = computed<Partial<BillForm>>(() => {
 	if (props.mode === 'new' || !props.defaultBill) return { createdBy: '' };
@@ -51,7 +78,7 @@ const initialValues = computed<Partial<BillForm>>(() => {
 });
 
 const { errors, values, handleSubmit, defineField, setValues } = useForm<BillForm>({
-	validationSchema,
+	validationSchema: validationSchema,
 	initialValues: initialValues.value,
 });
 const toast = useToast();
@@ -73,14 +100,13 @@ const getDefaultMemberAmounts = () => {
 	);
 };
 
-const isDivEqually = ref(true);
 const memberAmounts = ref<MemberAmounts>(getDefaultMemberAmounts());
 const openAddMember = ref(false);
 
 const totalMembers = computed(() => Object.keys(memberAmounts.value).length);
 
 const handleSubmitBill = handleSubmit(async (form) => {
-	const { amount, createdBy, note, name } = form;
+	const { createdBy, note, name } = form;
 	let billMembers: BillMember = Object.fromEntries(
 		Object.entries(memberAmounts.value)
 			.filter(([_, { amount }]) => amount > 0)
@@ -89,14 +115,16 @@ const handleSubmitBill = handleSubmit(async (form) => {
 
 	if (Object.keys(billMembers).length === 0) {
 		if (isDivEqually.value) {
-			billMembers = { [createdBy]: amount };
+			billMembers = { [createdBy]: form.amount };
 		} else {
 			return toast.error('Số tiền của thành viên không hợp lệ');
 		}
 	}
 
-	console.log(`☕ DYNO LOG ~ BillForm.vue:83 🥺`, form, toRaw(memberAmounts.value), billMembers);
-	return;
+	let amount = form.amount;
+	if (!isDivEqually.value) {
+		amount = Object.values(billMembers).reduce((acc, amount) => acc + amount, 0);
+	}
 
 	emit('submit', { groupId: group.value.id, amount, createdBy, note, name, members: billMembers });
 });
@@ -119,7 +147,6 @@ const splitAmountEvenly = () => {
 
 const handleMemberAmountChange = (memberId: Member['id'], amount: number) => {
 	memberAmounts.value[memberId].amount = amount;
-	calculateTotalAmount();
 };
 
 const handleAddMember = (memberId: Member['id']) => {
@@ -196,7 +223,7 @@ const tabs = [
 		<Flex stack class="gap-4">
 			<!-- Event -->
 			<FormControl
-				html-for="createdBy"
+				html-for="name"
 				label="Tên sự kiện"
 				:error="Boolean(errors.name)"
 				:helper-text="errors.name">
@@ -273,17 +300,15 @@ const tabs = [
 					:class="{ 'mt-6': !isDivEqually }" />
 
 				<Flex stack class="gap-1 grow">
-					<Typography
-						variant="smRegular"
-						class="text-slate-500 line-clamp-1 break-all"
-						v-bind="isDivEqually ? {} : { as: 'label', for: member.id }">
+					<Typography variant="smRegular" class="text-slate-500 line-clamp-1 break-all">
 						{{ member.name }}
 					</Typography>
 
-					<Typography v-if="isDivEqually" variant="mdSemiBold" class="text-black">
-						{{ toVND(memberAmounts[member.id]?.amount) }}
-					</Typography>
-
+					<CurrencyText
+						v-if="isDivEqually"
+						:amount="memberAmounts[member.id]?.amount || 0"
+						amount-class="text-md text-black font-semibold"
+						unit-class="text-sm text-black" />
 					<FormControl v-else :error="memberAmounts[member.id]?.amount < 0">
 						<CurrencyInput
 							placeholder="Nhập số tiền"

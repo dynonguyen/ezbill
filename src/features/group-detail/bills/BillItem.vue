@@ -13,7 +13,7 @@ const props = defineProps<{ bill: Bill }>();
 
 const MAX_AVATAR = 6;
 
-const { user, group } = useGroupContext();
+const {  group } = useGroupContext();
 
 const createdBy = computed(
 	() => group.value.members.find((member) => member.id === props.bill.createdBy)!,
@@ -46,7 +46,7 @@ const splitWith = computed(() => {
 				<Flex class="gap-2 flex-wrap">
 					<MemberAvatar v-bind="createdBy" :show-tooltip="false" class="shrink-0 !size-7" />
 					<Typography>
-						{{ createdBy.name + (user.id === props.bill.createdBy ? ' (bạn)' : '') }} đã trả
+						{{ createdBy.name }} đã trả
 					</Typography>
 				</Flex>
 
