@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import CurrencyInput from '@/components/ui/CurrencyInput.vue';
+import MemberAvatar from '@/components/MemberAvatar.vue';
+import Button from '@/components/ui/Button.vue';
+import CurrencyInput, { type CurrencyInputProps } from '@/components/ui/CurrencyInput.vue';
+import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
 import type { Bill, BillMember, Member } from '@/types/entities';
+import { toVND } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, toRaw, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import { z } from 'zod';
 import { useGroupContext } from '../hooks/useGroupContext';
@@ -24,7 +28,7 @@ const schema = z.object({
 	amount: z
 		.number({ message: 'Số tiền không hợp lệ' })
 		.min(1, 'Số tiền không hợp lệ')
-		.max(MAX.AMOUNT, `Tối đa ${MAX.AMOUNT}`),
+		.max(MAX.AMOUNT, `Tối đa ${toVND(MAX.AMOUNT)}`),
 	name: z
 		.string({ message: 'Nhập tên sự kiện' })
 		.nonempty('Nhập tên sự kiện')
@@ -50,7 +54,6 @@ const { errors, values, handleSubmit, defineField, setValues } = useForm<BillFor
 	validationSchema,
 	initialValues: initialValues.value,
 });
-
 const toast = useToast();
 
 const [amountField, amountProps] = defineField('amount');
@@ -72,21 +75,28 @@ const getDefaultMemberAmounts = () => {
 
 const isDivEqually = ref(true);
 const memberAmounts = ref<MemberAmounts>(getDefaultMemberAmounts());
-const selectMemberAnchor = ref<PopoverMethods>();
+const openAddMember = ref(false);
 
 const totalMembers = computed(() => Object.keys(memberAmounts.value).length);
 
 const handleSubmitBill = handleSubmit(async (form) => {
 	const { amount, createdBy, note, name } = form;
-	const billMembers: BillMember = Object.fromEntries(
+	let billMembers: BillMember = Object.fromEntries(
 		Object.entries(memberAmounts.value)
 			.filter(([_, { amount }]) => amount > 0)
 			.map(([id, { amount }]) => [id, amount]),
 	);
 
 	if (Object.keys(billMembers).length === 0) {
-		return toast.error('Số tiền của thành viên không hợp lệ');
+		if (isDivEqually.value) {
+			billMembers = { [createdBy]: amount };
+		} else {
+			return toast.error('Số tiền của thành viên không hợp lệ');
+		}
 	}
+
+	console.log(`☕ DYNO LOG ~ BillForm.vue:83 🥺`, form, toRaw(memberAmounts.value), billMembers);
+	return;
 
 	emit('submit', { groupId: group.value.id, amount, createdBy, note, name, members: billMembers });
 });
@@ -94,11 +104,6 @@ const handleSubmitBill = handleSubmit(async (form) => {
 const calculateTotalAmount = () => {
 	const total = Object.values(memberAmounts.value).reduce((acc, { amount }) => acc + amount, 0);
 	setValues({ amount: total });
-};
-
-const handleMemberAmountChange = (memberId: Member['id'], amount: number) => {
-	memberAmounts.value[memberId].amount = amount;
-	calculateTotalAmount();
 };
 
 const splitAmountEvenly = () => {
@@ -112,21 +117,29 @@ const splitAmountEvenly = () => {
 	);
 };
 
+const handleMemberAmountChange = (memberId: Member['id'], amount: number) => {
+	memberAmounts.value[memberId].amount = amount;
+	calculateTotalAmount();
+};
+
 const handleAddMember = (memberId: Member['id']) => {
 	memberAmounts.value = { ...memberAmounts.value, [memberId]: { amount: 0 } };
-	selectMemberAnchor.value?.hide();
+
+	if (Object.keys(memberAmounts.value).length === group.value.members.length) {
+		openAddMember.value = false;
+	}
+
 	if (!isDivEqually.value) {
-		nextTick(() => {
-			document.getElementById(memberId)?.focus();
-		});
+		nextTick(() => document.getElementById(memberId)?.focus());
 	}
 };
 
 const handleAddAllMember = () => {
+	openAddMember.value = false;
+
 	group.value.members.forEach((member) => {
 		if (!memberAmounts.value[member.id]) memberAmounts.value[member.id] = { amount: 0 };
 	});
-	selectMemberAnchor.value?.hide();
 };
 
 const handleDeleteMember = (memberId: Member['id']) => {
@@ -142,8 +155,10 @@ const handleDeleteAllMembers = () => {
 	if (!isDivEqually.value) calculateTotalAmount();
 };
 
-const handleTabChange = (val: boolean) => {
-	isDivEqually.value = val;
+const handleModeChange = (divEqually: boolean) => {
+	isDivEqually.value = divEqually;
+	setValues({ amount: 0 }, false);
+	splitAmountEvenly();
 };
 
 // Divide equally among members
@@ -151,11 +166,7 @@ watch([isDivEqually, totalMembers, () => values.amount], () => {
 	if (isDivEqually.value) splitAmountEvenly();
 });
 
-const inputNumberProps = {
-	type: 'number',
-	min: 0,
-	max: MAX.AMOUNT,
-};
+const inputNumberOpts: CurrencyInputProps['options'] = { valueRange: { min: 0, max: MAX.AMOUNT } };
 
 const tabs = [
 	{ label: 'Chia đều', value: true, helper: 'Số tiền sẽ được chia đều cho các thành viên.' },
@@ -172,7 +183,7 @@ const tabs = [
 				role="tab"
 				class="tab"
 				:class="{ 'tab-active': isDivEqually === tab.value }"
-				@click="handleTabChange(tab.value)">
+				@click="handleModeChange(tab.value)">
 				{{ tab.label }}
 			</a>
 		</div>
@@ -183,6 +194,7 @@ const tabs = [
 
 		<!-- Form -->
 		<Flex stack class="gap-4">
+			<!-- Event -->
 			<FormControl
 				html-for="createdBy"
 				label="Tên sự kiện"
@@ -196,19 +208,22 @@ const tabs = [
 					:maxlength="MAX.NAME" />
 			</FormControl>
 
+			<!-- Amount -->
 			<FormControl
-				html-for="amount"
+				v-if="isDivEqually"
 				label="Số tiền tổng hóa đơn"
 				:error="Boolean(errors.amount)"
 				:helper-text="errors.amount">
 				<CurrencyInput
-					class="input input-bordered w-full"
+					class="w-full"
 					id="amount"
 					placeholder="Nhập số tiền (VND)"
-					v-bind="{ ...inputNumberProps, ...amountProps }"
-					v-model="amountField" />
+					v-model="amountField"
+					v-bind="amountProps"
+					:options="inputNumberOpts" />
 			</FormControl>
 
+			<!-- Created by -->
 			<FormControl
 				html-for="createdBy"
 				label="Người trả"
@@ -226,6 +241,7 @@ const tabs = [
 				</select>
 			</FormControl>
 
+			<!-- Notes -->
 			<FormControl html-for="note" label="Mô tả">
 				<textarea
 					class="textarea textarea-bordered"
@@ -238,83 +254,99 @@ const tabs = [
 			</FormControl>
 		</Flex>
 
-		<!--
-		<Flex stack class="gap-4">
+		<!-- Members -->
+		<Flex stack>
+			<Typography variant="mdSemiBold" class="text-black">
+				Thành viên tham gia ({{ totalMembers }})
+			</Typography>
+
 			<Flex
 				v-for="member in Object.keys(memberAmounts).map(
 					(id) => group.members.find((m) => m.id === id)!,
 				)"
 				:key="member.id"
-				class="gap-3 items-center">
-				<MemberAvatar v-bind="member" :show-tooltip="false" class="!size-8 shrink-0 mt-5" />
-				<FormControl
-					:label="member.name"
-					class="w-full"
-					:html-for="member.id"
-					:pt="{ label: { class: 'break-all line-clamp-1' } }"
-					:error="Boolean(memberAmounts[member.id]?.amount < 0)">
-					<CustomInputNumber
-						placeholder="Nhập số tiền"
-						fluid
-						:input-id="member.id"
-						:model-value="memberAmounts[member.id]?.amount"
-						v-bind="inputNumberProps"
-						:disabled="isDivEqually"
-						:show-buttons="!isDivEqually"
-						@value-change="(val) => handleMemberAmountChange(member.id, val)" />
-				</FormControl>
+				class="gap-4 py-4 border-b border-dashed border-gray-300">
+				<MemberAvatar
+					v-bind="member"
+					size="full"
+					:pt="{ avatar: { class: '!size-12' } }"
+					:class="{ 'mt-6': !isDivEqually }" />
+
+				<Flex stack class="gap-1 grow">
+					<Typography
+						variant="smRegular"
+						class="text-slate-500 line-clamp-1 break-all"
+						v-bind="isDivEqually ? {} : { as: 'label', for: member.id }">
+						{{ member.name }}
+					</Typography>
+
+					<Typography v-if="isDivEqually" variant="mdSemiBold" class="text-black">
+						{{ toVND(memberAmounts[member.id]?.amount) }}
+					</Typography>
+
+					<FormControl v-else :error="memberAmounts[member.id]?.amount < 0">
+						<CurrencyInput
+							placeholder="Nhập số tiền"
+							:id="member.id"
+							:value="memberAmounts[member.id]?.amount"
+							:options="inputNumberOpts"
+							class="w-full"
+							@input="(ev) => handleMemberAmountChange(member.id, Number(ev.target.value))" />
+					</FormControl>
+				</Flex>
+
 				<span
-					class="icon msi-delete-outline-rounded mt-5 size-8 text-neutral-500 hover:text-red-400 cursor-pointer"
+					class="icon msi-delete-rounded size-5 text-red-500 hover:text-red-700 cursor-pointer shrink-0"
+					:class="{ 'mt-6': !isDivEqually }"
 					@click="handleDeleteMember(member.id)" />
 			</Flex>
 
-			<Flex class="gap-4 justify-between">
+			<!-- Member actions -->
+			<Flex class="justify-between">
 				<template v-if="totalMembers !== group.members.length">
-					<Button
-						variant="text"
-						icon="icon msi-add-2-rounded"
-						severity="secondary"
-						label="Thêm thành viên"
-						size="small"
-						@click="selectMemberAnchor?.toggle" />
+					<Flex class="gap-1 py-4 text-indigo-700 cursor-pointer" @click="openAddMember = true">
+						<span class="icon msi-add-rounded size-5"></span>
+						<Typography variant="smRegular">Thêm thành viên</Typography>
+					</Flex>
 
-					<Popover ref="selectMemberAnchor">
-						<Flex stack class="gap-3">
-							<Button
-								size="small"
-								severity="secondary"
-								label="Thêm tất cả"
-								class="mr-auto"
-								@click="handleAddAllMember" />
+					<Dialog
+						v-model:open="openAddMember"
+						header="Thêm thành viên"
+						@close="openAddMember = false">
+						<div stack class="grid grid-cols-3 gap-3">
+							<Flex
+								v-for="member in group.members.filter((m) => !memberAmounts[m.id])"
+								:key="member.id"
+								stack
+								center
+								class="gap-2 p-2 border border-neutral-200 rounded-xl cursor-pointer hover:bg-neutral-100 h-full justify-start"
+								@click="handleAddMember(member.id)">
+								<MemberAvatar v-bind="member" />
+								<Typography variant="xsMedium" class="break-all text-center line-clamp-1">
+									{{ member.name }}
+								</Typography>
+							</Flex>
+						</div>
 
-							<div stack class="grid grid-cols-4 gap-4 w-106 max-h-100 overflow-auto">
-								<Flex
-									v-for="member in group.members.filter((m) => !memberAmounts[m.id])"
-									:key="member.id"
-									stack
-									center
-									class="gap-2 p-2 border border-neutral-200 rounded-xl cursor-pointer hover:bg-neutral-100 h-full justify-start"
-									@click="handleAddMember(member.id)">
-									<MemberAvatar v-bind="member" :show-tooltip="false" />
-									<Typography variant="xsMedium" class="break-all text-center line-clamp-1">
-										{{ member.name }}
-									</Typography>
-								</Flex>
-							</div>
-						</Flex>
-					</Popover>
+						<template #action>
+							<Flex class="gap-2" items-fluid>
+								<Button variant="soft" color="grey" size="sm" @click="openAddMember = false">
+									Đóng
+								</Button>
+								<Button size="sm" @click="handleAddAllMember">Thêm tất cả</Button>
+							</Flex>
+						</template>
+					</Dialog>
 				</template>
 
-				<Button
+				<Flex
 					v-if="totalMembers"
-					icon="icon msi-delete-outline-rounded"
-					variant="text"
-					severity="danger"
-					label="Xoá tất cả"
-					size="small"
-					class="ml-auto"
-					@click="handleDeleteAllMembers" />
+					class="gap-1 text-red-500 cursor-pointer ml-auto py-4"
+					@click="handleDeleteAllMembers">
+					<Typography variant="smRegular">Xoá tất cả</Typography>
+					<span class="icon msi-delete-rounded size-5"></span>
+				</Flex>
 			</Flex>
-		</Flex> -->
+		</Flex>
 	</Flex>
 </template>

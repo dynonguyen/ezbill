@@ -81,8 +81,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 			<Flex stack class="p-4 gap-2 bg-gray-800">
 				<Typography variant="smRegular" class="text-white">Tổng chi tiêu nhóm:</Typography>
 				<Flex class="gap-1 text-white !items-end">
-					<span class="font-black text-[40px] leading-[43px]">{{ toVND(total, true) }}</span>
-					<span class="text-2xl">đ</span>
+					<span class="font-black text-[40px] leading-[43px]">{{ toVND(total) }}</span>
 				</Flex>
 			</Flex>
 

@@ -12,11 +12,10 @@ export function safeJSONParse<T = unknown>(data: string | T, fallback?: T): T {
 	}
 }
 
-export function toVND(amount: number, hideSymbol?: boolean): string {
-	return new Intl.NumberFormat(
-		'vi-VN',
-		hideSymbol ? undefined : { style: 'currency', currency: 'VND' },
-	).format(amount);
+export function toVND(amount: number, options?: Intl.NumberFormatOptions): string {
+	return new Intl.NumberFormat('vi-VN', options ?? { style: 'currency', currency: 'VND' }).format(
+		amount,
+	);
 }
 
 export const saveFileAs = (data: Blob | string, filename: string) => {
