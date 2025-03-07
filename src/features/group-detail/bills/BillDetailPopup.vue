@@ -10,12 +10,11 @@ import type { Bill } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { defineAsyncComponent, ref } from 'vue';
+import { ref } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import type { BillFormModel } from './BillForm.vue';
-
-const BillForm = defineAsyncComponent(() => import('./BillForm.vue'));
+import BillForm from './BillForm.vue';
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
@@ -49,14 +48,12 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 
 <template>
 	<Dialog header="Chi tiết hoá đơn" :open="Boolean(detailId)" @close="handleCloseDetail">
-		<Suspense>
-			<BillForm
-				:default-bill="bills.find((b) => b.id === detailId)"
-				mode="view-detail"
-				@submit="handleUpdateBill"
-				id="bill-form"
-				v-model="billFormModel" />
-		</Suspense>
+		<BillForm
+			:default-bill="bills.find((b) => b.id === detailId)"
+			mode="view-detail"
+			@submit="handleUpdateBill"
+			id="bill-form"
+			v-model="billFormModel" />
 
 		<template #action>
 			<Flex stack class="pt-2 gap-2">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { deleteGroup, updateGroup } from '@/apis/supabase';
+import InviteLink from '@/components/InviteLink.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
@@ -12,13 +13,11 @@ import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { defineAsyncComponent, ref, useId } from 'vue';
+import { ref, useId } from 'vue';
 import { useRouter } from 'vue-router';
+import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
-
-const InviteLink = defineAsyncComponent(() => import('@/components/InviteLink.vue'));
-const GroupForm = defineAsyncComponent(() => import('@/features/new-group/GroupForm.vue'));
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
@@ -142,25 +141,21 @@ const items = ref<
 	</details>
 
 	<Dialog v-model:open="openEditGroupName" header="Sửa tên nhóm">
-		<Suspense>
-			<GroupForm
-				v-if="openEditGroupName"
-				:initial-values="{ name: group.name }"
-				@submit="handleEditGroup">
-				<template #form-action>
-					<Flex class="gap-2" items-fluid>
-						<Button variant="soft" color="grey" @click="openEditGroupName = false">Huỷ</Button>
-						<Button type="submit" :loading="isUpdating">Cập nhật</Button>
-					</Flex>
-				</template>
-			</GroupForm>
-		</Suspense>
+		<GroupForm
+			v-if="openEditGroupName"
+			:initial-values="{ name: group.name }"
+			@submit="handleEditGroup">
+			<template #form-action>
+				<Flex class="gap-2" items-fluid>
+					<Button variant="soft" color="grey" @click="openEditGroupName = false">Huỷ</Button>
+					<Button type="submit" :loading="isUpdating">Cập nhật</Button>
+				</Flex>
+			</template>
+		</GroupForm>
 	</Dialog>
 
 	<Dialog v-model:open="openShareGroup" header="Mời tham gia nhóm">
-		<Suspense>
-			<InviteLink v-if="openShareGroup" :id="group.id" />
-		</Suspense>
+		<InviteLink v-if="openShareGroup" :id="group.id" />
 	</Dialog>
 
 	<Dialog v-model:open="confirmDelete" header="Xoá nhóm">

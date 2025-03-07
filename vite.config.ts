@@ -9,7 +9,7 @@ import vueDevTools from 'vite-plugin-vue-devtools';
 
 const BASE_URL = process.env.VITE_BASE_URL || '';
 
-const injectData = { baseUrl: BASE_URL, appName: 'Ezbill' };
+const injectData = { baseUrl: BASE_URL, appName: 'Ezbill', releaseDate: new Date().toISOString() };
 
 const plugins: PluginOption[] = [vue(), ViteEjsPlugin(injectData)];
 

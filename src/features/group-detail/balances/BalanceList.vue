@@ -74,7 +74,8 @@ const detailId = ref<Member['id'] | null>(null);
 					<CurrencyText
 						:amount="item.paid"
 						amount-class="font-semibold text-md"
-						unit-class="text-sm" />
+						unit-class="text-sm"
+						:fixed="0" />
 				</Flex>
 
 				<Flex class="justify-between gap-2">
@@ -83,6 +84,7 @@ const detailId = ref<Member['id'] | null>(null);
 						:amount="item.balance"
 						:class="item.balance >= 0 ? ' text-green-600' : ' text-red-500'"
 						show-sign
+						:fixed="0"
 						amount-class="font-semibold text-md"
 						unit-class="text-sm" />
 				</Flex>

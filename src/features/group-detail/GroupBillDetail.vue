@@ -8,14 +8,13 @@ import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { useQuery } from '@tanstack/vue-query';
-import { computed, defineAsyncComponent, nextTick, onUnmounted, provide, ref, watch } from 'vue';
+import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
 import BalanceList from './balances/BalanceList.vue';
 import BillList from './bills/BillList.vue';
+import NewBillPopup from './bills/NewBillPopup.vue';
 import GroupMenu from './GroupMenu.vue';
 import { useGroupContext } from './hooks/useGroupContext';
 import MemberList from './members/MemberList.vue';
-
-const NewBillPopup = defineAsyncComponent(() => import('./bills/NewBillPopup.vue'));
 
 type BillTabValue = 'bills' | 'balances';
 
@@ -90,7 +89,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 	<Flex v-if="loading" center class="h-full">
 		<Loading />
 	</Flex>
-	<Flex v-else stack class="bg-indigo-50 min-h-full overflow-auto" id="group-detail">
+	<Flex v-else stack class="bg-indigo-50 min-h-dvh overflow-auto" id="group-detail">
 		<!-- Header -->
 		<Flex class="px-4 py-2 gap-2 justify-between">
 			<Button
@@ -133,6 +132,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 					<CurrencyText
 						:amount="total"
 						amount-class="font-black text-[40px] leading-[43px]"
+						:fixed="0"
 						unit-class="text-2xl" />
 				</Flex>
 			</Flex>
@@ -158,7 +158,8 @@ provide(CONTEXT_KEY.BILLS, bills);
 			<CurrencyText
 				:amount="total"
 				amount-class="text-2xl font-semibold text-white"
-				unit-class="text-2xl text-white" />
+				unit-class="text-2xl text-white"
+				:fixed="0" />
 			<Button start-icon="icon msi-add-rounded" size="sm" @click="openNewBill = true">
 				Thêm hoá đơn
 			</Button>
@@ -189,9 +190,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 	</Flex>
 
 	<!-- New bill -->
-	<Suspense>
-		<NewBillPopup v-if="openNewBill" v-model:open="openNewBill" @close="openNewBill = false" />
-	</Suspense>
+	<NewBillPopup v-if="openNewBill" v-model:open="openNewBill" @close="openNewBill = false" />
 </template>
 
 <style module>

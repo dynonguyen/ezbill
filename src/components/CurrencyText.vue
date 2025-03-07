@@ -6,13 +6,17 @@ defineProps<{
 	amountClass?: string;
 	unitClass?: string;
 	showSign?: boolean;
+	fixed?: number;
 }>();
 </script>
 
 <template>
 	<div class="flex gap-1 items-end">
 		<span :class="amountClass">
-			{{ (showSign ? (amount > 0 ? '+' : '') : '') + toVND(amount, {}) }}
+			{{
+				(showSign ? (amount > 0 ? '+' : '') : '') +
+				toVND(fixed !== undefined ? Number(amount.toFixed(fixed)) : amount, {})
+			}}
 		</span>
 		<span :class="unitClass">₫</span>
 	</div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { createGroup } from '@/apis/supabase';
+import InviteLink from '@/components/InviteLink.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
@@ -11,11 +12,9 @@ import type { Group } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { defineAsyncComponent, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-
-const GroupForm = defineAsyncComponent(() => import('./GroupForm.vue'));
-const InviteLink = defineAsyncComponent(() => import('@/components/InviteLink.vue'));
+import GroupForm from './GroupForm.vue';
 
 const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
@@ -52,34 +51,32 @@ const handleViewGroup = () => {
 
 <template>
 	<Dialog v-model:open="open" :header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm'">
-		<Suspense>
-			<template v-if="open">
-				<GroupForm v-if="!inviteGroupId" @close="handleClose" @submit="handleAddGroup">
-					<template #form-action>
-						<Flex class="gap-2" items-fluid>
-							<Button variant="soft" color="grey" @click="handleClose">Huỷ</Button>
-							<Button type="submit" :loading="isPending">Tạo</Button>
-						</Flex>
-					</template>
-				</GroupForm>
-				<InviteLink v-else :id="inviteGroupId">
-					<template #action>
-						<Flex class="gap-2 mt-4" items-fluid>
-							<Button variant="soft" color="grey" @click="handleClose">Huỷ</Button>
-							<Button start-icon="icon msi-open-in-new" icon-pos="right" @click="handleViewGroup">
-								Xem nhóm
-							</Button>
-						</Flex>
-					</template>
-				</InviteLink>
-			</template>
-			<div v-else class="h-36"></div>
+		<template v-if="open">
+			<GroupForm v-if="!inviteGroupId" @close="handleClose" @submit="handleAddGroup">
+				<template #form-action>
+					<Flex class="gap-2" items-fluid>
+						<Button variant="soft" color="grey" @click="handleClose">Huỷ</Button>
+						<Button type="submit" :loading="isPending">Tạo</Button>
+					</Flex>
+				</template>
+			</GroupForm>
+			<InviteLink v-else :id="inviteGroupId">
+				<template #action>
+					<Flex class="gap-2 mt-4" items-fluid>
+						<Button variant="soft" color="grey" @click="handleClose">Huỷ</Button>
+						<Button start-icon="icon msi-open-in-new" icon-pos="right" @click="handleViewGroup">
+							Xem nhóm
+						</Button>
+					</Flex>
+				</template>
+			</InviteLink>
+		</template>
+		<div v-else class="h-36"></div>
 
-			<template #fallback>
-				<Flex center class="h-36">
-					<Loading />
-				</Flex>
-			</template>
-		</Suspense>
+		<template #fallback>
+			<Flex center class="h-36">
+				<Loading />
+			</Flex>
+		</template>
 	</Dialog>
 </template>

@@ -322,7 +322,8 @@ const tabs = [
 						v-if="isDivEqually"
 						:amount="memberAmounts[member.id]?.amount || 0"
 						amount-class="text-md text-black font-semibold"
-						unit-class="text-sm text-black" />
+						unit-class="text-sm text-black"
+						:fixed="0" />
 					<FormControl v-else :error="memberAmounts[member.id]?.amount < 0">
 						<CurrencyInput
 							placeholder="Nhập số tiền"

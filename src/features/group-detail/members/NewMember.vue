@@ -9,11 +9,9 @@ import type { Member } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { defineAsyncComponent, ref } from 'vue';
+import { ref } from 'vue';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { type MemberFormData } from './MemberForm.vue';
-
-const MemberForm = defineAsyncComponent(() => import('./MemberForm.vue'));
+import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const open = ref(false);
 
@@ -41,15 +39,13 @@ const handleAddMember = async (form: MemberFormData) => {
 	<slot name="new-btn" :handleOpen="() => (open = true)"></slot>
 
 	<Dialog v-model:open="open" header="Thêm thành viên">
-		<Suspense>
-			<MemberForm @submit="handleAddMember">
-				<template #action-btn>
-					<Flex class="gap-2" items-fluid>
-						<Button variant="soft" color="grey" @click="open = false">Huỷ</Button>
-						<Button type="submit" :loading="isPending">Tạo</Button>
-					</Flex>
-				</template>
-			</MemberForm>
-		</Suspense>
+		<MemberForm @submit="handleAddMember">
+			<template #action-btn>
+				<Flex class="gap-2" items-fluid>
+					<Button variant="soft" color="grey" @click="open = false">Huỷ</Button>
+					<Button type="submit" :loading="isPending">Tạo</Button>
+				</Flex>
+			</template>
+		</MemberForm>
 	</Dialog>
 </template>
