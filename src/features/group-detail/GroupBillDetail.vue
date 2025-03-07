@@ -153,7 +153,8 @@ provide(CONTEXT_KEY.BILLS, bills);
 		<!-- Sticky statistic -->
 		<Flex
 			id="sticky-statistic"
-			class="hidden gap-2 justify-between fixed top-0 left-0 p-4 bg-gray-800 rounded-b-2xl w-full z-10 first-render">
+			class="hidden gap-2 justify-between fixed top-0 left-1/2 -translate-x-1/2 p-4 bg-gray-800 rounded-b-2xl w-full z-10 first-render max-w-screen-sm"
+			center>
 			<CurrencyText
 				:amount="total"
 				amount-class="text-2xl font-semibold text-white"

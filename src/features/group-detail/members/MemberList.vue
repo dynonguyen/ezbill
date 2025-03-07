@@ -18,7 +18,7 @@ const { group } = useGroupContext();
 			<MemberEditing v-if="group.members.length" />
 		</Flex>
 
-		<Flex class="overflow-auto items-start pl-4">
+		<Flex class="overflow-auto !items-start pl-4">
 			<NewMember>
 				<template v-slot:new-btn="slotProps">
 					<Flex
@@ -46,7 +46,7 @@ const { group } = useGroupContext();
 
 				<Typography
 					variant="xsRegular"
-					class="text-center break-words line-clamp-2 text-slate-500"
+					class="text-center break-all line-clamp-2 text-slate-500"
 					:title="member.name">
 					{{ member.name }}
 				</Typography>

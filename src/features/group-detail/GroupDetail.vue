@@ -9,7 +9,7 @@ import { PATH } from '@/constants/path';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
-import { computed, provide, watch } from 'vue';
+import { computed, onMounted, onUnmounted, provide, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import GroupBillDetail from './GroupBillDetail.vue';
 
@@ -30,6 +30,14 @@ provide(CONTEXT_KEY.GROUP, group);
 
 watch(group, () => {
 	if (group.value) localDBStore.joinGroup(groupId.value);
+});
+
+onMounted(() => {
+	document.getElementById('app-layout')?.classList.remove('h-dvh');
+});
+
+onUnmounted(() => {
+	document.getElementById('app-layout')?.classList.add('h-dvh');
 });
 </script>
 

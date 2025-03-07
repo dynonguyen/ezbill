@@ -63,7 +63,7 @@ const detailId = ref<Member['id'] | null>(null);
 					</Typography>
 					<Typography
 						variant="xsRegular"
-						class="text-indigo-700 hover:text-indigo-800 cursor-pointer"
+						class="text-indigo-700 hover:text-indigo-800 cursor-pointer shrink-0"
 						@click="detailId = item.member.id">
 						Chi tiết
 					</Typography>
