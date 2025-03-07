@@ -41,12 +41,12 @@ const { group } = useGroupContext();
 				:key="member.id"
 				stack
 				center
-				class="gap-1 px-2 w-[64px] h-full !justify-start shrink-0">
+				class="gap-1 px-2 w-[72px] h-full !justify-start shrink-0">
 				<MemberAvatar v-bind="member" :pt="{ avatar: { class: '!size-12' } }" />
 
 				<Typography
 					variant="xsRegular"
-					class="text-center break-all line-clamp-2 text-slate-500"
+					class="text-center break-all line-clamp-1 text-slate-500"
 					:title="member.name">
 					{{ member.name }}
 				</Typography>
