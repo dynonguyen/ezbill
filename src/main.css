@@ -1,14 +1,19 @@
-@import 'tailwindcss';
-@config '../tailwind.config.js';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html {
-	font-size: 14px;
-	font-family:
-		'Open Sans',
-		-apple-system,
-		Arial,
-		sans-serif;
-	background-color: #fafafa;
+@layer base {
+	html {
+		font-family:
+			'Inter',
+			-apple-system,
+			Arial,
+			sans-serif;
+	}
+
+	body {
+		background-color: #000;
+	}
 }
 
 * ::-webkit-scrollbar {
@@ -26,18 +31,25 @@ html {
 	@apply bg-neutral-400 border-none rounded-lg;
 }
 
-@theme {
-	--color-error: var(--color-red-500);
-}
-
-.p-button {
-	font-weight: 500;
-}
-
-.p-dialog {
-	@apply max-w-full w-100;
-}
-
 .Vue-Toastification__toast {
 	max-width: 400px;
+	margin: 0 auto;
+}
+
+.input,
+.select,
+.textarea {
+	background-color: #fff;
+}
+
+html:has(.modal[open]) {
+	scrollbar-gutter: auto !important;
+}
+
+details > summary::-webkit-details-marker {
+	display: none;
+}
+
+details > summary {
+	list-style: none;
 }

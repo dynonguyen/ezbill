@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
-import { Button, Dialog, Message } from 'primevue';
+import Button from '@/components/ui/Button.vue';
+import Dialog from '@/components/ui/Dialog.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { ref } from 'vue';
 import { useGroupContext } from '../hooks/useGroupContext';
 import MemberEditingItem from './MemberEditingItem.vue';
@@ -12,49 +14,39 @@ const open = ref(false);
 </script>
 
 <template>
-	<Button
-		variant="text"
-		icon="icon msi-edit-outline-rounded"
-		label="Chỉnh sửa"
-		icon-pos="right"
-		size="small"
-		class="!text-neutral-600"
-		@click="open = true" />
+	<Typography
+		variant="xsRegular"
+		class="text-indigo-700 cursor-pointer hover:text-indigo-800"
+		@click="open = true">
+		Chỉnh sửa
+	</Typography>
 
-	<Dialog
-		:draggable="false"
-		v-model:visible="open"
-		modal
-		header="Chỉnh sửa thành viên"
-		:pt="{ header: { class: '!pb-0' }, content: { class: '!p-0' } }">
-		<div class="p-4">
-			<Message severity="info">
-				Bạn không thể xoá các thành viên đã tồn tại trong bill bất kì.
-			</Message>
-		</div>
+	<Dialog v-model:open="open" header="Thành viên">
+		<Flex stack class="gap-4 overflow-auto h-full">
+			<div class="p-4 rounded-lg bg-blue-100">
+				<Typography variant="smRegular" class="text-blue-700">
+					Bạn không thể xoá các thành viên đã tồn tại trong hóa đơn bất kì.
+				</Typography>
+			</div>
 
-		<Flex stack class="px-4 max-h-120 overflow-auto">
-			<MemberEditingItem
-				v-for="(member, index) in group.members"
-				:key="member.id"
-				:member="member"
-				:index="index" />
-
-			<NewMember>
-				<template v-slot:new-btn="slotProps">
-					<Button
-						icon="icon msi-add-2-rounded"
-						severity="secondary"
-						label="Thêm thành viên"
-						class="mt-4"
-						size="small"
-						@click="slotProps.handleOpen" />
-				</template>
-			</NewMember>
+			<Flex stack class="px-4 max-h-120 overflow-auto">
+				<MemberEditingItem
+					v-for="(member, index) in group.members"
+					:key="member.id"
+					:member="member"
+					:index="index" />
+			</Flex>
 		</Flex>
 
-		<Flex class="justify-end mt-2 p-4">
-			<Button variant="outlined" label="Đóng" @click="open = false" />
-		</Flex>
+		<template #action>
+			<Flex stack class="gap-2">
+				<NewMember>
+					<template v-slot:new-btn="slotProps">
+						<Button @click="slotProps.handleOpen">Thêm thành viên</Button>
+					</template>
+				</NewMember>
+				<Button variant="soft" color="grey" @click="open = false">Đóng</Button>
+			</Flex>
+		</template>
 	</Dialog>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
+import Toastify from './components/Toastify.vue';
 </script>
 
 <template>
 	<RouterView />
+	<Toastify />
 </template>

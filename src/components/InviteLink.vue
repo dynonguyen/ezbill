@@ -1,34 +1,22 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
-import FormControl from '@/components/FormControl.vue';
 import Loading from '@/components/Loading.vue';
-import { PATH } from '@/constants/path';
+import Flex from '@/components/ui/Flex.vue';
 import type { Group } from '@/types/entities';
-import { getEnv } from '@/utils/get-env';
-import { saveFileAs } from '@/utils/helpers';
-import { Button, Divider, InputText } from 'primevue';
+import { getGroupLink, saveFileAs } from '@/utils/helpers';
 import QRCode from 'qrcode';
 import { computed, onWatcherCleanup, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import Button from './ui/Button.vue';
+import FormControl from './ui/FormControl.vue';
 
-const props = defineProps<{ id: Group['id']; hideViewGroup?: boolean }>();
-const emit = defineEmits<{ close: [] }>();
+const props = defineProps<{ id: Group['id'] }>();
 
-const inviteLink = computed(
-	() => `${getEnv('VITE_BASE_URL')}${PATH.GROUP.replace(':id', props.id)}`,
-);
+const inviteLink = computed(() => getGroupLink(props.id));
 const qrBase64 = ref('');
 const copied = ref(false);
-const router = useRouter();
 
 const copyToClipboard = () => {
 	navigator.clipboard?.writeText(inviteLink.value);
 	copied.value = true;
-};
-
-const viewGroup = () => {
-	router.push({ path: PATH.GROUP.replace(':id', props.id) });
-	emit('close');
 };
 
 const downloadQR = () => {
@@ -58,43 +46,42 @@ watch(copied, () => {
 </script>
 
 <template>
-	<Flex class="gap-2 items-end">
+	<Flex class="gap-2 !items-end justify-between">
 		<FormControl class="grow" label="Link mời tham gia">
-			<InputText :value="inviteLink" readonly fluid />
+			<input class="input input-bordered w-full" :value="inviteLink" readonly />
 		</FormControl>
 		<Button
-			:icon="copied ? 'icon msi-check-rounded' : 'icon msi-content-copy-outline'"
-			:label="copied ? 'Đã sao chép' : 'Sao chép'"
-			:severity="copied ? 'success' : 'primary'"
-			variant="outlined"
-			@click="copyToClipboard" />
+			:start-icon="
+				copied
+					? 'icon msi-check-rounded shrink-0 !size-5 text-success'
+					: 'icon msi-content-copy-outline shrink-0 !size-5'
+			"
+			color="grey"
+			variant="soft"
+			shape="square"
+			class="shrink-0"
+			@click="copyToClipboard"></Button>
 	</Flex>
 
-	<Divider align="center">
+	<div class="divider" align="center">
 		<strong>OR chia sẻ mã QR</strong>
-	</Divider>
+	</div>
 
 	<Flex stack center>
 		<Flex v-if="qrBase64" stack class="gap-1">
 			<img :src="qrBase64" class="size-44 mx-auto" />
 			<Button
 				variant="link"
-				label="Tải xuống"
-				severity="help"
-				icon="icon msi-download size-5"
+				color="info"
+				start-icon="icon msi-download size-5"
 				class="!p-0 !text-blue-500"
-				@click="downloadQR" />
+				size="sm"
+				@click="downloadQR">
+				Tải xuống
+			</Button>
 		</Flex>
 		<Loading v-else />
 	</Flex>
 
-	<Flex class="justify-end gap-2 mt-4">
-		<Button variant="outlined" label="Đóng" @click="$emit('close')" />
-		<Button
-			v-if="!hideViewGroup"
-			label="Xem nhóm"
-			icon="icon msi-open-in-new"
-			icon-pos="right"
-			@click="viewGroup" />
-	</Flex>
+	<slot name="action"></slot>
 </template>

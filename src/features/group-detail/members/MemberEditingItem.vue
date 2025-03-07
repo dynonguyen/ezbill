@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import { removeMember, updateMember } from '@/apis/supabase';
-import Flex from '@/components/Flex.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
+import Button from '@/components/ui/Button.vue';
+import Dialog from '@/components/ui/Dialog.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
+import { useToast } from '@/hooks/useToast';
 import type { Member } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { Divider } from 'primevue';
 import { computed, ref } from 'vue';
-import { useToast } from 'vue-toastification';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
-const { group, user } = useGroupContext();
+const { group } = useGroupContext();
 const bills = useBillsContext();
 const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
 	mutationFn: removeMember,
@@ -65,26 +66,13 @@ const handleUpdate = async (form: MemberFormData) => {
 
 <template>
 	<Flex stack>
-		<Divider v-if="$props.index > 0" class="!my-4" />
+		<div v-if="index > 0" class="!my-2 divider" />
 
-		<MemberForm v-if="editing" :initial-values="$props.member" @submit="handleUpdate">
-			<template #right-submit-btn>
-				<Flex class="gap-1 shrink-0 self-start mt-3">
-					<button
-						type="submit"
-						:disabled="isUpdating"
-						class="icon msi-check-rounded size-6 text-green-500 cursor-pointer hover:text-green-600"></button>
-					<span
-						class="icon msi-close-rounded size-6 text-red-500 cursor-pointer hover:text-red-600"
-						@click="editing = false"></span>
-				</Flex>
-			</template>
-		</MemberForm>
-		<Flex v-else class="gap-2 justify-between">
-			<MemberAvatar v-bind="$props.member" :show-tooltip="false" class="shrink-0 !size-11" />
+		<Flex class="gap-2 justify-between">
+			<MemberAvatar v-bind="member" :show-tooltip="false" class="shrink-0" />
 
-			<Typography class="line-clamp-1 break-all grow">
-				{{ $props.member.name + ($props.member.id === user.id ? ' (Bạn)' : '') }}
+			<Typography variant="smRegular" class="line-clamp-1 break-all grow">
+				{{ member.name }}
 			</Typography>
 
 			<Flex class="gap-2 shrink-0">
@@ -102,4 +90,15 @@ const handleUpdate = async (form: MemberFormData) => {
 			</Flex>
 		</Flex>
 	</Flex>
+
+	<Dialog v-model:open="editing" header="Chỉnh sửa thành viên">
+		<MemberForm :initial-values="member" @submit="handleUpdate">
+			<template #action-btn>
+				<Flex class="gap-2" items-fluid>
+					<Button variant="soft" color="grey" @click="editing = false">Huỷ</Button>
+					<Button type="submit" :loading="isUpdating">Cập nhật</Button>
+				</Flex>
+			</template>
+		</MemberForm>
+	</Dialog>
 </template>

@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { fetchGroup } from '@/apis/supabase';
-import Flex from '@/components/Flex.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { useQuery } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
-import { Avatar, AvatarGroup, Skeleton } from 'primevue';
 import { computed, watch } from 'vue';
 
 const props = defineProps<{ id: Group['id'] }>();
@@ -22,7 +21,7 @@ const {
 	error,
 } = useQuery({ queryKey, queryFn: () => fetchGroup(props.id) });
 
-const MAX_AVATAR = 5;
+const MAX_AVATAR = 3;
 
 watch(error, () => {
 	if (error.value) {
@@ -32,38 +31,55 @@ watch(error, () => {
 </script>
 
 <template>
-	<Skeleton v-if="isPending" height="144px" border-radius="12px" />
+	<div class="skeleton h-24 w-full rounded-2xl" v-if="isPending" />
 	<Flex
 		v-else-if="group"
-		class="rounded-2xl p-4 bg-white shadow-lg shadow-neutral-200/25 w-full cursor-pointer hover:shadow-neutral-200 transition-shadow"
-		@click="$router.push(PATH.GROUP.replace(':id', group.id))"
-		stack>
-		<Flex class="gap-2" stack>
-			<Typography variant="lgSemiBold" class="break-words">
-				{{ group.name }}
-			</Typography>
+		stack
+		class="gap-2 p-4 rounded-2xl bg-white shadow-lg cursor-pointer"
+		@click="$router.push(PATH.GROUP.replace(':id', group.id))">
+		<Typography variant="xlSemiBold" class="text-black line-clamp-1 break-all">
+			{{ group.name }}
+		</Typography>
+		<Flex class="justify-between">
+			<Flex class="gap-1">
+				<div :class="$style.tag">
+					<span class="icon msi-calendar-clock-rounded"></span>
+					<span class="tag-content">{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm') }}</span>
+				</div>
 
-			<Typography v-if="!group.members.length" class="text-muted-color">
-				Chưa có thành viên
-			</Typography>
-			<Flex v-else class="gap-2">
-				<AvatarGroup>
-					<MemberAvatar
-						v-for="member in group.members.slice(0, MAX_AVATAR)"
-						:key="member.id"
-						v-bind="member" />
-					<Avatar
-						v-if="group.members.length > MAX_AVATAR"
-						:label="`+${group.members.length - MAX_AVATAR}`"
-						shape="circle" />
-				</AvatarGroup>
-				<Typography>{{ group.members.length }} thành viên</Typography>
+				<div :class="$style.tag">
+					<span class="icon msi-group-rounded"></span>
+					<span class="tag-content">{{ group.members.length }}</span>
+				</div>
 			</Flex>
 
-			<Typography variant="smRegular" class="text-muted-color">
-				<span class="font-medium">Ngày tạo:</span>
-				{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm') }}
-			</Typography>
+			<div class="avatar-group -space-x-4">
+				<MemberAvatar
+					v-for="member in group.members.slice(0, MAX_AVATAR)"
+					:key="member.id"
+					v-bind="member" />
+				<div class="avatar placeholder" v-if="group.members.length > MAX_AVATAR">
+					<div class="bg-neutral text-neutral-content w-7 rounded-full">
+						<Typography variant="xsRegular">
+							{{ `+${group.members.length - MAX_AVATAR}` }}
+						</Typography>
+					</div>
+				</div>
+			</div>
 		</Flex>
 	</Flex>
 </template>
+
+<style module>
+.tag {
+	@apply flex gap-1 items-center px-2 py-1 rounded-lg bg-slate-100 text-sm text-slate-500;
+
+	:global .icon {
+		@apply size-4;
+	}
+
+	:global .tag-content {
+		@apply text-sm;
+	}
+}
+</style>

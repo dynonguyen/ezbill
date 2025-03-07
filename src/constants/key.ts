@@ -4,6 +4,7 @@ export const LS_KEY = {
 
 export const STORE_KEY = {
 	LOCAL_DB: 'local-db',
+	TOAST: 'toast',
 };
 
 export const CONTEXT_KEY = {

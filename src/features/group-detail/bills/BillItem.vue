@@ -1,76 +1,66 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
-import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
-import type { Bill, Member } from '@/types/entities';
-import { toVND } from '@/utils/helpers';
+import CurrencyText from '@/components/CurrencyText.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
+import type { Bill } from '@/types/entities';
+import { hasEventPassed } from '@/utils/helpers';
 import dayjs from 'dayjs';
-import { Avatar, AvatarGroup } from 'primevue';
-import { computed } from 'vue';
-import ContainerBox from '../ContainerBox.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
 
-const props = defineProps<{ bill: Bill }>();
+defineProps<{ bill: Bill }>();
+defineEmits<{ delete: []; viewDetail: [] }>();
 
-const MAX_AVATAR = 6;
+const { group } = useGroupContext();
 
-const { user, group } = useGroupContext();
-
-const createdBy = computed(
-	() => group.value.members.find((member) => member.id === props.bill.createdBy)!,
-);
-
-const splitWith = computed(() => {
-	const members = Object.keys(props.bill.members)
-		.slice(0, MAX_AVATAR)
-		.map((id) => group.value.members.find((m) => m.id === id))
-		.filter(Boolean) as Member[];
-
-	const nMemberInBill = Object.keys(props.bill.members).length;
-
-	return { remaining: nMemberInBill > MAX_AVATAR ? nMemberInBill - MAX_AVATAR : 0, members };
-});
+const getBillInfo = (bill: Bill) => {
+	return [
+		['msi-calendar-month-rounded', dayjs(bill.createdAt).format('DD/MM/YYYY HH:mm')],
+		['msi-payments', group.value.members?.find((m) => m.id === bill.createdBy)?.name || 'Unknown'],
+		['msi-group', Object.keys(bill.members).length],
+	];
+};
 </script>
 
 <template>
-	<ContainerBox class="cursor-pointer hover:shadow-lg">
-		<Flex stack class="gap-3">
-			<Flex class="justify-between items-start gap-2 flex-wrap">
-				<Typography variant="lgMedium" class="line-clamp-2 break-words">
-					{{ $props.bill.name }}
+	<Flex stack class="gap-1 p-4 border-t border-dashed border-gray-300">
+		<Flex class="justify-between gap-2">
+			<Typography variant="mdSemiBold" class="text-black grow line-clamp-1 break-all">
+				{{ bill.name }}
+			</Typography>
+			<CurrencyText
+				:amount="bill.amount"
+				amount-class="text-md font-semibold"
+				unit-class="text-sm"
+				class="shrink-0" />
+		</Flex>
+
+		<Flex class="gap-2 justify-between flex-wrap">
+			<Flex stack class="gap-1 grow">
+				<Flex v-for="item in getBillInfo(bill)" :key="item[0]" class="gap-2 text-slate-500">
+					<span class="size-4 icon" :class="item[0]"></span>
+					<Typography variant="xsRegular">{{ item[1] }}</Typography>
+				</Flex>
+			</Flex>
+
+			<Flex class="gap-2 self-end">
+				<Typography
+					variant="xsRegular"
+					class="text-indigo-700 hover:text-indigo-800 cursor-pointer"
+					@click="$emit('viewDetail')"
+					v-if="hasEventPassed('onViewDetail')">
+					Chi tiết
 				</Typography>
 
-				<Typography variant="lgMedium" class="shrink-0">{{ toVND($props.bill.amount) }}</Typography>
-			</Flex>
-
-			<Flex class="justify-between items-end">
-				<Flex stack class="gap-1">
-					<Flex class="gap-2 flex-wrap">
-						<MemberAvatar v-bind="createdBy" :show-tooltip="false" class="shrink-0 !size-7" />
-						<Typography>
-							{{ createdBy.name + (user.id === props.bill.createdBy ? ' (bạn)' : '') }} đã trả
-						</Typography>
-					</Flex>
-
-					<Typography class="text-neutral-500">
-						{{ dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm') }}
-					</Typography>
-				</Flex>
-
-				<AvatarGroup class="shrink-0">
-					<MemberAvatar
-						v-for="member in splitWith.members"
-						:key="member.id"
-						v-bind="member"
-						class="!size-7" />
-
-					<Avatar
-						v-if="splitWith.remaining"
-						:label="`+${splitWith.remaining}`"
-						shape="circle"
-						class="!size-7" />
-				</AvatarGroup>
+				<Typography
+					v-if="hasEventPassed('onDelete')"
+					tabindex="0"
+					role="button"
+					variant="xsRegular"
+					class="text-red-700 hover:text-red-800 cursor-pointer"
+					@click="$emit('delete')">
+					Xoá
+				</Typography>
 			</Flex>
 		</Flex>
-	</ContainerBox>
+	</Flex>
 </template>

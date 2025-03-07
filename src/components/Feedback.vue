@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ImgHTMLAttributes } from 'vue';
-import Flex from './Flex.vue';
-import Typography, { type TypographyProps } from './Typography.vue';
+import Flex from './ui/Flex.vue';
+import Typography, { type TypographyProps } from './ui/Typography.vue';
 
 type FeedbackProps = {
 	img: string;

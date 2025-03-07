@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import Flex from '@/components/Flex.vue';
-import FormControl from '@/components/FormControl.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import FormControl from '@/components/ui/FormControl.vue';
+import { vFocus } from '@/directives/v-focus';
 import { toTypedSchema } from '@vee-validate/zod';
-import { InputText } from 'primevue';
 import { useForm } from 'vee-validate';
-import { onMounted, ref, useId } from 'vue';
+import { ref, useId } from 'vue';
 import { z } from 'zod';
 import AvatarSelect from '../AvatarSelect.vue';
 
 const emit = defineEmits<{ submit: [form: MemberFormData] }>();
 const props = defineProps<{ initialValues?: MemberFormData }>();
+
 const nameInputId = useId();
 
 const MAX = { NAME: 512 };
@@ -40,49 +40,37 @@ const handleChangeAvatar = (avt: string) => {
 };
 
 const [name, nameProps] = defineField('name');
-
-onMounted(() => document.getElementById(nameInputId)?.focus());
 </script>
 
 <template>
 	<Flex stack class="gap-4" as="form" @submit="handleAddMember">
-		<Flex class="gap-3 items-start">
-			<Flex stack center class="gap-1">
-				<div v-tooltip="'Thay đổi ảnh đại diện'">
-					<MemberAvatar
-						:show-tooltip="false"
-						id="_"
-						:name="values.name || 'Unknown'"
-						:avatar="values.avatar"
-						class="!size-11 shrink-0 cursor-pointer"
-						@click="openAvatarSelect = true" />
-				</div>
+		<div class="size-20 relative mx-auto cursor-pointer" @click="openAvatarSelect = true">
+			<MemberAvatar
+				:show-tooltip="false"
+				id="_"
+				:name="values.name || 'Unknown'"
+				:avatar="values.avatar"
+				size="full"
+				class="size-20 text-2xl" />
 
-				<Typography
-					v-if="values.avatar"
-					variant="xsMedium"
-					class="text-gray-500 cursor-pointer hover:text-error"
-					@click="setFieldValue('avatar', undefined)">
-					Xoá
-				</Typography>
+			<Flex center class="bg-white p-1 absolute bottom-0 right-0 rounded-full">
+				<span class="icon msi-photo-camera-rounded size-4 text-black"></span>
 			</Flex>
+		</div>
 
-			<FormControl :error="Boolean(errors.name)" :helper-text="errors.name" class="grow w-full">
-				<InputText
-					placeholder="Nhập tên của bạn"
-					fluid
-					:id="nameInputId"
-					v-model="name"
-					v-bind="nameProps"
-					autofocus
-					:maxlength="MAX.NAME" />
-			</FormControl>
+		<FormControl :error="Boolean(errors.name)" :helper-text="errors.name" class="grow w-full">
+			<input
+				class="input input-bordered w-full"
+				placeholder="Nhập tên thành viên"
+				:id="nameInputId"
+				v-model="name"
+				v-bind="nameProps"
+				v-focus
+				:maxlength="MAX.NAME" />
+		</FormControl>
 
-			<slot name="right-submit-btn"></slot>
-		</Flex>
-
-		<slot name="bottom-submit-btn"></slot>
+		<slot name="action-btn"></slot>
 	</Flex>
 
-	<AvatarSelect v-model:visible="openAvatarSelect" @change="handleChangeAvatar" />
+	<AvatarSelect v-model:open="openAvatarSelect" @change="handleChangeAvatar" />
 </template>

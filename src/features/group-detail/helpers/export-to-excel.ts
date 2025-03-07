@@ -1,6 +1,64 @@
+import type { Bill, BillMember, Group, Member } from '@/types/entities';
+import { getGroupLink, saveFileAs } from '@/utils/helpers';
+import dayjs from 'dayjs';
 import { Workbook, type Column, type Font } from 'exceljs';
-import type { Bill, BillMember, Group, Member } from '../../../types/entities';
-import { saveFileAs } from '../../../utils/helpers';
+
+const generateInformationSheet = (wb: Workbook, group: Group) => {
+	const ROW_HEIGHT = 16;
+	const COL_COMMON_STYLE: { font: Partial<Font> } = { font: { name: 'Arial', size: 12 } };
+
+	const ws = wb.addWorksheet('Thông tin nhóm');
+
+	// Define columns
+	ws.columns = [
+		{
+			key: 'name',
+			header: 'Tên nhóm',
+			width: 40,
+			style: COL_COMMON_STYLE,
+		},
+		{
+			key: 'link',
+			header: 'Link nhóm',
+			width: 60,
+			style: COL_COMMON_STYLE,
+		},
+		{
+			key: 'createdAt',
+			header: 'Ngày tạo',
+			width: 30,
+			style: COL_COMMON_STYLE,
+		},
+		{
+			key: 'members',
+			header: 'Số thành viên',
+			width: 15,
+			style: COL_COMMON_STYLE,
+		},
+	];
+
+	// Styling
+	ws.getRow(1).height = ROW_HEIGHT;
+
+	['A', 'B', 'C', 'D'].forEach((col) => {
+		const headerCell = ws.getCell(`${col}1`);
+		const summaryCell = ws.getCell(`${col}${ws.rowCount}`);
+
+		headerCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '3E85C6' } };
+		headerCell.font = { name: 'Arial', bold: true, size: 12, color: { argb: 'FFFFFF' } };
+
+		summaryCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'B6D7A8' } };
+		summaryCell.font = { name: 'Arial', bold: col === 'A', size: 12, color: { argb: '000000' } };
+	});
+
+	ws.getCell('A2').value = group.name;
+
+	const groupLink = getGroupLink(group.id);
+	ws.getCell('B2').value = { text: groupLink, hyperlink: groupLink };
+
+	ws.getCell('C2').value = dayjs(group.createdAt).format('DD/MM/YYYY HH:mm');
+	ws.getCell('D2').value = group.members?.length;
+};
 
 const generateOverviewSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 	const ROW_HEIGHT = 16;
@@ -194,6 +252,7 @@ export const exportGroupToExcel = async (group: Group, bills: Bill[]) => {
 
 	generateOverviewSheet(wb, group, bills);
 	generateDetailSheet(wb, group, bills);
+	generateInformationSheet(wb, group);
 
 	const buffer = await wb.xlsx.writeBuffer();
 	saveFileAs(new Blob([buffer]), `${group.name}.xlsx`);

@@ -21,7 +21,11 @@ export const createGroup = async (group: Pick<Group, 'name' | 'id'>) => {
 };
 
 export const fetchGroup = async (id: string): Promise<Group> => {
-	const { data, error } = await supabase.from(getGroupView(id)).select().single();
+	const { data, error } = await supabase
+		.from(getGroupView(id))
+		.select()
+		.eq('deleted', false)
+		.single();
 
 	if (error) throw error;
 
@@ -33,6 +37,11 @@ export const updateGroup = async (data: { id: string; updated: Partial<Group> })
 
 	const resp = await supabase.from(getGroupView(id)).update(updated).eq('id', id);
 
+	if (resp.error) throw resp.error;
+};
+
+export const deleteGroup = async (id: Group['id']) => {
+	const resp = await supabase.from(getGroupView(id)).update({ deleted: true }).eq('id', id);
 	if (resp.error) throw resp.error;
 };
 

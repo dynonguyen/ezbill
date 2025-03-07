@@ -1,30 +1,26 @@
 <script setup lang="ts">
-import Feedback from '@/components/Feedback.vue';
-import Flex from '@/components/Flex.vue';
-import Typography from '@/components/Typography.vue';
+import Flex from '@/components/ui/Flex.vue';
+import Typography from '@/components/ui/Typography.vue';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import RecentGroupItem from './RecentGroupItem.vue';
 
-const localStore = useLocalDBStore();
+const localStoreDB = useLocalDBStore();
 </script>
 
 <template>
-	<div class="grow overflow-auto">
-		<Flex stack class="gap-4 px-4">
-			<Typography variant="xlSemiBold">Nhóm đã tham gia</Typography>
+	<Flex stack class="gap-4 h-full py-4 grow overflow-auto">
+		<Typography variant="mdSemiBold" class="px-4 text-black">Nhóm của bạn</Typography>
 
-			<Feedback
-				v-if="!localStore.joinedGroups.length"
-				:img="getImgUrl('no-groups.svg')"
-				title="Không có nhóm nào"
-				:attrs="{ img: { class: 'w-1/2' } }" />
-			<Flex v-else class="gap-4" stack>
-				<RecentGroupItem
-					v-for="group in localStore.joinedGroups"
-					:key="group.groupId"
-					:id="group.groupId" />
-			</Flex>
+		<img
+			v-if="!localStoreDB.joinedGroups.length"
+			:src="getImgUrl('no-groups.svg')"
+			class="size-[300px] mx-auto" />
+		<Flex v-else stack class="gap-4 px-4">
+			<RecentGroupItem
+				v-for="group in localStoreDB.joinedGroups"
+				:key="group.groupId"
+				:id="group.groupId" />
 		</Flex>
-	</div>
+	</Flex>
 </template>

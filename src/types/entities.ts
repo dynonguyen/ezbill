@@ -9,6 +9,7 @@ export type Group = {
 	name: string;
 	members: Member[];
 	createdAt: string;
+	deleted: boolean;
 };
 
 export type BillMember = Record<Member['id'], number>;

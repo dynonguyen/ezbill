@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import type { Member } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
-import { Avatar, type AvatarProps } from 'primevue';
+import type { HTMLAttributes } from 'vue';
+import Typography, { type TypographyProps } from './ui/Typography.vue';
 
-withDefaults(defineProps<Member & AvatarProps & { showTooltip?: boolean }>(), {
-	showTooltip: true,
-});
+type MemberAvatarProps = Member & {
+	size?: 'sm' | 'md' | 'lg' | 'full';
+	pt?: { avatar?: HTMLAttributes; text?: HTMLAttributes };
+};
+
+withDefaults(defineProps<MemberAvatarProps>(), { size: 'md' });
 
 const AVATAR_COLOR: Record<string, string> = {
 	'0': '#D32F2F',
@@ -45,22 +49,40 @@ const AVATAR_COLOR: Record<string, string> = {
 	y: '#D81B60',
 	z: '#D50000',
 };
+
+const sizes: Record<NonNullable<MemberAvatarProps['size']>, string> = {
+	sm: 'size-5',
+	md: 'size-7',
+	lg: 'size-10',
+	full: 'size-full',
+};
+
+const fontSizes: Record<NonNullable<MemberAvatarProps['size']>, TypographyProps['variant']> = {
+	sm: 'smRegular',
+	md: 'smRegular',
+	lg: 'mdRegular',
+	full: 'mdRegular',
+};
 </script>
 
 <template>
-	<Avatar
-		v-if="$props.avatar"
-		:image="getImgUrl(`avatar/${$props.avatar}`)"
-		shape="circle"
-		v-tooltip.bottom="$props.showTooltip ? $props.name : null" />
-	<Avatar
-		v-else-if="$props.name"
-		:label="$props.name[0].toUpperCase()"
-		shape="circle"
-		class="font-semibold"
-		:style="{
-			color: '#FFF',
-			backgroundColor: AVATAR_COLOR[$props.name[0].toLowerCase()] || '#697182',
-		}"
-		v-tooltip.bottom="$props.showTooltip ? $props.name : null" />
+	<div class="avatar" v-if="avatar">
+		<div :class="[sizes[size]]" class="rounded-full" v-bind="pt?.avatar">
+			<img :src="getImgUrl(`avatar/${avatar}`)" />
+		</div>
+	</div>
+	<div v-else-if="name" class="avatar placeholder">
+		<div
+			class="text-white rounded-full"
+			:class="[sizes[size]]"
+			:style="{ backgroundColor: AVATAR_COLOR[name[0].toLowerCase()] || '#697182' }"
+			v-bind="pt?.avatar">
+			<Typography
+				:variant="fontSizes[size]"
+				:class="{ 'text-[length:inherit]': size === 'full' }"
+				v-bind="pt?.text">
+				{{ name[0].toUpperCase() }}
+			</Typography>
+		</div>
+	</div>
 </template>

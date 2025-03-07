@@ -26,6 +26,7 @@ create table
     "createdAt" timestamp with time zone not null default now(),
     name varchar(512) not null,
     members jsonb[] not null default '{}'::jsonb[],
+		deleted boolean not null default false,
     constraint groups_pkey primary key (id)
   ) tablespace pg_default;
 

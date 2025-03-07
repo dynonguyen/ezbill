@@ -12,6 +12,8 @@
 		"supabase",
 		"tanstack",
 		"toastification",
-		"VITE"
+		"Toastify",
+		"VITE",
+		"vnode"
 	]
 }
