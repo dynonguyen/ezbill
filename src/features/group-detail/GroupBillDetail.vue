@@ -86,7 +86,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 </script>
 
 <template>
-	<Flex v-if="loading" center class="h-full">
+	<Flex v-if="loading" center class="h-dvh">
 		<Loading />
 	</Flex>
 	<Flex v-else stack class="bg-indigo-50 min-h-dvh overflow-auto" id="group-detail">

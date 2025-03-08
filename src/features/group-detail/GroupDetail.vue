@@ -42,14 +42,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<Flex v-if="isPending" center class="h-full px-4">
+	<Flex v-if="isPending" center class="h-dvh px-4">
 		<Loading />
 	</Flex>
 	<Feedback
 		v-else-if="isError || !group"
 		:img="getImgUrl('no-groups.svg')"
 		title="Nhóm không tồn tại hoặc đã xảy ra lỗi."
-		class="px-4">
+		class="h-dvh px-4">
 		<template #action>
 			<Button
 				class="w-fit"
