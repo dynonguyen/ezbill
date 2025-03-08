@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CurrencyText from '@/components/CurrencyText.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
+import Autocomplete from '@/components/ui/Autocomplete.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyInput, { type CurrencyInputProps } from '@/components/ui/CurrencyInput.vue';
 import Dialog from '@/components/ui/Dialog.vue';
@@ -88,7 +89,7 @@ const toast = useToast();
 const [amountField, amountProps] = defineField('amount');
 const [noteField, noteProps] = defineField('note');
 const [nameField, nameProps] = defineField('name');
-const [createdByField, createdByProps] = defineField('createdBy');
+const [createdByField] = defineField('createdBy');
 
 const getDefaultMemberAmounts = () => {
 	if (props.mode === 'new')
@@ -270,16 +271,19 @@ const tabs = [
 				label="Người trả"
 				:error="Boolean(errors.createdBy)"
 				:helper-text="errors.createdBy">
-				<select
-					id="createdBy"
-					class="select select-bordered w-full"
-					v-model="createdByField"
-					v-bind="createdByProps">
-					<option disabled value="">Chọn người trả</option>
-					<option v-for="member in group.members" :key="member.id" :value="member.id">
-						{{ member.name }}
-					</option>
-				</select>
+				<Autocomplete
+					:pt="{ input: { id: 'createdBy' } }"
+					placeholder="Chọn người trả"
+					v-model:value="createdByField"
+					:options="group.members.map((member) => ({ ...member, value: member.id }))"
+					label="name">
+					<template v-slot:option="{ option }">
+						<Flex class="gap-2 w-full">
+							<MemberAvatar v-bind="option" size="sm" />
+							<span>{{ option.name }}</span>
+						</Flex>
+					</template>
+				</Autocomplete>
 			</FormControl>
 
 			<!-- Notes -->
