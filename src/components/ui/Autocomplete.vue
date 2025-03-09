@@ -88,27 +88,29 @@ onMounted(resetInputValue);
 				@click.stop="open = !open"></span>
 		</div>
 
-		<ul
-			v-if="open"
-			class="absolute menu mt-1 bg-base-100 rounded-box z-[1] w-full max-h-64 overflow-auto p-2 shadow-lg gap-1 flex-nowrap"
-			v-outside-click:[outsideClickId]="{ enabled: open, trigger: handleClose }"
-			v-bind="pt?.menu">
-			<template v-if="displayedOptions.length">
-				<li v-for="opt in displayedOptions" :key="opt.value" @click="handleSelect(opt as Option)">
-					<a class="w-full" :class="{ active: opt.value === value }">
-						<slot
-							v-if="$slots.option"
-							name="option"
-							:key="opt.value"
-							:option="opt"
-							:selected="opt.value === value"></slot>
-						<template v-else>{{ opt[label] }}</template>
-					</a>
-				</li>
-			</template>
-			<Typography v-else class="p-2 text-slate-400" variant="smRegular">
-				Không có lựa chọn
-			</Typography>
-		</ul>
+		<Teleport to="body">
+			<ul
+				v-if="open"
+				class="fixed top-0 menu mt-1 bg-base-100 rounded-box z-20 w-full max-h-64 overflow-auto p-2 shadow-lg gap-1 flex-nowrap"
+				v-outside-click:[outsideClickId]="{ enabled: open, trigger: handleClose }"
+				v-bind="pt?.menu">
+				<template v-if="displayedOptions.length">
+					<li v-for="opt in displayedOptions" :key="opt.value" @click="handleSelect(opt as Option)">
+						<a class="w-full" :class="{ active: opt.value === value }">
+							<slot
+								v-if="$slots.option"
+								name="option"
+								:key="opt.value"
+								:option="opt"
+								:selected="opt.value === value"></slot>
+							<template v-else>{{ opt[label] }}</template>
+						</a>
+					</li>
+				</template>
+				<Typography v-else class="p-2 text-slate-400" variant="smRegular">
+					Không có lựa chọn
+				</Typography>
+			</ul>
+		</Teleport>
 	</div>
 </template>

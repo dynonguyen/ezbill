@@ -1,8 +1,4 @@
-export type BankInfo = {
-	name: string;
-	code: string;
-	bin: string;
-};
+import type { BankInfo } from '../types/entities';
 
 export const BANKS: BankInfo[] = [
 	{ name: 'Ngân hàng TMCP Tiên Phong', code: 'TPB', bin: '970423' },
