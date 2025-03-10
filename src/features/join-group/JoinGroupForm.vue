@@ -77,7 +77,7 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 		</FormControl>
 
 		<Flex class="gap-2" items-fluid>
-			<Button variant="soft" color="grey" @click="handleClose">Huỷ</Button>
+			<Button variant="soft" color="grey" @click="handleClose">Đóng</Button>
 			<Button type="submit">Tham gia</Button>
 		</Flex>
 	</Flex>

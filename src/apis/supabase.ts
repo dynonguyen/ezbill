@@ -100,8 +100,8 @@ export const removeMember = async (data: { groupId: Group['id']; memberId: Membe
 	if (resp.error) throw resp.error;
 };
 
-export const updateMember = async (data: { groupId: Group['id']; updated: Member }) => {
-	const { groupId, updated } = data;
+export const updateMember = async (data: { groupId: Group['id']; newValue: Member }) => {
+	const { groupId, newValue } = data;
 
 	const [error, group] = await to(fetchGroup(groupId));
 
@@ -110,9 +110,9 @@ export const updateMember = async (data: { groupId: Group['id']; updated: Member
 	}
 
 	const newMembers = group.members?.map((member) => {
-		return member.id === updated.id
-			? updated
-			: updated.isAccounting
+		return member.id === newValue.id
+			? newValue
+			: newValue.isAccounting
 				? { ...member, isAccounting: false }
 				: member;
 	});

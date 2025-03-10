@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Button from '@/components/ui/Button.vue';
-import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { vFocus } from '@/directives/v-focus';
+import type { MemberBankInfo } from '@/types/entities';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { computed, ref, useId } from 'vue';
 import { z } from 'zod';
 import AvatarSelect from '../AvatarSelect.vue';
-import BankInfoForm from '../BankInfoForm.vue';
+import BankInfoDetail from '../BankInfoDetail.vue';
+import BankInfoPopup from '../BankInfoPopup.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
 
-const emit = defineEmits<{ submit: [form: MemberFormData] }>();
-const props = defineProps<{ initialValues?: MemberFormData }>();
+const emit = defineEmits<{ submit: [form: MemberFormData & { bankInfo?: MemberBankInfo }] }>();
+const props = defineProps<{ initialValues?: MemberFormData & { bankInfo?: MemberBankInfo } }>();
 const { group } = useGroupContext();
 
 const nameInputId = useId();
@@ -37,9 +38,10 @@ const { errors, handleSubmit, values, defineField, setFieldValue } = useForm<Mem
 
 const openAvatarSelect = ref(false);
 const openTransferInfo = ref(false);
+const bankInfo = ref<MemberBankInfo | null>(props.initialValues?.bankInfo || null);
 
 const handleAddMember = handleSubmit(async (form) => {
-	emit('submit', form);
+	emit('submit', bankInfo.value ? { ...form, bankInfo: bankInfo.value } : form);
 });
 
 const handleChangeAvatar = (avt: string) => {
@@ -82,7 +84,7 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 		<Flex class="gap-2 text-slate-500">
 			<input
 				type="checkbox"
-				class="checkbox"
+				class="checkbox checkbox-sm"
 				id="is-accounting"
 				v-model="isAccounting"
 				v-bind="isAccountingProps" />
@@ -98,12 +100,26 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 			</Flex>
 		</Flex>
 
+		<BankInfoDetail v-if="bankInfo" :bank-info="bankInfo">
+			<template #action>
+				<Flex class="gap-2">
+					<span
+						class="icon msi-edit cursor-pointer size-5 text-slate-500"
+						@click="openTransferInfo = true"></span>
+					<span
+						class="icon msi-delete cursor-pointer size-5 text-red-500"
+						@click="bankInfo = null"></span>
+				</Flex>
+			</template>
+		</BankInfoDetail>
 		<Button
+			v-else
 			type="button"
 			size="sm"
 			variant="soft"
 			color="grey"
 			start-icon="msi-account-balance-rounded"
+			class="!bg-transparent border-dashed"
 			@click="openTransferInfo = true">
 			Thêm thông tin chuyển khoản
 		</Button>
@@ -113,21 +129,9 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 
 	<AvatarSelect v-model:open="openAvatarSelect" @change="handleChangeAvatar" />
 
-	<Dialog v-model:open="openTransferInfo" header="Thông tin chuyển khoản">
-		<Flex stack class="gap-4">
-			<Typography variant="smRegular" class="p-4 rounded-lg bg-blue-100 text-slate-500">
-				Thông tin này dùng để tạo mã QR chuyển khoản thuận tiện trong việc thanh toán của cho thành
-				viên khác.
-			</Typography>
-
-			<BankInfoForm />
-		</Flex>
-
-		<template #action>
-			<Flex class="gap-2" items-fluid>
-				<Button variant="soft" color="grey" @click="openTransferInfo = false">Đóng</Button>
-				<Button @click="openTransferInfo = false">Lưu</Button>
-			</Flex>
-		</template>
-	</Dialog>
+	<BankInfoPopup
+		v-if="openTransferInfo"
+		v-model:open="openTransferInfo"
+		:initial-values="bankInfo"
+		@submit="(form) => (bankInfo = form)" />
 </template>

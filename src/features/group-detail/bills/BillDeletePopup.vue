@@ -47,7 +47,7 @@ const handleDeleteBill = async () => {
 
 		<template #action>
 			<Flex class="gap-2" items-fluid>
-				<Button variant="soft" color="grey" @click="deleteId = null">Huỷ</Button>
+				<Button variant="soft" color="grey" @click="deleteId = null">Đóng</Button>
 				<Button color="danger" @click="handleDeleteBill" :loading="isDeleting">Xoá</Button>
 			</Flex>
 		</template>

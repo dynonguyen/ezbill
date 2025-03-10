@@ -54,7 +54,7 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 				</Typography>
 
 				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="$emit('close')">Huỷ</Button>
+					<Button type="button" variant="soft" color="grey" @click="$emit('close')">Đóng</Button>
 					<Button type="submit" form="bill-form" :loading="isPending">Tạo</Button>
 				</Flex>
 			</Flex>

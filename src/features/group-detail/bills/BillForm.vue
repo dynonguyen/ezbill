@@ -244,6 +244,7 @@ const tabs = [
 				<input
 					class="input input-bordered w-full"
 					placeholder="Nhập tên"
+					id="name"
 					v-model="nameField"
 					v-bind="nameProps"
 					:maxlength="MAX.NAME" />
@@ -267,12 +268,10 @@ const tabs = [
 
 			<!-- Created by -->
 			<FormControl
-				html-for="createdBy"
 				label="Người trả"
 				:error="Boolean(errors.createdBy)"
 				:helper-text="errors.createdBy">
 				<Autocomplete
-					:pt="{ input: { id: 'createdBy' } }"
 					placeholder="Chọn người trả"
 					v-model:value="createdByField"
 					:options="group.members.map((member) => ({ ...member, value: member.id }))"

@@ -52,7 +52,7 @@ onUnmounted(() => {
 				</slot>
 
 				<div
-					class="grow overflow-auto px-4"
+					class="grow overflow-auto px-4 dialog-body"
 					:class="{ 'pt-4': $slots.header || header, 'pb-4': $slots.action }"
 					v-bind="pt?.body">
 					<slot></slot>

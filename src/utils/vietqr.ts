@@ -1,7 +1,7 @@
 export type VietQRData = {
 	bin: string; // Bank Identification Number
 	accountNumber: string;
-	amount: string;
+	amount: number;
 	content?: string;
 };
 
@@ -38,7 +38,7 @@ export function buildVietQRData(data: VietQRData): string {
 
 	// Số tiền (nếu có)
 	if (amount) {
-		payload += `54${String(amount.length).padStart(2, '0')}${amount}`;
+		payload += `54${String(`${amount}`.length).padStart(2, '0')}${amount}`;
 	}
 
 	// Nội dung (nếu có)

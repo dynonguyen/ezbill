@@ -2,6 +2,7 @@ export type BankInfo = {
 	name: string;
 	code: string;
 	bin: string;
+	shortname: string;
 };
 
 export type MemberBankInfo = {
@@ -13,7 +14,7 @@ export type Member = {
 	id: string;
 	name: string;
 	avatar?: string;
-	bin?: MemberBankInfo; // bank identification number
+	bankInfo?: MemberBankInfo;
 	isAccounting?: boolean; // isAccounting: true means this member is responsible for accounting
 };
 

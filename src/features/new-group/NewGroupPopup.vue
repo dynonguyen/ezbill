@@ -55,7 +55,7 @@ const handleViewGroup = () => {
 			<GroupForm v-if="!inviteGroupId" @close="handleClose" @submit="handleAddGroup">
 				<template #form-action>
 					<Flex class="gap-2" items-fluid>
-						<Button variant="soft" color="grey" @click="handleClose">Huỷ</Button>
+						<Button variant="soft" color="grey" @click="handleClose">Đóng</Button>
 						<Button type="submit" :loading="isPending">Tạo</Button>
 					</Flex>
 				</template>
@@ -63,7 +63,7 @@ const handleViewGroup = () => {
 			<InviteLink v-else :id="inviteGroupId">
 				<template #action>
 					<Flex class="gap-2 mt-4" items-fluid>
-						<Button variant="soft" color="grey" @click="handleClose">Huỷ</Button>
+						<Button variant="soft" color="grey" @click="handleClose">Đóng</Button>
 						<Button start-icon="icon msi-open-in-new" icon-pos="right" @click="handleViewGroup">
 							Xem nhóm
 						</Button>

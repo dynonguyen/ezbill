@@ -68,7 +68,7 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 				</Typography>
 
 				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="handleCloseDetail">Huỷ</Button>
+					<Button variant="soft" color="grey" @click="handleCloseDetail">Đóng</Button>
 					<Button type="submit" form="bill-form" :loading="isUpdating">Cập nhật</Button>
 				</Flex>
 			</Flex>

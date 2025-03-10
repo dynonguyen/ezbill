@@ -25,6 +25,7 @@
 		"vue": "^3.5.13",
 		"vue-currency-input": "^3.2.1",
 		"vue-router": "^4.5.0",
+		"vue-select": "^4.0.0-beta.6",
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
@@ -33,6 +34,7 @@
 		"@tsconfig/node22": "^22.0.0",
 		"@types/node": "^22.10.7",
 		"@types/qrcode": "^1.5.5",
+		"@types/vue-select": "^3.16.8",
 		"@vitejs/plugin-vue": "^5.2.1",
 		"@vue/eslint-config-prettier": "^10.1.0",
 		"@vue/eslint-config-typescript": "^14.3.0",
