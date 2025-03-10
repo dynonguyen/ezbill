@@ -3,6 +3,7 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
+import AccountingMaker from './AccountingMaker.vue';
 import MemberEditing from './MemberEditing.vue';
 import NewMember from './NewMember.vue';
 
@@ -42,7 +43,9 @@ const { group } = useGroupContext();
 				stack
 				center
 				class="gap-1 px-2 w-[72px] h-full !justify-start shrink-0">
-				<MemberAvatar v-bind="member" :pt="{ avatar: { class: '!size-12' } }" />
+				<AccountingMaker :show="member.isAccounting">
+					<MemberAvatar v-bind="member" :pt="{ avatar: { class: '!size-12' } }" />
+				</AccountingMaker>
 
 				<Typography
 					variant="xsRegular"

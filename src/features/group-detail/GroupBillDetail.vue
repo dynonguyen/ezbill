@@ -199,6 +199,6 @@ provide(CONTEXT_KEY.BILLS, bills);
 	height: 6px;
 	border-top-left-radius: 100px;
 	border-top-right-radius: 100px;
-	@apply bg-white;
+	@apply bg-indigo-50;
 }
 </style>

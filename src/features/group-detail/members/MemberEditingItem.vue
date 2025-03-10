@@ -13,6 +13,7 @@ import to from 'await-to-js';
 import { computed, ref } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
+import AccountingMaker from './AccountingMaker.vue';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
@@ -52,7 +53,7 @@ const handleDelete = async () => {
 
 const handleUpdate = async (form: MemberFormData) => {
 	const [error] = await to(
-		updateMutateAsync({ groupId: group.value.id, updated: { ...form, id: props.member.id } }),
+		updateMutateAsync({ groupId: group.value.id, newValue: { ...form, id: props.member.id } }),
 	);
 
 	if (error) {
@@ -69,7 +70,9 @@ const handleUpdate = async (form: MemberFormData) => {
 		<div v-if="index > 0" class="!my-2 divider" />
 
 		<Flex class="gap-2 justify-between">
-			<MemberAvatar v-bind="member" :show-tooltip="false" class="shrink-0" />
+			<AccountingMaker :show="member.isAccounting">
+				<MemberAvatar v-bind="member" :show-tooltip="false" class="shrink-0" />
+			</AccountingMaker>
 
 			<Typography variant="smRegular" class="line-clamp-1 break-all grow">
 				{{ member.name }}
@@ -92,10 +95,10 @@ const handleUpdate = async (form: MemberFormData) => {
 	</Flex>
 
 	<Dialog v-model:open="editing" header="Chỉnh sửa thành viên">
-		<MemberForm :initial-values="member" @submit="handleUpdate">
+		<MemberForm :initial-values="member as MemberFormData" @submit="handleUpdate">
 			<template #action-btn>
 				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="editing = false">Huỷ</Button>
+					<Button variant="soft" color="grey" @click="editing = false">Đóng</Button>
 					<Button type="submit" :loading="isUpdating">Cập nhật</Button>
 				</Flex>
 			</template>

@@ -147,7 +147,7 @@ const items = ref<
 			@submit="handleEditGroup">
 			<template #form-action>
 				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="openEditGroupName = false">Huỷ</Button>
+					<Button variant="soft" color="grey" @click="openEditGroupName = false">Đóng</Button>
 					<Button type="submit" :loading="isUpdating">Cập nhật</Button>
 				</Flex>
 			</template>
@@ -165,7 +165,7 @@ const items = ref<
 
 		<template #action>
 			<Flex class="gap-2" items-fluid>
-				<Button variant="soft" color="grey" @click="confirmDelete = false">Huỷ</Button>
+				<Button variant="soft" color="grey" @click="confirmDelete = false">Đóng</Button>
 				<Button color="danger" @click="handleDeleteGroup" :loading="isDeleting">Xoá</Button>
 			</Flex>
 		</template>

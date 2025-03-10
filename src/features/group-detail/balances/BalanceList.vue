@@ -10,7 +10,9 @@ import { getImgUrl } from '@/utils/get-asset';
 import { computed, ref } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
+import AccountingMaker from '../members/AccountingMaker.vue';
 import BalanceDetail from './BalanceDetail.vue';
+import BankQR from './BankQR.vue';
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
@@ -44,22 +46,69 @@ const amounts = computed(() => {
 });
 
 const detailId = ref<Member['id'] | null>(null);
+const transferId = ref<Member['id'] | null>(null);
+
+const transferInfo = computed(() =>
+	amounts.value.find((item) => item.member.id === transferId.value),
+);
+
+const accounting = computed(() => group.value.members.find((member) => member.isAccounting));
 </script>
 
 <template>
 	<Flex v-if="!bills.length" center>
 		<img :src="getImgUrl('no-bills-2.svg')" class="size-[300px]" />
 	</Flex>
-	<Flex v-else stack class="gap-2">
-		<Flex v-for="item in amounts" :key="item.member.id" class="p-4 rounded-xl bg-gray-100 gap-4">
-			<MemberAvatar
-				v-bind="item.member"
-				:pt="{ avatar: { class: '!size-[60px] shrink-0' }, text: { class: '!text-2xl' } }" />
+	<template v-else>
+		<Flex stack class="gap-2">
+			<Flex
+				v-for="item in amounts"
+				:key="item.member.id"
+				stack
+				class="gap-2 p-4 rounded-xl bg-gray-100">
+				<Flex class="gap-4">
+					<AccountingMaker :show="item.member.isAccounting">
+						<MemberAvatar
+							v-bind="item.member"
+							:pt="{ avatar: { class: '!size-[60px] shrink-0' }, text: { class: '!text-2xl' } }" />
+					</AccountingMaker>
 
-			<Flex stack class="grow self-start">
-				<Flex class="gap-2 justify-between">
-					<Typography variant="mdSemiBold" class="text-black line-clamp-1 break-all">
-						{{ item.member.name }}
+					<Flex stack class="grow self-start">
+						<Flex class="gap-2 justify-between">
+							<Typography variant="mdSemiBold" class="text-black line-clamp-1 break-all">
+								{{ item.member.name }}
+							</Typography>
+						</Flex>
+
+						<Flex class="justify-between gap-2">
+							<Typography variant="xsRegular" class="text-slate-500">Đã chi:</Typography>
+							<CurrencyText
+								:amount="item.paid"
+								amount-class="font-semibold text-md"
+								unit-class="text-sm"
+								:fixed="0" />
+						</Flex>
+
+						<Flex class="justify-between gap-2">
+							<Typography variant="xsRegular" class="text-slate-500">Nhận lại:</Typography>
+							<CurrencyText
+								:amount="item.balance"
+								:class="item.balance >= 0 ? ' text-green-600' : ' text-red-500'"
+								show-sign
+								:fixed="0"
+								amount-class="font-semibold text-md"
+								unit-class="text-sm" />
+						</Flex>
+					</Flex>
+				</Flex>
+
+				<Flex class="gap-2 justify-end shrink-0">
+					<Typography
+						v-if="item.balance !== 0 && !item.member.isAccounting"
+						variant="xsRegular"
+						class="text-sky-700 hover:text-sky-800 cursor-pointer shrink-0"
+						@click="transferId = item.member.id">
+						Chuyển khoản
 					</Typography>
 					<Typography
 						variant="xsRegular"
@@ -68,34 +117,57 @@ const detailId = ref<Member['id'] | null>(null);
 						Chi tiết
 					</Typography>
 				</Flex>
-
-				<Flex class="justify-between gap-2">
-					<Typography variant="xsRegular" class="text-slate-500">Đã chi:</Typography>
-					<CurrencyText
-						:amount="item.paid"
-						amount-class="font-semibold text-md"
-						unit-class="text-sm"
-						:fixed="0" />
-				</Flex>
-
-				<Flex class="justify-between gap-2">
-					<Typography variant="xsRegular" class="text-slate-500">Nhận lại:</Typography>
-					<CurrencyText
-						:amount="item.balance"
-						:class="item.balance >= 0 ? ' text-green-600' : ' text-red-500'"
-						show-sign
-						:fixed="0"
-						amount-class="font-semibold text-md"
-						unit-class="text-sm" />
-				</Flex>
 			</Flex>
 		</Flex>
-	</Flex>
 
-	<Dialog :open="Boolean(detailId)" header="Chi tiết số dư" @close="detailId = null">
-		<BalanceDetail v-if="detailId" :id="detailId" />
-		<template #action>
-			<Button variant="soft" color="grey" class="w-full" @click="detailId = null">Đóng</Button>
-		</template>
-	</Dialog>
+		<Dialog :open="Boolean(detailId)" header="Chi tiết số dư" @close="detailId = null">
+			<BalanceDetail v-if="detailId" :id="detailId" />
+			<template #action>
+				<Button variant="soft" color="grey" class="w-full" @click="detailId = null">Đóng</Button>
+			</template>
+		</Dialog>
+
+		<Dialog :open="Boolean(transferId)" header="Chuyển khoản" @close="transferId = null">
+			<Flex v-if="!accounting" class="gap-2 bg-yellow-200 rounded-lg p-4">
+				Chưa có kế toán trong nhóm. Thêm kế toán trong phần chỉnh sửa thành viên.
+			</Flex>
+			<Flex v-else-if="transferInfo" stack class="gap-4">
+				<Flex class="p-4 rounded-lg bg-blue-100">
+					<Typography variant="smRegular" v-if="transferInfo.balance < 0" class="text-slate-600">
+						Cần chuyển khoản cho kế toán
+						<strong>{{ accounting?.name }}</strong>
+						số tiền là
+						<CurrencyText
+							:amount="Math.abs(transferInfo.balance)"
+							:fixed="0"
+							class="inline-flex"
+							amount-class="font-semibold text-md"
+							unit-class="text-sm" />
+					</Typography>
+					<Typography v-else>
+						Kế toán
+						<strong>{{ accounting?.name }}</strong>
+						cần chuyển khoản cho bạn số tiền là
+						<CurrencyText
+							:amount="Math.abs(transferInfo.balance)"
+							:fixed="0"
+							class="inline-flex"
+							amount-class="font-semibold text-md"
+							unit-class="text-sm" />
+					</Typography>
+				</Flex>
+
+				<BankQR
+					:bank-info="
+						transferInfo.balance < 0 ? accounting?.bankInfo : transferInfo.member.bankInfo
+					"
+					:amount="Math.abs(transferInfo.balance)"
+					:member="transferInfo.member" />
+			</Flex>
+
+			<template #action>
+				<Button variant="soft" color="grey" @click="transferId = null" class="w-full">Đóng</Button>
+			</template>
+		</Dialog>
+	</template>
 </template>

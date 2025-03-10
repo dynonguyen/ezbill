@@ -1,7 +1,21 @@
+export type BankInfo = {
+	name: string;
+	code: string;
+	bin: string;
+	shortname: string;
+};
+
+export type MemberBankInfo = {
+	bin: BankInfo['bin'];
+	accountNumber: string;
+};
+
 export type Member = {
 	id: string;
 	name: string;
 	avatar?: string;
+	bankInfo?: MemberBankInfo;
+	isAccounting?: boolean; // isAccounting: true means this member is responsible for accounting
 };
 
 export type Group = {

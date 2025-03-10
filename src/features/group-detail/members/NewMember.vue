@@ -42,7 +42,7 @@ const handleAddMember = async (form: MemberFormData) => {
 		<MemberForm @submit="handleAddMember">
 			<template #action-btn>
 				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="open = false">Huỷ</Button>
+					<Button type="button" variant="soft" color="grey" @click="open = false">Đóng</Button>
 					<Button type="submit" :loading="isPending">Tạo</Button>
 				</Flex>
 			</template>

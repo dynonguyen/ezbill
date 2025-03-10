@@ -62,9 +62,13 @@ export const addMember = async (data: { groupId: Group['id']; member: Member }) 
 		throw new Error('Thành viên đã tồn tại trong nhóm. Vui lòng nhập một tên khác');
 	}
 
+	const currentMembers = !member.isAccounting
+		? currentGroup.members
+		: currentGroup.members.map((m) => ({ ...m, isAccounting: false }));
+
 	const resp = await supabase
 		.from(getGroupView(groupId))
-		.update({ members: [...currentGroup.members, member] })
+		.update({ members: [...currentMembers, member] })
 		.eq('id', groupId);
 
 	if (resp.error) throw resp.error;
@@ -96,8 +100,8 @@ export const removeMember = async (data: { groupId: Group['id']; memberId: Membe
 	if (resp.error) throw resp.error;
 };
 
-export const updateMember = async (data: { groupId: Group['id']; updated: Member }) => {
-	const { groupId, updated } = data;
+export const updateMember = async (data: { groupId: Group['id']; newValue: Member }) => {
+	const { groupId, newValue } = data;
 
 	const [error, group] = await to(fetchGroup(groupId));
 
@@ -105,7 +109,13 @@ export const updateMember = async (data: { groupId: Group['id']; updated: Member
 		throw new Error('Không thể cập nhật thành viên');
 	}
 
-	const newMembers = group.members?.map((member) => (member.id === updated.id ? updated : member));
+	const newMembers = group.members?.map((member) => {
+		return member.id === newValue.id
+			? newValue
+			: newValue.isAccounting
+				? { ...member, isAccounting: false }
+				: member;
+	});
 
 	const resp = await supabase
 		.from(getGroupView(groupId))
