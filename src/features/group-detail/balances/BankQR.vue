@@ -2,18 +2,18 @@
 import { updateMember } from '@/apis/supabase';
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { useToast } from '@/hooks/useToast';
 import type { Member, MemberBankInfo } from '@/types/entities';
 import { saveFileAs } from '@/utils/helpers';
 import { buildVietQRData } from '@/utils/vietqr';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import QRCode from 'qrcode';
 import { ref, watch } from 'vue';
 import BankInfoDetail from '../BankInfoDetail.vue';
 import BankInfoPopup from '../BankInfoPopup.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
+import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 
 const props = defineProps<{
 	bankInfo?: MemberBankInfo;
@@ -28,7 +28,7 @@ const open = ref(false);
 const { mutateAsync: updateMutateAsync } = useMutation({ mutationFn: updateMember });
 const toast = useToast();
 const { group } = useGroupContext();
-const queryClient = useQueryClient();
+const { refetchGroup } = useGroupQueryControl();
 
 const handleUpdateBankInfo = async (form?: MemberBankInfo) => {
 	const [error] = await to(
@@ -42,7 +42,7 @@ const handleUpdateBankInfo = async (form?: MemberBankInfo) => {
 		return toast.error(error.message || 'Không thể cập nhật thông tin');
 	}
 
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
+	refetchGroup();
 };
 
 const downloadQR = () => {

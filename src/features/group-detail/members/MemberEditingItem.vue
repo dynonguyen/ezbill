@@ -5,14 +5,14 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { useToast } from '@/hooks/useToast';
 import type { Member } from '@/types/entities';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
+import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 import AccountingMaker from './AccountingMaker.vue';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
@@ -27,7 +27,7 @@ const { mutateAsync: updateMutateAsync, isPending: isUpdating } = useMutation({
 });
 
 const toast = useToast();
-const queryClient = useQueryClient();
+const { refetchGroup } = useGroupQueryControl();
 
 const editing = ref(false);
 
@@ -48,7 +48,7 @@ const handleDelete = async () => {
 		return toast.error(error.message || 'Không thể xóa thành viên');
 	}
 
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
+	refetchGroup();
 };
 
 const handleUpdate = async (form: MemberFormData) => {
@@ -61,7 +61,7 @@ const handleUpdate = async (form: MemberFormData) => {
 	}
 
 	editing.value = false;
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
+	refetchGroup();
 };
 </script>
 

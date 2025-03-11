@@ -4,26 +4,24 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { useToast } from '@/hooks/useToast';
 import type { Bill } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
-import { useGroupContext } from '../hooks/useGroupContext';
+import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 import type { BillFormModel } from './BillForm.vue';
 import BillForm from './BillForm.vue';
 
-const { group } = useGroupContext();
 const bills = useBillsContext();
-const queryClient = useQueryClient();
 const toast = useToast();
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: updateBill,
 });
+const { refetchBills } = useGroupQueryControl();
 
 const detailId = defineModel<Bill['id'] | null>({ default: null });
 const billFormModel = ref<BillFormModel>();
@@ -42,7 +40,7 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	}
 
 	detailId.value = null;
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
+	refetchBills();
 };
 </script>
 

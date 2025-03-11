@@ -5,24 +5,23 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { vOutsideClick } from '@/directives/v-outside-click';
 import { useToast } from '@/hooks/useToast';
 import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref, useId } from 'vue';
 import { useRouter } from 'vue-router';
 import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
+import { useGroupQueryControl } from './hooks/useRealtimeChannel';
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
 const toast = useToast();
-const queryClient = useQueryClient();
 const actionId = useId();
 const router = useRouter();
 const localDBStore = useLocalDBStore();
@@ -33,6 +32,7 @@ const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
 	mutationFn: deleteGroup,
 });
+const { refetchGroup } = useGroupQueryControl();
 
 const open = ref(false);
 const openShareGroup = ref(false);
@@ -57,7 +57,8 @@ const handleEditGroup = async (form: Partial<Group>) => {
 	}
 
 	openEditGroupName.value = false;
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
+
+	refetchGroup();
 };
 
 const handleDeleteGroup = async () => {
@@ -69,7 +70,7 @@ const handleDeleteGroup = async () => {
 
 	localDBStore.removeFromGroup(group.value.id);
 	confirmDelete.value = false;
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, group.value.id] });
+	refetchGroup();
 
 	router.push(PATH.HOME);
 };

@@ -4,24 +4,22 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { useToast } from '@/hooks/useToast';
 import type { Bill } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useGroupContext } from '../hooks/useGroupContext';
+import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 import type { BillFormModel } from './BillForm.vue';
 import BillForm from './BillForm.vue';
 
 const emit = defineEmits<{ close: [] }>();
 
-const { group } = useGroupContext();
 const { isPending, mutateAsync } = useMutation({ mutationFn: createBill });
 
-const queryClient = useQueryClient();
 const toast = useToast();
+const { refetchBills } = useGroupQueryControl();
 
 const billFormModel = ref<BillFormModel>();
 
@@ -33,7 +31,7 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	}
 
 	emit('close');
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
+	refetchBills();
 };
 </script>
 

@@ -4,18 +4,18 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { useToast } from '@/hooks/useToast';
 import type { Bill } from '@/types/entities';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
+import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
-const queryClient = useQueryClient();
 const toast = useToast();
+const { refetchBills } = useGroupQueryControl();
 
 const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
 	mutationFn: deleteBill,
@@ -33,7 +33,7 @@ const handleDeleteBill = async () => {
 	}
 
 	deleteId.value = null;
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
+	refetchBills();
 };
 </script>
 

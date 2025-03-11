@@ -11,9 +11,15 @@ export const CONTEXT_KEY = {
 	GROUP: 'group',
 	GROUP_USER: 'group-user',
 	BILLS: 'bills',
+	REALTIME_CLIENT: 'realtime-client',
 };
 
 export const QUERY_KEY = {
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',
+};
+
+export const REALTIME_EVENT = {
+	GROUP_UPDATED: 'GROUP_UPDATED',
+	BILL_UPDATED: 'BILL_UPDATED',
 };
