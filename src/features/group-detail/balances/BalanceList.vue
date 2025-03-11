@@ -162,7 +162,8 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 						transferInfo.balance < 0 ? accounting?.bankInfo : transferInfo.member.bankInfo
 					"
 					:amount="Math.abs(transferInfo.balance)"
-					:member="transferInfo.member" />
+					:member="transferInfo.balance < 0 ? accounting : transferInfo.member"
+					:is-accounting="transferInfo.balance < 0" />
 			</Flex>
 
 			<template #action>

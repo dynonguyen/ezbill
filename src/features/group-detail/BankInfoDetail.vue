@@ -7,7 +7,7 @@ import type { MemberBankInfo } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import { computed } from 'vue';
 
-const props = defineProps<{ bankInfo: MemberBankInfo; amount?: number }>();
+const props = defineProps<{ recipient?: string; bankInfo: MemberBankInfo; amount?: number }>();
 const bank = computed(() => BANKS.find((b) => props.bankInfo?.bin === b.bin));
 </script>
 
@@ -19,6 +19,7 @@ const bank = computed(() => BANKS.find((b) => props.bankInfo?.bin === b.bin));
 		</Flex>
 
 		<Flex stack class="gap-1">
+			<LabelValue label="Người nhận" :value="recipient" />
 			<LabelValue label="Ngân hàng" :value="bank ? `${bank.shortname} - ${bank.name}` : ''" />
 			<LabelValue label="Số tài khoản" :value="bankInfo.accountNumber" />
 			<LabelValue v-if="amount" label="Số tiền" :value="toVND(amount)" />
