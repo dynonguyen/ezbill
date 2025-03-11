@@ -43,7 +43,7 @@ const { group } = useGroupContext();
 				stack
 				center
 				class="gap-1 px-2 w-[72px] h-full !justify-start shrink-0">
-				<AccountingMaker :show="member.isAccounting">
+				<AccountingMaker :show="member.isAccounting" class="size-12">
 					<MemberAvatar v-bind="member" :pt="{ avatar: { class: '!size-12' } }" />
 				</AccountingMaker>
 

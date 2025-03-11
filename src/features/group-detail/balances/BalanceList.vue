@@ -67,7 +67,7 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 				stack
 				class="gap-2 p-4 rounded-xl bg-gray-100">
 				<Flex class="gap-4">
-					<AccountingMaker :show="item.member.isAccounting">
+					<AccountingMaker :show="item.member.isAccounting" class="size-[60px]">
 						<MemberAvatar
 							v-bind="item.member"
 							:pt="{ avatar: { class: '!size-[60px] shrink-0' }, text: { class: '!text-2xl' } }" />
