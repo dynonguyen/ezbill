@@ -22,7 +22,10 @@ const getBillInfo = (bill: Bill) => {
 </script>
 
 <template>
-	<Flex stack class="gap-1 p-4 border-t border-dashed border-gray-300">
+	<Flex
+		stack
+		class="gap-1 p-4 border-t border-dashed border-gray-300 cursor-pointer hover:bg-gray-100"
+		@click="$emit('viewDetail')">
 		<Flex class="justify-between gap-2">
 			<Typography variant="mdSemiBold" class="text-black grow line-clamp-1 break-all">
 				{{ bill.name }}
@@ -45,20 +48,12 @@ const getBillInfo = (bill: Bill) => {
 
 			<Flex class="gap-2 self-end">
 				<Typography
-					variant="xsRegular"
-					class="text-indigo-700 hover:text-indigo-800 cursor-pointer"
-					@click="$emit('viewDetail')"
-					v-if="hasEventPassed('onViewDetail')">
-					Chi tiết
-				</Typography>
-
-				<Typography
 					v-if="hasEventPassed('onDelete')"
 					tabindex="0"
 					role="button"
 					variant="xsRegular"
 					class="text-red-700 hover:text-red-800 cursor-pointer"
-					@click="$emit('delete')">
+					@click.stop="$emit('delete')">
 					Xoá
 				</Typography>
 			</Flex>

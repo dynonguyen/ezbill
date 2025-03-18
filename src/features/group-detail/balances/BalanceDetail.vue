@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Typography from '@/components/ui/Typography.vue';
 import type { Bill, Member } from '@/types/entities';
 import { computed, ref } from 'vue';
 import BillDetailPopup from '../bills/BillDetailPopup.vue';
@@ -19,11 +20,16 @@ const memberBills = computed(() => {
 </script>
 
 <template>
-	<BillItem
-		v-for="bill in memberBills"
-		:key="bill.id"
-		:bill="bill"
-		@view-detail="detailId = bill.id" />
+	<template v-if="memberBills.length">
+		<BillItem
+			v-for="bill in memberBills"
+			:key="bill.id"
+			:bill="bill"
+			@view-detail="detailId = bill.id" />
 
-	<BillDetailPopup v-model="detailId" />
+		<BillDetailPopup v-model="detailId" />
+	</template>
+	<template v-else>
+		<Typography class="text-center text-gray-500">Thành viên này có hoá đơn nào</Typography>
+	</template>
 </template>

@@ -65,7 +65,8 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 				v-for="item in amounts"
 				:key="item.member.id"
 				stack
-				class="gap-2 p-4 rounded-xl bg-gray-100">
+				class="gap-2 p-4 rounded-xl bg-gray-100 cursor-pointer hover:bg-gray-200"
+				@click="detailId = item.member.id">
 				<Flex class="gap-4">
 					<AccountingMaker :show="item.member.isAccounting" class="size-[60px]">
 						<MemberAvatar
@@ -107,14 +108,8 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 						v-if="item.balance !== 0 && !item.member.isAccounting"
 						variant="xsRegular"
 						class="text-sky-700 hover:text-sky-800 cursor-pointer shrink-0"
-						@click="transferId = item.member.id">
+						@click.stop="transferId = item.member.id">
 						Chuyển khoản
-					</Typography>
-					<Typography
-						variant="xsRegular"
-						class="text-indigo-700 hover:text-indigo-800 cursor-pointer shrink-0"
-						@click="detailId = item.member.id">
-						Chi tiết
 					</Typography>
 				</Flex>
 			</Flex>
