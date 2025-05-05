@@ -1,8 +1,6 @@
-# Get started
+# Self-hosting supabase with Docker
 
-## Self-hosting supabase with Docker
-
-[Supabase docs](https://supabase.com/docs/guides/self-hosting/docker)
+This is a minimal Docker Compose setup for self-hosting Supabase. Follow the steps [here](https://supabase.com/docs/guides/hosting/docker) to get started.
 
 ```bash
 cp docker
@@ -17,7 +15,12 @@ docker compose -p supabase stop
 docker compose -p supabase start
 ```
 
-## Run locally
+# DB Migration
+
+- Open the supabase studio: http://localhost:8000
+- `Paste & Run` SQL from `scripts/migration.sql` to the SQL editor
+
+# Run locally
 
 ```bash
 cp .env.example .env

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Flex from '@/components/ui/Flex.vue';
+import AccountingIcon from './AccountingIcon.vue';
 
 defineProps<{ show?: boolean }>();
 </script>
@@ -11,7 +12,7 @@ defineProps<{ show?: boolean }>();
 			data-tip="Kế toán"
 			center
 			class="tooltip tooltip-top size-5 rounded-full absolute bottom-0 right-0 bg-white">
-			<span class="icon msi-crown-rounded size-3 text-yellow-600"></span>
+			<AccountingIcon />
 		</Flex>
 	</div>
 	<slot v-else></slot>

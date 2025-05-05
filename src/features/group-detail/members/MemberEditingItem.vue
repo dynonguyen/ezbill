@@ -13,7 +13,7 @@ import { computed, ref } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
-import AccountingMaker from './AccountingMaker.vue';
+import AccountingIcon from './AccountingIcon.vue';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
@@ -70,13 +70,16 @@ const handleUpdate = async (form: MemberFormData) => {
 		<div v-if="index > 0" class="!my-2 divider" />
 
 		<Flex class="gap-2 justify-between">
-			<AccountingMaker :show="member.isAccounting">
-				<MemberAvatar v-bind="member" :show-tooltip="false" class="shrink-0" />
-			</AccountingMaker>
+			<MemberAvatar v-bind="member" :show-tooltip="false" class="shrink-0" />
 
-			<Typography variant="smRegular" class="line-clamp-1 break-all grow">
-				{{ member.name }}
-			</Typography>
+			<Flex class="grow gap-2 relative">
+				<Typography :title="member.name" variant="smRegular" class="line-clamp-1 break-all">
+					{{ member.name }}
+				</Typography>
+				<span v-if="member.isAccounting" data-tip="Kế toán" class="tooltip tooltip-top shrink-0">
+					<AccountingIcon />
+				</span>
+			</Flex>
 
 			<Flex class="gap-2 shrink-0">
 				<span

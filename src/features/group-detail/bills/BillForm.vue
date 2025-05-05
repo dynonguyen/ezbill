@@ -213,6 +213,14 @@ const tabs = [
 	{ label: 'Chia đều', value: true, helper: 'Số tiền sẽ được chia đều cho các thành viên.' },
 	{ label: 'Tự chia', value: false, helper: 'Nhập chi tiết số tiền của các thành viên.' },
 ];
+
+const createdByOptions = computed(() => {
+	const options = group.value.members.map((member) => ({ ...member, value: member.id }));
+	return options.sort((a, b) => {
+		if (a.isAccounting) return -1;
+		return 1;
+	});
+});
 </script>
 
 <template>
@@ -274,7 +282,7 @@ const tabs = [
 				<Autocomplete
 					placeholder="Chọn người trả"
 					v-model:value="createdByField"
-					:options="group.members.map((member) => ({ ...member, value: member.id }))"
+					:options="createdByOptions"
 					label="name">
 					<template v-slot:option="{ option }">
 						<Flex class="gap-2 w-full">

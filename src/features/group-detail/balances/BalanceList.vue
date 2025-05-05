@@ -76,15 +76,38 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 
 					<Flex stack class="grow self-start">
 						<Flex class="gap-2 justify-between">
-							<Typography variant="mdSemiBold" class="text-black line-clamp-1 break-all">
+							<Typography
+								variant="mdSemiBold"
+								class="text-black line-clamp-1 break-all"
+								:title="item.member.name">
 								{{ item.member.name }}
 							</Typography>
+
+							<Flex
+								class="gap-2 justify-end shrink-0"
+								v-if="item.balance !== 0 && !item.member.isAccounting">
+								<Typography
+									variant="xsRegular"
+									class="text-sky-700 hover:text-sky-800 cursor-pointer shrink-0"
+									@click.stop="transferId = item.member.id">
+									Chuyển khoản
+								</Typography>
+							</Flex>
 						</Flex>
 
 						<Flex class="justify-between gap-2">
 							<Typography variant="xsRegular" class="text-slate-500">Đã chi:</Typography>
 							<CurrencyText
 								:amount="item.paid"
+								amount-class="font-semibold text-md"
+								unit-class="text-sm"
+								:fixed="0" />
+						</Flex>
+
+						<Flex class="justify-between gap-2">
+							<Typography variant="xsRegular" class="text-slate-500">Đã tiêu:</Typography>
+							<CurrencyText
+								:amount="item.spent"
 								amount-class="font-semibold text-md"
 								unit-class="text-sm"
 								:fixed="0" />
@@ -101,16 +124,6 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 								unit-class="text-sm" />
 						</Flex>
 					</Flex>
-				</Flex>
-
-				<Flex class="gap-2 justify-end shrink-0">
-					<Typography
-						v-if="item.balance !== 0 && !item.member.isAccounting"
-						variant="xsRegular"
-						class="text-sky-700 hover:text-sky-800 cursor-pointer shrink-0"
-						@click.stop="transferId = item.member.id">
-						Chuyển khoản
-					</Typography>
 				</Flex>
 			</Flex>
 		</Flex>
