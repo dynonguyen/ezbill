@@ -216,7 +216,7 @@ const tabs = [
 
 const createdByOptions = computed(() => {
 	const options = group.value.members.map((member) => ({ ...member, value: member.id }));
-	return options.sort((a, b) => {
+	return options.sort((a) => {
 		if (a.isAccounting) return -1;
 		return 1;
 	});
