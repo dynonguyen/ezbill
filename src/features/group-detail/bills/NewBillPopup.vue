@@ -26,8 +26,8 @@ const billFormModel = ref<BillFormModel>();
 const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	const [error] = await to(mutateAsync(form));
 
-	return toast.error(error?.message || 'Tạo bill thất bại');
 	if (error) {
+		return toast.error(error?.message || 'Tạo bill thất bại');
 	}
 
 	emit('close');
