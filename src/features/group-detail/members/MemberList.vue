@@ -47,7 +47,7 @@ const { group } = useGroupContext();
 				:key="member.id"
 				stack
 				center
-				class="gap-1 px-2 w-[72px] h-full !justify-start shrink-0"
+				class="gap-1 px-2 w-[72px] h-full !justify-start shrink-0 cursor-pointer"
 				@click="
 					() => {
 						editingMember = member;
