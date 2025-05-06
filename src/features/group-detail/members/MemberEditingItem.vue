@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { removeMember, updateMember } from '@/apis/supabase';
+import { removeMember } from '@/apis/supabase';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
@@ -13,16 +13,12 @@ import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 import AccountingIcon from './AccountingIcon.vue';
 import MemberEditingForm from './MemberEditingPopup.vue';
-import { type MemberFormData } from './MemberForm.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
 const { group } = useGroupContext();
 const bills = useBillsContext();
 const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
 	mutationFn: removeMember,
-});
-const { mutateAsync: updateMutateAsync, isPending: isUpdating } = useMutation({
-	mutationFn: updateMember,
 });
 
 const toast = useToast();
@@ -47,19 +43,6 @@ const handleDelete = async () => {
 		return toast.error(error.message || 'Không thể xóa thành viên');
 	}
 
-	refetchGroup();
-};
-
-const handleUpdate = async (form: MemberFormData) => {
-	const [error] = await to(
-		updateMutateAsync({ groupId: group.value.id, newValue: { ...form, id: props.member.id } }),
-	);
-
-	if (error) {
-		return toast.error(error.message || 'Không thể cập nhật thành viên');
-	}
-
-	editing.value = false;
 	refetchGroup();
 };
 </script>
