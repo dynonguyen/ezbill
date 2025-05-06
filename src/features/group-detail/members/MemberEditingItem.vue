@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { removeMember, updateMember } from '@/apis/supabase';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Button from '@/components/ui/Button.vue';
-import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
@@ -14,7 +12,8 @@ import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 import AccountingIcon from './AccountingIcon.vue';
-import MemberForm, { type MemberFormData } from './MemberForm.vue';
+import MemberEditingForm from './MemberEditingPopup.vue';
+import { type MemberFormData } from './MemberForm.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
 const { group } = useGroupContext();
@@ -97,14 +96,5 @@ const handleUpdate = async (form: MemberFormData) => {
 		</Flex>
 	</Flex>
 
-	<Dialog v-model:open="editing" header="Chỉnh sửa thành viên">
-		<MemberForm :initial-values="member as MemberFormData" @submit="handleUpdate">
-			<template #action-btn>
-				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="editing = false">Đóng</Button>
-					<Button type="submit" :loading="isUpdating">Cập nhật</Button>
-				</Flex>
-			</template>
-		</MemberForm>
-	</Dialog>
+	<MemberEditingForm v-model:open="editing" :member="member" />
 </template>

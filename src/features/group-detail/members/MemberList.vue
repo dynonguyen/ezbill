@@ -2,11 +2,16 @@
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
+import type { Member } from '@/types/entities';
+import { ref } from 'vue';
 import { useGroupContext } from '../hooks/useGroupContext';
 import AccountingMaker from './AccountingMaker.vue';
 import MemberEditing from './MemberEditing.vue';
+import MemberEditingForm from './MemberEditingPopup.vue';
 import NewMember from './NewMember.vue';
 
+const editingMember = ref<Member | null>(null);
+const open = ref(false);
 const { group } = useGroupContext();
 </script>
 
@@ -42,7 +47,13 @@ const { group } = useGroupContext();
 				:key="member.id"
 				stack
 				center
-				class="gap-1 px-2 w-[72px] h-full !justify-start shrink-0">
+				class="gap-1 px-2 w-[72px] h-full !justify-start shrink-0"
+				@click="
+					() => {
+						editingMember = member;
+						open = true;
+					}
+				">
 				<AccountingMaker :show="member.isAccounting" class="size-12">
 					<MemberAvatar v-bind="member" :pt="{ avatar: { class: '!size-12' } }" />
 				</AccountingMaker>
@@ -54,6 +65,8 @@ const { group } = useGroupContext();
 					{{ member.name }}
 				</Typography>
 			</Flex>
+
+			<MemberEditingForm v-if="editingMember && open" :member="editingMember" v-model:open="open" />
 		</Flex>
 	</Flex>
 </template>

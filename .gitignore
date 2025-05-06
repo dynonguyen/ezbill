@@ -30,3 +30,4 @@ coverage
 *.tsbuildinfo
 .env
 docker/volumes/db/data
+!docker/volumes/logs

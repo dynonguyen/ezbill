@@ -3,10 +3,11 @@ import Flex from '@/components/ui/Flex.vue';
 import AccountingIcon from './AccountingIcon.vue';
 
 defineProps<{ show?: boolean }>();
+defineOptions({ inheritAttrs: false });
 </script>
 
 <template>
-	<div class="relative" v-if="show">
+	<div class="relative" v-bind="$attrs" v-if="show">
 		<slot></slot>
 		<Flex
 			data-tip="Kế toán"
