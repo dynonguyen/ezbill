@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
-import { vOutsideClick } from '@/directives/v-outside-click';
-import { onMounted, ref, useId, type HTMLAttributes, type InputHTMLAttributes } from 'vue';
+import { onClickOutside } from '@vueuse/core';
+import { onMounted, ref, useTemplateRef, type HTMLAttributes, type InputHTMLAttributes } from 'vue';
 import Typography from './Typography.vue';
 
 export type AutocompleteOption<T = unknown> = T & { value: string | number };
@@ -26,8 +26,7 @@ const open = defineModel<boolean>('open');
 const value = defineModel<string | number>('value');
 const input = ref<HTMLInputElement | null>(null);
 const displayedOptions = ref<Option[]>(props.options);
-
-const outsideClickId = useId();
+const outsideClickTarget = useTemplateRef('menu-target');
 
 const findOption = (value?: string | number) => props.options.find((opt) => opt.value === value);
 
@@ -69,13 +68,14 @@ const handleSearch = (e: Event) => {
 };
 
 onMounted(resetInputValue);
+
+onClickOutside(outsideClickTarget, handleClose);
 </script>
 
 <template>
 	<div class="relative" v-bind="pt?.root">
 		<div
 			class="input input-bordered flex items-center gap-2"
-			:id="outsideClickId"
 			@click="open = true"
 			v-bind="pt?.inputWrap">
 			<input
@@ -95,7 +95,7 @@ onMounted(resetInputValue);
 		<ul
 			v-if="open"
 			class="absolute menu mt-1 bg-base-100 rounded-box z-20 w-full max-h-64 overflow-auto p-2 shadow-lg gap-1 flex-nowrap"
-			v-outside-click:[outsideClickId]="{ enabled: open, trigger: handleClose }"
+			ref="menu-target"
 			v-bind="pt?.menu">
 			<template v-if="displayedOptions.length">
 				<li v-for="opt in displayedOptions" :key="opt.value" @click="handleSelect(opt as Option)">

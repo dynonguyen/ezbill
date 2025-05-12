@@ -6,13 +6,13 @@ import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { PATH } from '@/constants/path';
-import { vOutsideClick } from '@/directives/v-outside-click';
 import { useToast } from '@/hooks/useToast';
 import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
+import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
-import { ref, useId } from 'vue';
+import { ref, useId, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
@@ -25,6 +25,7 @@ const toast = useToast();
 const actionId = useId();
 const router = useRouter();
 const localDBStore = useLocalDBStore();
+const outsideClickTarget = useTemplateRef('menu-target');
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: updateGroup,
@@ -75,6 +76,8 @@ const handleDeleteGroup = async () => {
 	router.push(PATH.HOME);
 };
 
+onClickOutside(outsideClickTarget, handleClose);
+
 const items = ref<
 	Array<{ label: string; icon: string; action(): void; hasDivider?: boolean; itemClass?: string }>
 >([
@@ -119,7 +122,7 @@ const items = ref<
 
 		<ul
 			class="dropdown-content menu bg-gray-50 rounded-box z-[1] w-52 shadow-lg mt-4 p-0 overflow-hidden"
-			v-outside-click:[actionId]="{ enabled: open, trigger: handleClose }">
+			ref="menu-target">
 			<template v-for="(item, index) in items" :key="index">
 				<Flex
 					class="p-4 justify-between hover:bg-gray-100 cursor-pointer"
