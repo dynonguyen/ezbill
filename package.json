@@ -45,7 +45,7 @@
 		"cz-customizable": "^7.0.0",
 		"daisyui": "^4.12.23",
 		"dotenv": "^16.4.7",
-		"eslint": "^9.18.0",
+		"eslint": "^9.26.0",
 		"eslint-plugin-vue": "^9.32.0",
 		"jiti": "^2.4.2",
 		"npm-run-all2": "^7.0.2",

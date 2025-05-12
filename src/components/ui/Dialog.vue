@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core';
+import { onClickOutside, onKeyDown } from '@vueuse/core';
 import { computed, useTemplateRef, type HTMLAttributes } from 'vue';
 import Flex from './Flex.vue';
 import Typography from './Typography.vue';
@@ -26,6 +26,15 @@ onClickOutside(outsideClickTarget, (ev) => {
 	if (index === nDialog.value + 1) handleDialogClose();
 });
 
+onKeyDown('Escape', () => {
+	if (open.value) {
+		const numOfDialogs = document.querySelectorAll('.dialog').length;
+		if (nDialog.value + 1 === numOfDialogs) {
+			handleDialogClose();
+		}
+	}
+});
+
 defineOptions({ inheritAttrs: false });
 </script>
 
@@ -39,7 +48,7 @@ defineOptions({ inheritAttrs: false });
 			:data-modal-index="nDialog + 1">
 			<div
 				ref="target"
-				class="modal-box dialog-content absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2">
+				class="dialog-content absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2">
 				<Flex stack class="max-h-[80vh] overflow-hidden py-4">
 					<slot name="header">
 						<Typography v-if="header" variant="displaySemiBold" class="px-4 text-center">
@@ -74,7 +83,7 @@ defineOptions({ inheritAttrs: false });
 	content: '';
 }
 
-.modal-box.dialog-content {
+.dialog-content {
 	@apply rounded-2xl bg-white shadow-2xl p-0 border border-base-200 w-full max-w-[calc(100vw-32px)] sm:max-w-[480px];
 }
 </style>
