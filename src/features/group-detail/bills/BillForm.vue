@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/useToast';
 import type { Bill, BillMember, Member } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
+import dayjs from 'dayjs';
 import { useForm } from 'vee-validate';
 import { computed, nextTick, ref, watch } from 'vue';
 import { z } from 'zod';
@@ -36,10 +37,7 @@ const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 const { group } = useGroupContext();
 
 const baseSchema = z.object({
-	name: z
-		.string({ message: 'Nhập tên sự kiện' })
-		.nonempty('Nhập tên sự kiện')
-		.max(MAX.NAME, `Tối đa ${MAX.NAME}`),
+	name: z.string({ message: 'Nhập tên sự kiện' }).max(MAX.NAME, `Tối đa ${MAX.NAME}`).optional(),
 	createdBy: z.string().nonempty('Chọn người trả bill'),
 	note: z.string().max(MAX.NOTE).optional().nullable(),
 });
@@ -91,6 +89,8 @@ const [noteField, noteProps] = defineField('note');
 const [nameField, nameProps] = defineField('name');
 const [createdByField] = defineField('createdBy');
 
+const defaultEventName = `Sự kiện ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`;
+
 const getDefaultMemberAmounts = () => {
 	if (props.mode === 'new')
 		return group.value.members.reduce((acc, member) => {
@@ -112,7 +112,9 @@ const totalMembersAmount = computed(() =>
 );
 
 const handleSubmitBill = handleSubmit(async (form) => {
-	const { createdBy, note, name } = form;
+	const { createdBy, note } = form;
+	const name = form.name?.trim() || defaultEventName;
+
 	let billMembers: BillMember = Object.fromEntries(
 		Object.entries(memberAmounts.value)
 			.filter(([_, { amount }]) => amount > 0)
@@ -239,21 +241,6 @@ const createdByOptions = computed(() => {
 
 		<!-- Form -->
 		<Flex stack class="gap-4">
-			<!-- Event -->
-			<FormControl
-				html-for="name"
-				label="Tên sự kiện"
-				:error="Boolean(errors.name)"
-				:helper-text="errors.name">
-				<input
-					class="input input-bordered w-full"
-					placeholder="Nhập tên"
-					id="name"
-					v-model="nameField"
-					v-bind="nameProps"
-					:maxlength="MAX.NAME" />
-			</FormControl>
-
 			<!-- Amount -->
 			<FormControl
 				v-if="isDivEqually"
@@ -284,6 +271,21 @@ const createdByOptions = computed(() => {
 						</Flex>
 					</template>
 				</Autocomplete>
+			</FormControl>
+
+			<!-- Event -->
+			<FormControl
+				html-for="name"
+				label="Tên sự kiện"
+				:error="Boolean(errors.name)"
+				:helper-text="errors.name">
+				<input
+					class="input input-bordered w-full"
+					:placeholder="defaultEventName"
+					id="name"
+					v-model="nameField"
+					v-bind="nameProps"
+					:maxlength="MAX.NAME" />
 			</FormControl>
 
 			<!-- Notes -->

@@ -16,7 +16,7 @@ const open = ref(false);
 <template>
 	<Typography
 		variant="xsRegular"
-		class="text-indigo-700 cursor-pointer hover:text-indigo-800"
+		class="text-indigo-700 cursor-pointer hover:text-indigo-800 pl-4 leading-6"
 		@click="open = true">
 		Chỉnh sửa
 	</Typography>

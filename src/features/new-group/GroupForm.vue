@@ -37,7 +37,6 @@ const [name, nameProps] = defineField('name');
 		<FormControl html-for="name" :error="Boolean(errors.name)" :helper-text="errors.name">
 			<input
 				type="text"
-				autofocus
 				class="input input-bordered w-full"
 				id="name"
 				placeholder="Nhập tên nhóm"

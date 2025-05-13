@@ -52,7 +52,7 @@ const getBillInfo = (bill: Bill) => {
 					tabindex="0"
 					role="button"
 					variant="xsRegular"
-					class="text-red-700 hover:text-red-800 cursor-pointer"
+					class="text-red-700 hover:text-red-800 cursor-pointer pt-6 pl-6"
 					@click.stop="$emit('delete')">
 					Xoá
 				</Typography>

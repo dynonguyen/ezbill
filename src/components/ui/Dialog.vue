@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { lockScroll, unlockScroll } from '@/utils/scrolling';
 import { onClickOutside, onKeyDown } from '@vueuse/core';
-import { computed, useTemplateRef, type HTMLAttributes } from 'vue';
+import { computed, onUnmounted, useTemplateRef, watch, type HTMLAttributes } from 'vue';
 import Flex from './Flex.vue';
 import Typography from './Typography.vue';
 
 defineProps<{ header?: string; pt?: { body?: HTMLAttributes } }>();
+defineOptions({ inheritAttrs: false });
 
 const emit = defineEmits<{ close: [] }>();
 const open = defineModel<boolean>('open');
@@ -13,6 +15,10 @@ const outsideClickTarget = useTemplateRef<HTMLElement>('target');
 const handleDialogClose = () => {
 	open.value = false;
 	emit('close');
+};
+
+const countDialogs = () => {
+	return document.querySelectorAll('.dialog').length || 0;
 };
 
 const nDialog = computed(() => {
@@ -35,13 +41,27 @@ onKeyDown('Escape', () => {
 	}
 });
 
-defineOptions({ inheritAttrs: false });
+const conditionalUnlockScroll = () => {
+	if (!countDialogs()) {
+		unlockScroll();
+	}
+};
+
+watch(
+	[open],
+	() => {
+		if (open.value) lockScroll();
+		else conditionalUnlockScroll();
+	},
+	{ immediate: true, flush: 'post' },
+);
+
+onUnmounted(conditionalUnlockScroll);
 </script>
 
 <template>
-	<Teleport to="body">
+	<Teleport v-if="open" to="body">
 		<div
-			v-if="open"
 			class="dialog fixed w-screen h-screen inset-0"
 			v-bind="$attrs"
 			:style="{ zIndex: 1000 + nDialog }"
@@ -85,5 +105,13 @@ defineOptions({ inheritAttrs: false });
 
 .dialog-content {
 	@apply rounded-2xl bg-white shadow-2xl p-0 border border-base-200 w-full max-w-[calc(100vw-32px)] sm:max-w-[480px];
+}
+
+/* body {
+	@apply pr-3;
+} */
+
+.lock-scroll {
+	@apply overflow-hidden mr-4;
 }
 </style>
