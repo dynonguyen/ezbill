@@ -17,13 +17,22 @@ export const getScrollbarWidth = () => {
 
 export const lockScroll = () => {
 	document.body.style.overflow = 'hidden';
+	const scrollbarWidth = getScrollbarWidth();
 
 	if (hasScrollbar()) {
-		document.body.style.paddingRight = `${getScrollbarWidth()}px`;
+		document.body.style.paddingRight = `${scrollbarWidth}px`;
+		const stickyStatistic = document.getElementById('sticky-statistic');
+		if (stickyStatistic) {
+			stickyStatistic.style.left = `calc(50% - ${scrollbarWidth / 2}px)`;
+		}
 	}
 };
 
 export const unlockScroll = () => {
 	document.body.style.overflow = '';
 	document.body.style.paddingRight = '';
+	const stickyStatistic = document.getElementById('sticky-statistic');
+	if (stickyStatistic) {
+		stickyStatistic.style.left = '50%';
+	}
 };
