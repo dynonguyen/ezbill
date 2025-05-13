@@ -80,7 +80,7 @@ const initialValues = computed<Partial<BillForm>>(() => {
 	return { amount, createdBy, name, note };
 });
 
-const { errors, values, handleSubmit, defineField, setValues, isFieldDirty } = useForm<BillForm>({
+const { errors, values, handleSubmit, defineField, setFieldValue } = useForm<BillForm>({
 	validationSchema: validationSchema,
 	initialValues: initialValues.value,
 });
@@ -137,7 +137,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 
 const calculateTotalAmount = () => {
 	const total = Object.values(memberAmounts.value).reduce((acc, { amount }) => acc + amount, 0);
-	setValues({ amount: total });
+	setFieldValue('amount', total);
 };
 
 const splitAmountEvenly = () => {
@@ -263,7 +263,7 @@ const createdByOptions = computed(() => {
 				:helper-text="errors.amount">
 				<CurrencyInput
 					:model-value="amountField"
-					@change="(valStr) => setValues({ amount: Number(valStr) })"
+					@change="(valStr) => setFieldValue('amount', Number(valStr))"
 					placeholder="Nhập số tiền (VND)" />
 			</FormControl>
 

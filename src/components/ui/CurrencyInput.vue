@@ -1,6 +1,7 @@
 <!-- https://github.com/joserick/v-money-spinner/ -->
 <script setup lang="ts">
 export type CurrencyInputProps = { options?: object };
+import { VMoneySpinner } from '@/components/v-money-spinner/index';
 
 const props = defineProps<CurrencyInputProps>();
 
@@ -23,7 +24,7 @@ const config = {
 </script>
 
 <template>
-	<v-money-spinner class="currency-input" v-bind="config"></v-money-spinner>
+	<VMoneySpinner class="currency-input" v-bind="config"></VMoneySpinner>
 </template>
 
 <style>
