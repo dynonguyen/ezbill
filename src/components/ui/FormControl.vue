@@ -18,9 +18,9 @@ defineProps<FormControlProps>();
 <template>
 	<Flex
 		stack
-		class="gap-1"
+		class="gap-1 ez-form-control"
 		:class="{
-			'[&_.input]:!border-error [&_.input]:!outline-error [&_.select]:!outline-error [&_.select]:!border-error':
+			'[&_.input]:!border-error [&_.input]:!outline-error [&_.select]:!outline-error [&_.select]:!border-error ez-form-control--error':
 				error,
 		}">
 		<Typography

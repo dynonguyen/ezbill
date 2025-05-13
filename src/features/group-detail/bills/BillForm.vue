@@ -3,7 +3,7 @@ import CurrencyText from '@/components/CurrencyText.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Autocomplete from '@/components/ui/Autocomplete.vue';
 import Button from '@/components/ui/Button.vue';
-import CurrencyInput, { type CurrencyInputProps } from '@/components/ui/CurrencyInput.vue';
+import CurrencyInput from '@/components/ui/CurrencyInput.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
@@ -61,7 +61,7 @@ const validationSchema = computed(() => {
 	const schema = isDivEqually.value
 		? baseSchema.merge(
 				z.object({
-					amount: z
+					amount: z.coerce
 						.number({ message: 'Số tiền không hợp lệ' })
 						.min(1, 'Số tiền không hợp lệ')
 						.max(MAX.AMOUNT, `Tối đa ${toVND(MAX.AMOUNT)}`),
@@ -80,13 +80,13 @@ const initialValues = computed<Partial<BillForm>>(() => {
 	return { amount, createdBy, name, note };
 });
 
-const { errors, values, handleSubmit, defineField, setValues } = useForm<BillForm>({
+const { errors, values, handleSubmit, defineField, setValues, isFieldDirty } = useForm<BillForm>({
 	validationSchema: validationSchema,
 	initialValues: initialValues.value,
 });
 const toast = useToast();
 
-const [amountField, amountProps] = defineField('amount');
+const [amountField] = defineField('amount');
 const [noteField, noteProps] = defineField('note');
 const [nameField, nameProps] = defineField('name');
 const [createdByField] = defineField('createdBy');
@@ -190,8 +190,6 @@ const handleDeleteAllMembers = () => {
 
 const handleModeChange = (divEqually: boolean) => {
 	isDivEqually.value = divEqually;
-	setValues({ amount: 0 }, false);
-	splitAmountEvenly();
 };
 
 // Divide equally among members
@@ -206,8 +204,6 @@ watch(
 	},
 	{ immediate: true },
 );
-
-const inputNumberOpts: CurrencyInputProps['options'] = { valueRange: { min: 0, max: MAX.AMOUNT } };
 
 const tabs = [
 	{ label: 'Chia đều', value: true, helper: 'Số tiền sẽ được chia đều cho các thành viên.' },
@@ -263,15 +259,12 @@ const createdByOptions = computed(() => {
 				v-if="isDivEqually"
 				label="Số tiền tổng hóa đơn"
 				:error="Boolean(errors.amount)"
+				class="[&_input]:w-full"
 				:helper-text="errors.amount">
 				<CurrencyInput
-					class="w-full"
-					id="amount"
-					placeholder="Nhập số tiền (VND)"
-					:value="amountField"
-					v-model="amountField"
-					v-bind="amountProps"
-					:options="inputNumberOpts" />
+					:model-value="amountField"
+					@change="(valStr) => setValues({ amount: Number(valStr) })"
+					placeholder="Nhập số tiền (VND)" />
 			</FormControl>
 
 			<!-- Created by -->
@@ -335,14 +328,14 @@ const createdByOptions = computed(() => {
 						amount-class="text-md text-black font-semibold"
 						unit-class="text-sm text-black"
 						:fixed="0" />
-					<FormControl v-else :error="memberAmounts[member.id]?.amount < 0">
+					<FormControl
+						v-else
+						:error="memberAmounts[member.id]?.amount < 0"
+						class="[&_input]:w-full">
 						<CurrencyInput
-							placeholder="Nhập số tiền"
-							:id="member.id"
-							:value="memberAmounts[member.id]?.amount"
-							:options="inputNumberOpts"
-							class="w-full"
-							@input="(ev) => handleMemberAmountChange(member.id, Number(ev.target.value))" />
+							:model-value="memberAmounts[member.id]?.amount || 0"
+							@change="(amountStr) => handleMemberAmountChange(member.id, Number(amountStr))"
+							placeholder="Nhập số tiền (VND)" />
 					</FormControl>
 				</Flex>
 

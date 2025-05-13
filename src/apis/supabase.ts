@@ -81,12 +81,12 @@ export const removeMember = async (data: { groupId: Group['id']; memberId: Membe
 	const [bError, bills] = await to(fetchBills(groupId));
 
 	if (gError || bError) {
-		throw new Error('Không thể xóa thành viên');
+		throw new Error('Không thể Xoá thành viên');
 	}
 
 	if (bills.some((bill) => bill.createdBy === memberId || bill.members[memberId])) {
 		throw new Error(
-			'Thành viên đã tạo hoặc tham gia vào một số bill. Vui lòng xóa bill trước khi xóa thành viên',
+			'Thành viên đã tạo hoặc tham gia vào một số bill. Vui lòng Xoá bill trước khi Xoá thành viên',
 		);
 	}
 

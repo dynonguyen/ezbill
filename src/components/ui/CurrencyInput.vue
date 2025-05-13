@@ -1,21 +1,41 @@
+<!-- https://github.com/joserick/v-money-spinner/ -->
 <script setup lang="ts">
-import { useCurrencyInput, type CurrencyInputOptions } from 'vue-currency-input';
-
-export type CurrencyInputProps = { options?: Partial<CurrencyInputOptions> };
+export type CurrencyInputProps = { options?: object };
 
 const props = defineProps<CurrencyInputProps>();
 
-const { inputRef } = useCurrencyInput({
-	currency: 'VND',
-	locale: 'vi-VN',
-	autoDecimalDigits: false,
-	precision: 0, // No decimals since VND doesn’t use cents
-	accountingSign: false,
-	valueRange: { min: 0, max: 100_000_000_000 },
+const config = {
+	spinner: false,
+	min: 0,
+	max: 1000_000_000_000,
+	suffix: ' ₫',
+	precision: 0,
+	decimal: ',',
+	thousands: '.',
+	template: '',
+	masked: false,
+	disableNegative: true,
+	align: 'left',
+	step: 1000,
+	allowBlank: true,
 	...props.options,
-});
+};
 </script>
 
 <template>
-	<input ref="inputRef" type="text" class="input input-bordered" />
+	<v-money-spinner class="currency-input" v-bind="config"></v-money-spinner>
 </template>
+
+<style>
+.currency-input {
+	& input {
+		@apply input input-bordered bg-transparent;
+	}
+}
+
+.ez-form-control--error {
+	& .currency-input input {
+		@apply !border-error !outline-error;
+	}
+}
+</style>

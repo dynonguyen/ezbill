@@ -1,0 +1,3 @@
+- Chỉnh lại luồng thêm bill
+- Thêm lịch sử thanh toán
+- Cho phép config loại tiền
