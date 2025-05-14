@@ -11,12 +11,12 @@
 	"categories": ["productivity", "tools", "travel", "lifestyle", "money management"],
 	"icons": [
 		{
-			"src": "/icon-192x192.png",
+			"src": "/icon/192px.png",
 			"sizes": "192x192",
 			"type": "image/png"
 		},
 		{
-			"src": "/img/icons/icon-512x512.png",
+			"src": "/icon/512px.png",
 			"sizes": "512x512",
 			"type": "image/png"
 		}
