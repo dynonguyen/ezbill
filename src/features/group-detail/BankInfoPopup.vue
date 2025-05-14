@@ -9,7 +9,7 @@ import { BANKS } from '@/constants/bank';
 import type { MemberBankInfo } from '@/types/entities';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { z } from 'zod';
 
 const props = defineProps<{ initialValues?: MemberBankInfo | null }>();
@@ -42,19 +42,6 @@ const bankOptions: AutocompleteOption[] = BANKS.map((bank) => ({
 	value: bank.bin,
 	label: `${bank.shortname} - ${bank.name}`,
 }));
-
-watch(openBin, () => {
-	const dialogBody = document.querySelector('#bank-form-root .dialog-body');
-	if (dialogBody) {
-		if (openBin.value) {
-			dialogBody.classList.remove('overflow-auto');
-			dialogBody.classList.add('overflow-visible');
-		} else {
-			dialogBody.classList.remove('overflow-visible');
-			dialogBody.classList.add('overflow-auto');
-		}
-	}
-});
 </script>
 
 <template>
@@ -88,7 +75,6 @@ watch(openBin, () => {
 						placeholder="Nhập số tài khoản"
 						v-model="accountNumber"
 						v-bind="accountNumberProps"
-						v-focus
 						:maxlength="128" />
 				</FormControl>
 
