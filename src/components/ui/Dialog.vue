@@ -69,7 +69,7 @@ onUnmounted(conditionalUnlockScroll);
 			<div
 				ref="target"
 				class="dialog-content absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2">
-				<Flex stack class="max-h-[90dvh] overflow-hidden py-4">
+				<Flex stack class="max-h-[80dvh] overflow-hidden py-4">
 					<slot name="header">
 						<Typography v-if="header" variant="displaySemiBold" class="px-4 text-center">
 							{{ header }}
