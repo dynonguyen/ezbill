@@ -2,3 +2,6 @@
 - Thêm lịch sử thanh toán
 - Cho phép config loại tiền
 - Import excel
+- Hỗ trợ đa ngôn ngữ
+- Filter, search, sort hoá đơn
+- Chỉnh lại autocomplete
