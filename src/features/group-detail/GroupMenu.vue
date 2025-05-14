@@ -18,6 +18,7 @@ import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
 import { useGroupQueryControl } from './hooks/useRealtimeChannel';
+import UploadBackupFile from './UploadBackupFile.vue';
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
@@ -39,6 +40,7 @@ const open = ref(false);
 const openShareGroup = ref(false);
 const openEditGroupName = ref(false);
 const confirmDelete = ref(false);
+const showImport = ref(false);
 
 const handleClose = () => {
 	open.value = false;
@@ -93,9 +95,14 @@ const items = ref<
 		action: () => (openShareGroup.value = true),
 	},
 	{
-		label: 'Xuất file excel',
+		label: 'Xuất ra file excel',
 		icon: 'icon msi-file-save-rounded size-5',
 		action: exportGroup,
+	},
+	{
+		label: 'Nhập từ file excel',
+		icon: 'icon msi-upload-file-rounded size-5',
+		action: () => (showImport.value = true),
 	},
 	{
 		label: 'Xoá nhóm',
@@ -169,6 +176,17 @@ const items = ref<
 
 		<template #action>
 			<Button color="danger" @click="handleDeleteGroup" :loading="isDeleting">Xoá</Button>
+		</template>
+	</Dialog>
+
+	<Dialog v-model:open="showImport" header="Nhập từ file excel">
+		<UploadBackupFile />
+
+		<template #action>
+			<Flex class="gap-2" items-fluid>
+				<Button variant="soft" color="grey" @click="showImport = false">Đóng</Button>
+				<Button color="primary">Tải lên</Button>
+			</Flex>
 		</template>
 	</Dialog>
 </template>

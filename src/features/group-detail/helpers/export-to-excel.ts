@@ -247,12 +247,20 @@ const generateDetailSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 	});
 };
 
+const generateBackupSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
+	const ws = wb.addWorksheet('Backup', { state: 'hidden' });
+
+	ws.getCell('A1').value = JSON.stringify(group || {});
+	ws.getCell('A2').value = JSON.stringify(bills || []);
+};
+
 export const exportGroupToExcel = async (group: Group, bills: Bill[]) => {
 	const wb = new Workbook();
 
 	generateOverviewSheet(wb, group, bills);
 	generateDetailSheet(wb, group, bills);
 	generateInformationSheet(wb, group);
+	generateBackupSheet(wb, group, bills);
 
 	const buffer = await wb.xlsx.writeBuffer();
 	saveFileAs(new Blob([buffer]), `${group.name}.xlsx`);
