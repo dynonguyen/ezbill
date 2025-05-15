@@ -21,7 +21,7 @@ const open = ref(false);
 		Chỉnh sửa
 	</Typography>
 
-	<Dialog v-model:open="open" header="Thành viên">
+	<Dialog v-model:open="open" header="Thành viên" hide-close-button>
 		<Flex stack class="gap-4 overflow-auto h-full">
 			<div class="p-4 rounded-lg bg-blue-100">
 				<Typography variant="smRegular" class="text-blue-700">

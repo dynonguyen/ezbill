@@ -144,7 +144,7 @@ const items = ref<
 		</ul>
 	</details>
 
-	<Dialog v-model:open="openEditGroupName" header="Sửa tên nhóm">
+	<Dialog v-model:open="openEditGroupName" header="Sửa tên nhóm" hide-close-button>
 		<GroupForm
 			v-if="openEditGroupName"
 			:initial-values="{ name: group.name }"
@@ -168,10 +168,7 @@ const items = ref<
 		</Typography>
 
 		<template #action>
-			<Flex class="gap-2" items-fluid>
-				<Button variant="soft" color="grey" @click="confirmDelete = false">Đóng</Button>
-				<Button color="danger" @click="handleDeleteGroup" :loading="isDeleting">Xoá</Button>
-			</Flex>
+			<Button color="danger" @click="handleDeleteGroup" :loading="isDeleting">Xoá</Button>
 		</template>
 	</Dialog>
 </template>

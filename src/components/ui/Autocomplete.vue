@@ -1,13 +1,14 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
-import { onClickOutside } from '@vueuse/core';
 import {
 	computed,
 	onMounted,
 	ref,
 	useTemplateRef,
+	watch,
 	type HTMLAttributes,
 	type InputHTMLAttributes,
 } from 'vue';
+import Dialog from './Dialog.vue';
 import Typography from './Typography.vue';
 
 export type AutocompleteOption<T = unknown> = T & { value: string | number };
@@ -33,7 +34,6 @@ const open = defineModel<boolean>('open');
 const value = defineModel<string | number | null>('value');
 const input = ref<HTMLInputElement | null>(null);
 const displayedOptions = ref<Option[]>(props.options);
-const outsideClickTarget = useTemplateRef('menu-target');
 const inputWrap = useTemplateRef('inputWrap');
 
 const findOption = (value?: string | number) => props.options.find((opt) => opt.value === value);
@@ -77,19 +77,18 @@ const handleSearch = (e: Event) => {
 
 onMounted(resetInputValue);
 
-onClickOutside(outsideClickTarget, handleClose);
-
 const getRootPosition = () => {
 	if (inputWrap.value && open.value) {
 		const { top, left, width } = inputWrap.value.getBoundingClientRect();
 		return { top: top + window.scrollY + inputWrap.value.offsetHeight, left, width };
 	}
-	return {};
+
+	return { top: 0, left: 0, width: 0 };
 };
 
-const rootPosition = computed(() => {
-	return getRootPosition();
-});
+watch([value], resetInputValue, { immediate: true });
+
+const rootPosition = computed(getRootPosition);
 </script>
 
 <template>
@@ -112,16 +111,24 @@ const rootPosition = computed(() => {
 				@click.stop="open = !open"></span>
 		</div>
 
-		<Teleport v-if="open" to="body">
+		<Dialog
+			v-model:open="open"
+			without-backdrop
+			hide-close-button
+			:pt="{
+				contentWrap: {
+					style: {
+						top: `${rootPosition.top + 4}px`,
+						left: `${rootPosition.left}px`,
+						width: `${rootPosition.width}px`,
+						transform: 'none',
+					},
+				},
+				body: { class: '!p-0' },
+				content: { class: '!p-0 ' },
+			}">
 			<ul
-				class="fixed menu mt-1 bg-base-100 rounded-box z-[9999] w-full max-h-64 overflow-auto p-2 shadow-lg gap-1 flex-nowrap"
-				ref="menu-target"
-				v-bind="pt?.menu"
-				:style="{
-					top: `${rootPosition.top}px`,
-					left: `${rootPosition.left}px`,
-					width: `${rootPosition.width}px`,
-				}">
+				class="menu bg-base-100 rounded-box w-full max-h-72 overflow-auto p-2 shadow-lg gap-1 flex-nowrap">
 				<template v-if="displayedOptions.length">
 					<li v-for="opt in displayedOptions" :key="opt.value" @click="handleSelect(opt as Option)">
 						<a class="w-full" :class="{ active: opt.value === value }">
@@ -139,6 +146,6 @@ const rootPosition = computed(() => {
 					Không có lựa chọn
 				</Typography>
 			</ul>
-		</Teleport>
+		</Dialog>
 	</div>
 </template>

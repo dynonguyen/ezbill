@@ -9,7 +9,7 @@ import { BANKS } from '@/constants/bank';
 import type { MemberBankInfo } from '@/types/entities';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { ref } from 'vue';
+import { ref, useId } from 'vue';
 import { z } from 'zod';
 
 const props = defineProps<{ initialValues?: MemberBankInfo | null }>();
@@ -19,6 +19,7 @@ const schema = z.object({
 	bin: z.string().nonempty('Bắt buộc').default(''),
 	accountNumber: z.string().nonempty('Bắt buộc').default(''),
 });
+const formId = useId();
 
 const validationSchema = toTypedSchema(schema);
 
@@ -52,7 +53,7 @@ const bankOptions: AutocompleteOption[] = BANKS.map((bank) => ({
 				viên khác.
 			</Typography>
 
-			<Flex stack class="gap-4" as="form" @submit="handleAddBankInfo">
+			<Flex stack class="gap-4" as="form" :id="formId" @submit="handleAddBankInfo">
 				<FormControl
 					label="Ngân hàng"
 					:error="Boolean(errors.bin)"
@@ -77,12 +78,11 @@ const bankOptions: AutocompleteOption[] = BANKS.map((bank) => ({
 						v-bind="accountNumberProps"
 						:maxlength="128" />
 				</FormControl>
-
-				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="open = false">Đóng</Button>
-					<Button type="submit">Lưu</Button>
-				</Flex>
 			</Flex>
 		</Flex>
+
+		<template #action>
+			<Button type="submit" :form="formId">Lưu</Button>
+		</template>
 	</Dialog>
 </template>

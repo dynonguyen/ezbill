@@ -2,7 +2,6 @@
 import { deleteBill } from '@/apis/supabase';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
-import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
 import type { Bill } from '@/types/entities';
@@ -46,10 +45,7 @@ const handleDeleteBill = async () => {
 		</Typography>
 
 		<template #action>
-			<Flex class="gap-2" items-fluid>
-				<Button variant="soft" color="grey" @click="deleteId = null">Đóng</Button>
-				<Button color="danger" @click="handleDeleteBill" :loading="isDeleting">Xoá</Button>
-			</Flex>
+			<Button color="danger" @click="handleDeleteBill" :loading="isDeleting">Xoá</Button>
 		</template>
 	</Dialog>
 </template>

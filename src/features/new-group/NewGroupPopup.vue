@@ -50,7 +50,10 @@ const handleViewGroup = () => {
 </script>
 
 <template>
-	<Dialog v-model:open="open" :header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm'">
+	<Dialog
+		v-model:open="open"
+		:header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm'"
+		hide-close-button>
 		<template v-if="open">
 			<GroupForm v-if="!inviteGroupId" @close="handleClose" @submit="handleAddGroup">
 				<template #form-action>

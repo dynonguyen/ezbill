@@ -3,9 +3,13 @@ import { addIconSelectors } from '@iconify/tailwind';
 import daisyui from 'daisyui';
 import themes from 'daisyui/src/theming/themes';
 import plugin from 'tailwindcss/plugin';
+import customIcons from './tailwind-custom-icons.json';
 
 const iconifyPlugin = addIconSelectors({
-	prefixes: [{ prefix: 'msi', source: materialSymbolIcons }],
+	prefixes: [
+		{ prefix: 'msi', source: materialSymbolIcons },
+		{ prefix: 'other', source: customIcons },
+	],
 	maskSelector: '.icon',
 	iconSelector: '.{prefix}-{name}',
 });

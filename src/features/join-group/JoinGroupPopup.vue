@@ -6,7 +6,7 @@ const open = defineModel<boolean>({ default: false });
 </script>
 
 <template>
-	<Dialog v-model:open="open" header="Tham gia nhóm">
+	<Dialog v-model:open="open" header="Tham gia nhóm" hide-close-button>
 		<JoinGroupForm v-if="open" @close="open = false" />
 		<div v-else class="h-36" />
 	</Dialog>

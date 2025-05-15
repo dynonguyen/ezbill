@@ -36,7 +36,7 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 </script>
 
 <template>
-	<Dialog header="Thêm hoá đơn">
+	<Dialog header="Thêm hoá đơn" hide-close-button>
 		<BillForm mode="new" @submit="handleAddBill" id="bill-form" v-model="billFormModel" />
 
 		<template #action>
