@@ -1,6 +1,14 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
-import { onClickOutside } from '@vueuse/core';
-import { onMounted, ref, useTemplateRef, type HTMLAttributes, type InputHTMLAttributes } from 'vue';
+import {
+	computed,
+	onMounted,
+	ref,
+	useTemplateRef,
+	watch,
+	type HTMLAttributes,
+	type InputHTMLAttributes,
+} from 'vue';
+import Dialog from './Dialog.vue';
 import Typography from './Typography.vue';
 
 export type AutocompleteOption<T = unknown> = T & { value: string | number };
@@ -23,10 +31,10 @@ const props = withDefaults(defineProps<AutocompleteProps>(), { options: () => []
 const emit = defineEmits<{ change: [value: string | number, option: Option] }>();
 
 const open = defineModel<boolean>('open');
-const value = defineModel<string | number>('value');
+const value = defineModel<string | number | null>('value');
 const input = ref<HTMLInputElement | null>(null);
 const displayedOptions = ref<Option[]>(props.options);
-const outsideClickTarget = useTemplateRef('menu-target');
+const inputWrap = useTemplateRef('inputWrap');
 
 const findOption = (value?: string | number) => props.options.find((opt) => opt.value === value);
 
@@ -69,11 +77,22 @@ const handleSearch = (e: Event) => {
 
 onMounted(resetInputValue);
 
-onClickOutside(outsideClickTarget, handleClose);
+const getRootPosition = () => {
+	if (inputWrap.value && open.value) {
+		const { top, left, width } = inputWrap.value.getBoundingClientRect();
+		return { top: top + window.scrollY + inputWrap.value.offsetHeight, left, width };
+	}
+
+	return { top: 0, left: 0, width: 0 };
+};
+
+watch([value], resetInputValue, { immediate: true });
+
+const rootPosition = computed(getRootPosition);
 </script>
 
 <template>
-	<div class="relative" v-bind="pt?.root">
+	<div v-bind="pt?.root" ref="inputWrap">
 		<div
 			class="input input-bordered flex items-center gap-2"
 			@click="open = true"
@@ -92,27 +111,41 @@ onClickOutside(outsideClickTarget, handleClose);
 				@click.stop="open = !open"></span>
 		</div>
 
-		<ul
-			v-if="open"
-			class="absolute menu mt-1 bg-base-100 rounded-box z-20 w-full max-h-64 overflow-auto p-2 shadow-lg gap-1 flex-nowrap"
-			ref="menu-target"
-			v-bind="pt?.menu">
-			<template v-if="displayedOptions.length">
-				<li v-for="opt in displayedOptions" :key="opt.value" @click="handleSelect(opt as Option)">
-					<a class="w-full" :class="{ active: opt.value === value }">
-						<slot
-							v-if="$slots.option"
-							name="option"
-							:key="opt.value"
-							:option="opt"
-							:selected="opt.value === value"></slot>
-						<template v-else>{{ opt[label] }}</template>
-					</a>
-				</li>
-			</template>
-			<Typography v-else class="p-2 text-slate-400" variant="smRegular">
-				Không có lựa chọn
-			</Typography>
-		</ul>
+		<Dialog
+			v-model:open="open"
+			without-backdrop
+			hide-close-button
+			:pt="{
+				contentWrap: {
+					style: {
+						top: `${rootPosition.top + 4}px`,
+						left: `${rootPosition.left}px`,
+						width: `${rootPosition.width}px`,
+						transform: 'none',
+					},
+				},
+				body: { class: '!p-0' },
+				content: { class: '!p-0 ' },
+			}">
+			<ul
+				class="menu bg-base-100 rounded-box w-full max-h-72 overflow-auto p-2 shadow-lg gap-1 flex-nowrap">
+				<template v-if="displayedOptions.length">
+					<li v-for="opt in displayedOptions" :key="opt.value" @click="handleSelect(opt as Option)">
+						<a class="w-full" :class="{ active: opt.value === value }">
+							<slot
+								v-if="$slots.option"
+								name="option"
+								:key="opt.value"
+								:option="opt"
+								:selected="opt.value === value"></slot>
+							<template v-else>{{ opt[label] }}</template>
+						</a>
+					</li>
+				</template>
+				<Typography v-else class="p-2 text-slate-400" variant="smRegular">
+					Không có lựa chọn
+				</Typography>
+			</ul>
+		</Dialog>
 	</div>
 </template>

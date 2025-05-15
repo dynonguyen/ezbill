@@ -40,3 +40,20 @@ export function getGroupLink(groupId: string): string {
 export function hasEventPassed(evName: string): boolean {
 	return getCurrentInstance()?.vnode?.props?.[evName];
 }
+
+export function debounce<T extends (...args: any[]) => any>(
+	fn: T,
+	delay: number,
+): (...args: Parameters<T>) => void {
+	let timeoutId: ReturnType<typeof setTimeout>;
+
+	return function (this: unknown, ...args: Parameters<T>) {
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
+
+		timeoutId = setTimeout(() => {
+			fn.apply(this, args);
+		}, delay);
+	};
+}

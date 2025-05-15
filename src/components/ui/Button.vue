@@ -1,5 +1,5 @@
 <script setup lang="ts">
-type ButtonProps = {
+export type ButtonProps = {
 	variant?: 'contained' | 'outlined' | 'soft' | 'text' | 'link';
 	shape?: 'rounded' | 'pill' | 'circle' | 'square';
 	color?:

@@ -45,7 +45,11 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 </script>
 
 <template>
-	<Dialog header="Chi tiết hoá đơn" :open="Boolean(detailId)" @close="handleCloseDetail">
+	<Dialog
+		header="Chi tiết hoá đơn"
+		:open="Boolean(detailId)"
+		@close="handleCloseDetail"
+		hide-close-button>
 		<BillForm
 			:default-bill="bills.find((b) => b.id === detailId)"
 			mode="view-detail"

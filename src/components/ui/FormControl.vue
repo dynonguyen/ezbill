@@ -23,14 +23,16 @@ defineProps<FormControlProps>();
 			'[&_.input]:!border-error [&_.input]:!outline-error [&_.select]:!outline-error [&_.select]:!border-error ez-form-control--error':
 				error,
 		}">
-		<Typography
-			as="label"
-			v-if="label"
-			:variant="size === 'large' ? 'mdRegular' : 'smRegular'"
-			:for="htmlFor"
-			v-bind="pt?.label">
-			{{ label }}
-		</Typography>
+		<slot name="label">
+			<Typography
+				as="label"
+				v-if="label"
+				:variant="size === 'large' ? 'mdRegular' : 'smRegular'"
+				:for="htmlFor"
+				v-bind="pt?.label">
+				{{ label }}
+			</Typography>
+		</slot>
 
 		<slot></slot>
 

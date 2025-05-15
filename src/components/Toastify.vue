@@ -31,7 +31,7 @@ const getHeader = (type: ToastType) => {
 </script>
 
 <template>
-	<Dialog v-model:open="store.toast.open" :class="$style.toastify">
+	<Dialog v-model:open="store.toast.open" :class="$style.toastify" hide-close-button>
 		<template #header v-if="store.toast.type">
 			<Flex class="gap-2" stack center>
 				<span

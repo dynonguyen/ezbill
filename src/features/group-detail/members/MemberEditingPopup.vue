@@ -39,7 +39,7 @@ const handleUpdate = async (form: MemberFormData) => {
 </script>
 
 <template>
-	<Dialog v-model:open="open" header="Chỉnh sửa thành viên">
+	<Dialog v-model:open="open" header="Chỉnh sửa thành viên" hide-close-button>
 		<MemberForm :initial-values="member as MemberFormData" @submit="handleUpdate">
 			<template #action-btn>
 				<Flex class="gap-2" items-fluid>

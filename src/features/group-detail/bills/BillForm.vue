@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import CurrencyText from '@/components/CurrencyText.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Autocomplete from '@/components/ui/Autocomplete.vue';
 import Button from '@/components/ui/Button.vue';
 import CurrencyInput from '@/components/ui/CurrencyInput.vue';
 import Dialog from '@/components/ui/Dialog.vue';
@@ -17,6 +16,7 @@ import { useForm } from 'vee-validate';
 import { computed, nextTick, ref, watch } from 'vue';
 import { z } from 'zod';
 import { useGroupContext } from '../hooks/useGroupContext';
+import MemberSelect from '../MemberSelect.vue';
 
 type BillFormProps = { mode: 'new' | 'view-detail'; defaultBill?: Bill };
 type BillForm = {
@@ -211,14 +211,6 @@ const tabs = [
 	{ label: 'Chia đều', value: true, helper: 'Số tiền sẽ được chia đều cho các thành viên.' },
 	{ label: 'Tự chia', value: false, helper: 'Nhập chi tiết số tiền của các thành viên.' },
 ];
-
-const createdByOptions = computed(() => {
-	const options = group.value.members.map((member) => ({ ...member, value: member.id }));
-	return options.sort((a) => {
-		if (a.isAccounting) return -1;
-		return 1;
-	});
-});
 </script>
 
 <template>
@@ -259,18 +251,7 @@ const createdByOptions = computed(() => {
 				label="Người trả"
 				:error="Boolean(errors.createdBy)"
 				:helper-text="errors.createdBy">
-				<Autocomplete
-					placeholder="Chọn người trả"
-					v-model:value="createdByField"
-					:options="createdByOptions"
-					label="name">
-					<template v-slot:option="{ option }">
-						<Flex class="gap-2 w-full">
-							<MemberAvatar v-bind="option" size="sm" />
-							<span>{{ option.name }}</span>
-						</Flex>
-					</template>
-				</Autocomplete>
+				<MemberSelect placeholder="Chọn người trả" v-model:value="createdByField" />
 			</FormControl>
 
 			<!-- Event -->
@@ -372,12 +353,7 @@ const createdByOptions = computed(() => {
 						</div>
 
 						<template #action>
-							<Flex class="gap-2" items-fluid>
-								<Button variant="soft" color="grey" size="sm" @click="openAddMember = false">
-									Đóng
-								</Button>
-								<Button size="sm" @click="handleAddAllMember">Thêm tất cả</Button>
-							</Flex>
+							<Button @click="handleAddAllMember">Thêm tất cả</Button>
 						</template>
 					</Dialog>
 				</template>

@@ -38,7 +38,7 @@ const handleAddMember = async (form: MemberFormData) => {
 <template>
 	<slot name="new-btn" :handleOpen="() => (open = true)"></slot>
 
-	<Dialog v-model:open="open" header="Thêm thành viên">
+	<Dialog v-model:open="open" header="Thêm thành viên" hide-close-button>
 		<MemberForm @submit="handleAddMember">
 			<template #action-btn>
 				<Flex class="gap-2" items-fluid>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import CurrencyText from '@/components/CurrencyText.vue';
 import MemberAvatar from '@/components/MemberAvatar.vue';
-import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
@@ -130,9 +129,6 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 
 		<Dialog :open="Boolean(detailId)" header="Chi tiết số dư" @close="detailId = null">
 			<BalanceDetail v-if="detailId" :id="detailId" />
-			<template #action>
-				<Button variant="soft" color="grey" class="w-full" @click="detailId = null">Đóng</Button>
-			</template>
 		</Dialog>
 
 		<Dialog :open="Boolean(transferId)" header="Chuyển khoản" @close="transferId = null">
@@ -173,10 +169,6 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 					:member="transferInfo.balance < 0 ? accounting : transferInfo.member"
 					:is-accounting="transferInfo.balance < 0" />
 			</Flex>
-
-			<template #action>
-				<Button variant="soft" color="grey" @click="transferId = null" class="w-full">Đóng</Button>
-			</template>
 		</Dialog>
 	</template>
 </template>

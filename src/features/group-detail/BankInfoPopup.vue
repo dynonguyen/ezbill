@@ -9,7 +9,7 @@ import { BANKS } from '@/constants/bank';
 import type { MemberBankInfo } from '@/types/entities';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { ref, watch } from 'vue';
+import { ref, useId } from 'vue';
 import { z } from 'zod';
 
 const props = defineProps<{ initialValues?: MemberBankInfo | null }>();
@@ -19,6 +19,7 @@ const schema = z.object({
 	bin: z.string().nonempty('Bắt buộc').default(''),
 	accountNumber: z.string().nonempty('Bắt buộc').default(''),
 });
+const formId = useId();
 
 const validationSchema = toTypedSchema(schema);
 
@@ -42,19 +43,6 @@ const bankOptions: AutocompleteOption[] = BANKS.map((bank) => ({
 	value: bank.bin,
 	label: `${bank.shortname} - ${bank.name}`,
 }));
-
-watch(openBin, () => {
-	const dialogBody = document.querySelector('#bank-form-root .dialog-body');
-	if (dialogBody) {
-		if (openBin.value) {
-			dialogBody.classList.remove('overflow-auto');
-			dialogBody.classList.add('overflow-visible');
-		} else {
-			dialogBody.classList.remove('overflow-visible');
-			dialogBody.classList.add('overflow-auto');
-		}
-	}
-});
 </script>
 
 <template>
@@ -65,7 +53,7 @@ watch(openBin, () => {
 				viên khác.
 			</Typography>
 
-			<Flex stack class="gap-4" as="form" @submit="handleAddBankInfo">
+			<Flex stack class="gap-4" as="form" :id="formId" @submit="handleAddBankInfo">
 				<FormControl
 					label="Ngân hàng"
 					:error="Boolean(errors.bin)"
@@ -88,15 +76,13 @@ watch(openBin, () => {
 						placeholder="Nhập số tài khoản"
 						v-model="accountNumber"
 						v-bind="accountNumberProps"
-						v-focus
 						:maxlength="128" />
 				</FormControl>
-
-				<Flex class="gap-2" items-fluid>
-					<Button variant="soft" color="grey" @click="open = false">Đóng</Button>
-					<Button type="submit">Lưu</Button>
-				</Flex>
 			</Flex>
 		</Flex>
+
+		<template #action>
+			<Button type="submit" :form="formId">Lưu</Button>
+		</template>
 	</Dialog>
 </template>
