@@ -100,10 +100,10 @@ const displayedBills = computed<Bill[]>(() => {
 			return result.every((r) => r);
 		});
 
-		return sliceBills(sortBills(filtered));
+		return sortBills(filtered);
 	}
 
-	return sliceBills(sortBills(bills.value));
+	return sortBills(bills.value);
 });
 
 const handleSearchChange = debounce((ev: Event) => {
@@ -175,13 +175,13 @@ const handleResetSearchFilter = () => {
 		</Flex>
 		<template v-else>
 			<BillItem
-				v-for="bill in displayedBills"
+				v-for="bill in sliceBills(displayedBills)"
 				:key="bill.id"
 				:bill="bill"
 				@delete="deleteId = bill.id"
 				@view-detail="detailId = bill.id" />
 
-			<Flex class="py-2 justify-end" v-if="bills.length > FIRST_VIEW_LIMIT">
+			<Flex class="py-2 justify-end" v-if="displayedBills.length > FIRST_VIEW_LIMIT">
 				<Button size="sm" variant="outlined" color="neutral" @click="isViewAll = !isViewAll">
 					<span>{{ isViewAll ? 'Thu gọn' : 'Xem tất cả' }}</span>
 					<span
