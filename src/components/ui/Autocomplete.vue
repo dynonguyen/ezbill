@@ -58,6 +58,15 @@ const handleSelect = (opt: Option) => {
 	emit('change', opt.value, opt);
 };
 
+const handleInputClick = () => {
+	if (open.value) {
+		open.value = false;
+	} else {
+		open.value = true;
+		input.value?.focus?.();
+	}
+};
+
 const handleClose = () => {
 	open.value = false;
 	displayedOptions.value = props.options;
@@ -80,7 +89,7 @@ onMounted(resetInputValue);
 const getRootPosition = () => {
 	if (inputWrap.value && open.value) {
 		const { top, left, width } = inputWrap.value.getBoundingClientRect();
-		return { top: top + window.scrollY + inputWrap.value.offsetHeight, left, width };
+		return { top: top + inputWrap.value.offsetHeight, left, width };
 	}
 
 	return { top: 0, left: 0, width: 0 };
@@ -95,7 +104,7 @@ const rootPosition = computed(getRootPosition);
 	<div v-bind="pt?.root" ref="inputWrap">
 		<div
 			class="input input-bordered flex items-center gap-2"
-			@click="open = true"
+			@click="handleInputClick"
 			v-bind="pt?.inputWrap">
 			<input
 				ref="input"
@@ -105,10 +114,7 @@ const rootPosition = computed(getRootPosition);
 				@input="handleSearch"
 				@blur="resetInputValue"
 				v-bind="pt?.input" />
-			<span
-				class="icon msi-arrow-drop-down"
-				:class="{ 'rotate-180': open }"
-				@click.stop="open = !open"></span>
+			<span class="icon msi-arrow-drop-down" :class="{ 'rotate-180': open }"></span>
 		</div>
 
 		<Dialog
@@ -118,7 +124,7 @@ const rootPosition = computed(getRootPosition);
 			:pt="{
 				contentWrap: {
 					style: {
-						top: `${rootPosition.top + 4}px`,
+						top: `${rootPosition.top + 6}px`,
 						left: `${rootPosition.left}px`,
 						width: `${rootPosition.width}px`,
 						transform: 'none',
