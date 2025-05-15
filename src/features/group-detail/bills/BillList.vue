@@ -7,6 +7,7 @@ import Typography from '@/components/ui/Typography.vue';
 import type { Bill, Member } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
 import { debounce } from '@/utils/helpers';
+import dayjs from 'dayjs';
 import { match } from 'ts-pattern';
 import { computed, ref, useTemplateRef } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
@@ -70,7 +71,9 @@ const displayedBills = computed<Bill[]>(() => {
 				const query = keyword.value.toLowerCase();
 				result.push(
 					Boolean(
-						bill.name.toLowerCase().includes(query) || bill.note?.toLowerCase().includes(query),
+						bill.name.toLowerCase().includes(query) ||
+							bill.note?.toLowerCase().includes(query) ||
+							dayjs(bill.createdAt).format('DD/MM/YYYY HH:mm').includes(query),
 					),
 				);
 			}
@@ -117,7 +120,7 @@ const handleResetSearchFilter = () => {
 					ref="searchRef"
 					type="text"
 					class="grow"
-					placeholder="Tìm kiếm theo tên, mô tả"
+					placeholder="Tìm kiếm theo tên, mô tả, ngày tạo"
 					@input="handleSearchChange" />
 			</Flex>
 
@@ -188,7 +191,7 @@ const handleResetSearchFilter = () => {
 					:value="key"
 					v-model="sort"
 					:checked="sort === key" />
-				<Typography class="cursor-pointer" as="label" :for="`sort-opt-${key}`">
+				<Typography class="cursor-pointer grow" as="label" :for="`sort-opt-${key}`">
 					{{ label }}
 				</Typography>
 			</Flex>
