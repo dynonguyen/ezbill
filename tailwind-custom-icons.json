@@ -3,6 +3,9 @@
 	"icons": {
 		"sort": {
 			"body": "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 20V10m0 10l-3-3m3 3l3-3m5-13v10m0-10l3 3m-3-3l-3 3\"/>"
+		},
+		"not-equal": {
+			"body": "<path fill=\"currentColor\" d=\"M18 9.998H6a1 1 0 1 1 0-2h12a1 1 0 0 1 0 2m0 6H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2\"/><path fill=\"currentColor\" d=\"M14.999 5c.507.219.742.806.525 1.314l-5.212 12.162A1 1 0 0 1 9 19a1 1 0 0 1-.525-1.314l5.212-12.162A1 1 0 0 1 15 5z\"/>"
 		}
 	},
 	"width": 24,

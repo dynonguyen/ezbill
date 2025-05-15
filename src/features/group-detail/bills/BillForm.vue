@@ -8,13 +8,14 @@ import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Bill, BillMember, Member } from '@/types/entities';
+import { BillType, type Bill, type BillMember, type Member } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import dayjs from 'dayjs';
 import { useForm } from 'vee-validate';
 import { computed, nextTick, ref, watch } from 'vue';
 import { z } from 'zod';
+import { billTypeMapping } from '../helpers/utils';
 import { useGroupContext } from '../hooks/useGroupContext';
 import MemberSelect from '../MemberSelect.vue';
 
@@ -31,6 +32,7 @@ export type BillFormModel = { amount: number; isDivEqually: boolean };
 const emit = defineEmits<{ close: []; submit: [form: Omit<Bill, 'id' | 'createdAt'>] }>();
 const model = defineModel<BillFormModel>();
 const props = withDefaults(defineProps<BillFormProps>(), { mode: 'new' });
+const type = ref<BillType>(BillType.Equally);
 
 const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 
@@ -134,7 +136,15 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		amount = Object.values(billMembers).reduce((acc, amount) => acc + amount, 0);
 	}
 
-	emit('submit', { groupId: group.value.id, amount, createdBy, note, name, members: billMembers });
+	emit('submit', {
+		type: type.value,
+		groupId: group.value.id,
+		amount,
+		createdBy,
+		note,
+		name,
+		members: billMembers,
+	});
 });
 
 const calculateTotalAmount = () => {
@@ -190,8 +200,8 @@ const handleDeleteAllMembers = () => {
 	if (!isDivEqually.value) calculateTotalAmount();
 };
 
-const handleModeChange = (divEqually: boolean) => {
-	isDivEqually.value = divEqually;
+const handleTypeChange = (t: BillType) => {
+	type.value = t;
 };
 
 // Divide equally among members
@@ -207,28 +217,27 @@ watch(
 	{ immediate: true },
 );
 
-const tabs = [
-	{ label: 'Chia đều', value: true, helper: 'Số tiền sẽ được chia đều cho các thành viên.' },
-	{ label: 'Tự chia', value: false, helper: 'Nhập chi tiết số tiền của các thành viên.' },
-];
+const tabs = Object.values(BillType).map(billTypeMapping);
 </script>
 
 <template>
 	<Flex stack class="gap-4 relative" as="form" @submit="handleSubmitBill">
 		<div role="tablist" class="tabs tabs-boxed">
-			<a
+			<Flex
 				v-for="tab in tabs"
-				:key="tab.value.toString()"
+				:key="tab.type"
+				center
 				role="tab"
-				class="tab"
-				:class="{ 'tab-active': isDivEqually === tab.value }"
-				@click="handleModeChange(tab.value)">
-				{{ tab.label }}
-			</a>
+				class="tab tooltip tooltip-bottom"
+				:data-tip="tab.label"
+				:class="{ 'tab-active': tab.type === type }"
+				@click="handleTypeChange(tab.type)">
+				<span class="icon size-5" :class="tab.icon"></span>
+			</Flex>
 		</div>
 
-		<Typography variant="smRegular" class="text-slate-500">
-			{{ tabs.find((tab) => tab.value === isDivEqually)?.helper }}
+		<Typography role="alert" variant="smRegular" class="alert text-slate-500">
+			{{ tabs.find((tab) => tab.type === type)?.helperText }}
 		</Typography>
 
 		<!-- Form -->
@@ -274,7 +283,7 @@ const tabs = [
 				<textarea
 					class="textarea textarea-bordered"
 					placeholder="Nhập mô tả (nếu có)"
-					rows="4"
+					rows="2"
 					id="note"
 					:maxlength="MAX.NOTE"
 					v-model="noteField"

@@ -12,7 +12,7 @@
 	}
 
 	body {
-		background-color: #000;
+		@apply bg-base-100;
 	}
 }
 
