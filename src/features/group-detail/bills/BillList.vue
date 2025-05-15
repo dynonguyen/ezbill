@@ -28,6 +28,7 @@ const sortOptions = [
 	{ by: 'amount', order: 'asc', label: 'Tổng tiền thấp đến cao' },
 	{ by: 'amount', order: 'desc', label: 'Tổng tiền cao đến thấp' },
 ].map((opt) => ({ ...opt, key: `${opt.by}${opt.order}` })) as SortOption[];
+const FIRST_VIEW_LIMIT = 10;
 
 const detailId = ref<Bill['id'] | null>(null);
 const deleteId = ref<Bill['id'] | null>(null);
@@ -37,6 +38,7 @@ const showFilterDialog = ref(false);
 const filter = ref<{ createdBy?: Member['id']; participant?: Member['id'] }>({});
 const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 const sort = ref<SortOption['key']>(sortOptions[0].key);
+const isViewAll = ref(false);
 
 const hasFilter = computed(() => Object.keys(filter.value).length > 0);
 
@@ -60,6 +62,11 @@ const sortBills = (bills: Bill[]) => {
 		.otherwise(() => () => 0);
 
 	return [...bills].sort(compareFn);
+};
+
+const sliceBills = (bills: Bill[]) => {
+	if (isViewAll.value) return bills;
+	return bills.slice(0, FIRST_VIEW_LIMIT);
 };
 
 const displayedBills = computed<Bill[]>(() => {
@@ -168,11 +175,19 @@ const handleResetSearchFilter = () => {
 		</Flex>
 		<template v-else>
 			<BillItem
-				v-for="bill in displayedBills"
+				v-for="bill in sliceBills(displayedBills)"
 				:key="bill.id"
 				:bill="bill"
 				@delete="deleteId = bill.id"
 				@view-detail="detailId = bill.id" />
+
+			<Flex class="py-2 justify-end" v-if="displayedBills.length > FIRST_VIEW_LIMIT">
+				<Button size="sm" variant="outlined" color="neutral" @click="isViewAll = !isViewAll">
+					<span>{{ isViewAll ? 'Thu gọn' : 'Xem tất cả' }}</span>
+					<span
+						:class="`icon ${isViewAll ? 'msi-keyboard-arrow-up-rounded' : 'msi-keyboard-arrow-down-rounded'}`"></span>
+				</Button>
+			</Flex>
 
 			<BillDetailPopup v-model="detailId" />
 			<BillDeletePopup v-model="deleteId" />
