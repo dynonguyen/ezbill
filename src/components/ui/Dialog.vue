@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { lockScroll, unlockScroll } from '@/utils/scrolling';
 import { onClickOutside, onKeyDown } from '@vueuse/core';
-import { computed, onUnmounted, useTemplateRef, watch, type HTMLAttributes } from 'vue';
+import { computed, nextTick, onUnmounted, useTemplateRef, watch, type HTMLAttributes } from 'vue';
 import Button, { type ButtonProps } from './Button.vue';
 import Flex from './Flex.vue';
 import Typography from './Typography.vue';
@@ -54,9 +54,9 @@ onKeyDown('Escape', () => {
 });
 
 const conditionalUnlockScroll = () => {
-	if (!countDialogs()) {
-		unlockScroll();
-	}
+	nextTick(() => {
+		if (!countDialogs()) unlockScroll();
+	});
 };
 
 watch(

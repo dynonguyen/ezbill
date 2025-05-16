@@ -12,6 +12,7 @@ export const CONTEXT_KEY = {
 	GROUP_USER: 'group-user',
 	BILLS: 'bills',
 	REALTIME_CLIENT: 'realtime-client',
+	BILL_FORM: 'bill-form',
 };
 
 export const QUERY_KEY = {

@@ -29,7 +29,7 @@ const {
 	queryFn: () => fetchBills(group.value.id),
 });
 
-const openNewBill = ref(false);
+const openNewBill = ref(true); // MOCK
 const billTab = ref<BillTabValue>('bills');
 
 watch(error, () => {
@@ -190,7 +190,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 	</Flex>
 
 	<!-- New bill -->
-	<NewBillPopup v-if="openNewBill" v-model:open="openNewBill" @close="openNewBill = false" />
+	<NewBillPopup v-if="openNewBill" v-model:open="openNewBill" />
 </template>
 
 <style module>
