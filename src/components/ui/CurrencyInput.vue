@@ -1,7 +1,12 @@
 <!-- https://github.com/joserick/v-money-spinner/ -->
 <script setup lang="ts">
-export type CurrencyInputProps = { options?: object };
-import { VMoneySpinner } from '@/components/v-money-spinner/index';
+import { VMoneySpinner } from '@/components/v-money-spinner';
+import type { InputHTMLAttributes } from 'vue';
+
+export type CurrencyInputProps = {
+	options?: object;
+	inputProps?: InputHTMLAttributes;
+};
 
 const props = defineProps<CurrencyInputProps>();
 
@@ -24,19 +29,12 @@ const config = {
 </script>
 
 <template>
-	<VMoneySpinner class="currency-input" v-bind="config"></VMoneySpinner>
+	<VMoneySpinner
+		:pt="{
+			input: {
+				...inputProps,
+				class: `input input-bordered bg-transparent ${inputProps?.class ? ' ' + inputProps.class : ''}`,
+			},
+		}"
+		v-bind="config"></VMoneySpinner>
 </template>
-
-<style>
-.currency-input {
-	& input {
-		@apply input input-bordered bg-transparent;
-	}
-}
-
-.ez-form-control--error {
-	& .currency-input input {
-		@apply !border-error !outline-error;
-	}
-}
-</style>

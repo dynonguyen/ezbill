@@ -17,11 +17,11 @@
 			</button>
 			<Money
 				v-model="amount.model.value"
-				v-bind="vAttrs"
 				ref="money"
 				@keydown.up.prevent="plus"
 				@keydown.down.prevent="minus"
-				:class="[style('inputClass'), template ? 'text-' + align : '']" />
+				v-bind="{ ...vAttrs, ...pt?.input }"
+				:class="[style('inputClass'), template ? 'text-' + align : '', pt?.input?.class]" />
 			<button
 				v-if="spinnerAlign('normal')"
 				type="button"

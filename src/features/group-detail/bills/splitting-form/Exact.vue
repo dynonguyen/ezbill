@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import CurrencyInput from '@/components/ui/CurrencyInput.vue';
 import Flex from '@/components/ui/Flex.vue';
+import { toVND } from '@/utils/helpers';
 import { watch } from 'vue';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import SplittingMemberItem from './SplittingMemberItem.vue';
@@ -23,7 +25,15 @@ watch([() => participants.value.length, amount], () => {
 			:key="m.id"
 			:member="m">
 			<template #action>
-				<input class="input input-sm input-bordered w-5" @click.stop />
+				<div @click.stop.prevent>
+					<CurrencyInput
+						:model-value="memberAmounts[m.id] || 0"
+						:input-props="{
+							disabled: !m.checked,
+							class: 'input-sm w-32 shrink-0',
+							placeholder: toVND(12000),
+						}" />
+				</div>
 			</template>
 		</SplittingMemberItem>
 	</Flex>

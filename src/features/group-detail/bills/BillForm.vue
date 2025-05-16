@@ -154,8 +154,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 				<CurrencyInput
 					:model-value="amountField"
 					@change="(valStr) => setFieldValue('amount', Number(valStr))"
-					placeholder="Nhập số tiền (VND)"
-					name="amount" />
+					:input-props="{ placeholder: 'Nhập số tiền (VND)', name: 'amount' }" />
 			</FormControl>
 
 			<!-- Created by -->
