@@ -7,15 +7,23 @@ import AccountingIcon from '../../members/AccountingIcon.vue';
 import { useBillFormContext } from './useBillFormContext';
 
 defineProps<{ member: Member & { checked?: boolean } }>();
+defineEmits<{ toggle: [] }>();
+
 const { toggleParticipant } = useBillFormContext();
 </script>
 
 <template>
 	<Flex
-		class="gap-1 justify-between p-2 rounded-lg cursor-pointer hover:bg-gray-100"
-		:class="{ 'opacity-50': !member.checked }"
-		@click="toggleParticipant(member.id)">
-		<Flex class="gap-2 grow">
+		class="gap-2 justify-between px-2 rounded-lg cursor-pointer hover:bg-gray-100"
+		:class="{ 'opacity-50': !member.checked }">
+		<Flex
+			class="gap-2 grow py-2"
+			@click="
+				() => {
+					toggleParticipant(member.id);
+					$emit('toggle');
+				}
+			">
 			<input type="checkbox" class="checkbox checkbox-primary" :checked="member.checked" />
 			<MemberAvatar v-bind="member" />
 			<Typography
@@ -28,6 +36,8 @@ const { toggleParticipant } = useBillFormContext();
 			<AccountingIcon v-if="member.isAccounting" />
 		</Flex>
 
-		<slot name="action"></slot>
+		<div class="py-2 shrink-0" v-if="$slots.action">
+			<slot name="action"></slot>
+		</div>
 	</Flex>
 </template>

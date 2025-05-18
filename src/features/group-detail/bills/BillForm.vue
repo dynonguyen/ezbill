@@ -11,9 +11,9 @@ import { toTypedSchema } from '@vee-validate/zod';
 import dayjs from 'dayjs';
 import { match } from 'ts-pattern';
 import { useForm } from 'vee-validate';
-import { computed, provide, ref, toRaw } from 'vue';
+import { computed, provide, ref } from 'vue';
 import { z } from 'zod';
-import { billTypeMapping } from '../helpers/utils';
+import { billTypeMapping, splitEqually, splitExactly } from '../helpers/utils';
 import { useGroupContext } from '../hooks/useGroupContext';
 import MemberSelect from '../MemberSelect.vue';
 import Equally from './splitting-form/Equally.vue';
@@ -25,9 +25,10 @@ type BillForm = Pick<Bill, 'type' | 'amount' | 'createdBy' | 'name' | 'note'>;
 
 const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 const defaultEventName = `Sự kiện ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`;
+const defaultBillType = BillType.Exact;
 
 const schema = z.object({
-	type: z.nativeEnum(BillType).default(BillType.Equally),
+	type: z.nativeEnum(BillType).default(defaultBillType),
 	createdBy: z.string().nonempty('Chọn người trả bill'),
 	amount: z.coerce
 		.number({ message: 'Số tiền không hợp lệ' })
@@ -45,7 +46,7 @@ const { group } = useGroupContext();
 const validationSchema = toTypedSchema(schema);
 
 const initialValues = computed<Partial<BillForm>>(() => {
-	if (props.mode === 'new' || !props.defaultBill) return { type: BillType.Equally, createdBy: '' };
+	if (props.mode === 'new' || !props.defaultBill) return { type: defaultBillType, createdBy: '' };
 
 	const { type, amount, createdBy, name, note } = props.defaultBill;
 
@@ -64,16 +65,16 @@ const [createdByField] = defineField('createdBy');
 const [nameField, nameProps] = defineField('name');
 const [noteField, noteProps] = defineField('note');
 
-const getMemberAmount = () => {
-	return group.value.members.reduce((acc, m) => {
-		acc[m.id] = 0;
-		return acc;
-	}, {} as BillMember);
+const getDefaultMemberAmount = () => {
+	return splitEqually(
+		0,
+		group.value.members.map((m) => m.id),
+	);
 };
 const getAllParticipantIds = () => group.value.members.map((m) => m.id);
 
 const memberAmounts = ref<BillMember>(
-	props.mode === 'new' ? getMemberAmount() : props.defaultBill?.members || {},
+	props.mode === 'new' ? getDefaultMemberAmount() : props.defaultBill?.members || {},
 );
 const participants = ref<Member['id'][]>(
 	props.mode === 'new' ? getAllParticipantIds() : Object.keys(props.defaultBill?.members || {}),
@@ -95,24 +96,38 @@ const toggleAllParticipants = () => {
 	}
 };
 
-provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
-	amount: amountField,
-	memberAmounts,
-	participants,
-	toggleParticipant,
-});
-
 const tabs = Object.values(BillType).map(billTypeMapping);
 
 const validateMemberAmounts = (): string | null => {
-	if (!amountField.value) return 'Số tiền không hợp lệ';
+	if (!amountField.value) return 'Vui lòng nhập số tiền tổng ';
+	if (participants.value.length === 0) return 'Chọn ít nhất 1 người tham gia';
 
 	return match(typeField.value)
-		.with(BillType.Equally, () => {
-			if (participants.value.length === 0) return 'Chọn ít nhất 1 người tham gia';
+		.with(BillType.Equally, () => null)
+		.with(BillType.Exact, () => {
+			const total = Object.values(memberAmounts.value).reduce((acc, cur) => acc + cur, 0);
+			const remainingMembers = participants.value.filter((id) => !memberAmounts.value[id]).length;
+
+			if (total > amountField.value || (total < amountField.value && remainingMembers === 0)) {
+				return 'Tổng số tiền các thành viên không khớp với số tiền tổng';
+			}
+
 			return null;
 		})
-		.otherwise(() => null);
+		.exhaustive();
+};
+
+const handleTypeChange = (type: BillType) => {
+	typeField.value = type;
+
+	match(type)
+		.with(BillType.Equally, () => {
+			memberAmounts.value = splitEqually(amountField.value, participants.value);
+		})
+		.with(BillType.Exact, () => {
+			memberAmounts.value = getDefaultMemberAmount();
+		})
+		.exhaustive();
 };
 
 const handleSubmitBill = handleSubmit(async (form) => {
@@ -124,6 +139,12 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		return toast.error(memberAmountsError);
 	}
 
+	const members: BillMember = match(type)
+		.returnType<BillMember>()
+		.with(BillType.Equally, () => splitEqually(amount, participants.value))
+		.with(BillType.Exact, () => splitExactly(amount, memberAmounts.value))
+		.exhaustive();
+
 	const formData: Omit<Bill, 'id' | 'createdAt'> = {
 		groupId: group.value.id,
 		type,
@@ -131,14 +152,18 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		createdBy,
 		name,
 		note,
-		members: toRaw(memberAmounts.value),
+		members,
 	};
-
-	// TEST
-	console.log(`☕ DYNO DEBUG ~ BillForm.vue:81 🦫`, formData);
 
 	emit('submit', formData);
 }, veeValidateFocusOnError);
+
+provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
+	amount: amountField,
+	memberAmounts,
+	participants,
+	toggleParticipant,
+});
 </script>
 
 <template>
@@ -210,7 +235,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 					class="tab tooltip tooltip-bottom"
 					:data-tip="tab.label"
 					:class="{ 'tab-active': tab.type === typeField }"
-					@click="typeField = tab.type">
+					@click="handleTypeChange(tab.type)">
 					<span class="icon size-5" :class="tab.icon"></span>
 				</Flex>
 			</div>
@@ -223,13 +248,15 @@ const handleSubmitBill = handleSubmit(async (form) => {
 			</Typography>
 
 			<Flex stack class="gap-2">
-				<Flex class="gap-2 px-2 cursor-pointer" @click="toggleAllParticipants">
+				<Flex class="gap-2 px-2">
 					<input
+						id="all-participants"
 						type="checkbox"
 						class="checkbox checkbox-primary"
 						:indeterminate="participants.length > 0 && participants.length < group.members.length"
-						:checked="participants.length === group.members.length" />
-					<Typography variant="mdSemiBold">
+						:checked="participants.length === group.members.length"
+						@click="toggleAllParticipants" />
+					<Typography variant="mdSemiBold" as="label" class="cursor-pointer" for="all-participants">
 						Thành viên tham gia ({{ participants.length }})
 					</Typography>
 				</Flex>

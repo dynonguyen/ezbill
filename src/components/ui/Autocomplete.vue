@@ -47,6 +47,7 @@ const resetInputValue = () => {
 			input.value.value = '';
 		}
 	}
+	displayedOptions.value = props.options;
 };
 
 const handleSelect = (opt: Option) => {

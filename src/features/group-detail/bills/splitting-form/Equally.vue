@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import Flex from '@/components/ui/Flex.vue';
-import Typography from '@/components/ui/Typography.vue';
 import type { BillMember } from '@/types/entities';
-import { toVND } from '@/utils/helpers';
 import { watch } from 'vue';
 import { useGroupContext } from '../../hooks/useGroupContext';
+import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
 import { useBillFormContext } from './useBillFormContext';
 
@@ -28,9 +27,7 @@ watch([() => participants.value.length, amount], () => {
 			:key="m.id"
 			:member="m">
 			<template #action>
-				<Typography variant="smMedium" class="text-slate-600">
-					{{ toVND(memberAmounts[m.id] || 0) }}
-				</Typography>
+				<CustomCurrencyText :amount="memberAmounts[m.id] || 0" />
 			</template>
 		</SplittingMemberItem>
 	</Flex>

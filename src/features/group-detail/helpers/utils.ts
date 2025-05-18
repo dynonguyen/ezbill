@@ -1,4 +1,4 @@
-import { BillType } from '@/types/entities';
+import { BillType, type BillMember, type Member } from '@/types/entities';
 import { match } from 'ts-pattern';
 
 type BillTypeMappingResult = {
@@ -36,4 +36,38 @@ export function billTypeMapping(type: BillType): BillTypeMappingResult {
 			icon: 'msi-pie-chart',
 		}))
 		.exhaustive();
+}
+
+export function splitEqually(amount: number, participants: Member['id'][]): BillMember {
+	const len = participants.length;
+	return participants.reduce((acc, id) => {
+		acc[id] = amount / len;
+		return acc;
+	}, {} as BillMember);
+}
+
+export function splitExactly(amount: number, memberAmounts: BillMember): BillMember {
+	const result = { ...memberAmounts };
+
+	const remaining = Object.values(result).reduce(
+		(acc, amount) => {
+			if (!amount) acc.nMember++;
+			else acc.amount -= amount;
+
+			return acc;
+		},
+		{ amount, nMember: 0 },
+	);
+
+	if (remaining.nMember) {
+		const remainingAmount = remaining.amount / remaining.nMember;
+
+		Object.keys(result).forEach((id) => {
+			if (!result[id]) {
+				result[id] = remainingAmount;
+			}
+		});
+	}
+
+	return result;
 }
