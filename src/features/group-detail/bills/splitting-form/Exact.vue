@@ -4,6 +4,7 @@ import Flex from '@/components/ui/Flex.vue';
 import type { BillMember } from '@/types/entities';
 import { debounce, toVND } from '@/utils/helpers';
 import { computed, nextTick, watch } from 'vue';
+import { getTotalMemberAmount } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
@@ -39,7 +40,7 @@ const remaining = computed(() => {
 
 	if (nRemainingMembers === 0) return { total: 0, perMember: 0 };
 
-	const total = Object.values(memberAmounts.value || {}).reduce((acc, cur) => acc + cur, 0);
+	const total = getTotalMemberAmount(memberAmounts.value || {});
 	const totalRemaining = total > (amount.value ?? 0) ? 0 : (amount.value ?? 0) - total;
 
 	return {

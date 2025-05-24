@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from '@/components/ui/Button.vue';
 import CurrencyInput from '@/components/ui/CurrencyInput.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
@@ -11,9 +12,15 @@ import { toTypedSchema } from '@vee-validate/zod';
 import dayjs from 'dayjs';
 import { match } from 'ts-pattern';
 import { useForm } from 'vee-validate';
-import { computed, provide, ref } from 'vue';
+import { computed, provide, ref, watch } from 'vue';
 import { z } from 'zod';
-import { billTypeMapping, splitEqually, splitExactly } from '../helpers/utils';
+import {
+	billTypeMapping,
+	getTotalMemberAmount,
+	omitZeroMemberAmounts,
+	splitEqually,
+	splitExactly,
+} from '../helpers/utils';
 import { useGroupContext } from '../hooks/useGroupContext';
 import MemberSelect from '../MemberSelect.vue';
 import Equally from './splitting-form/Equally.vue';
@@ -79,6 +86,25 @@ const memberAmounts = ref<BillMember>(
 const participants = ref<Member['id'][]>(
 	props.mode === 'new' ? getAllParticipantIds() : Object.keys(props.defaultBill?.members || {}),
 );
+const fixAmountField = ref<{ show: boolean; amount: number }>({ show: false, amount: 0 });
+
+watch(
+	[() => getTotalMemberAmount(memberAmounts.value), amountField, typeField],
+	([totalMemberAmount, total]) => {
+		if (typeField.value === BillType.Exact && totalMemberAmount && validateMemberAmounts()) {
+			fixAmountField.value =
+				totalMemberAmount !== total
+					? { show: true, amount: totalMemberAmount }
+					: { show: false, amount: 0 };
+
+			return;
+		}
+
+		if (fixAmountField.value.show) {
+			fixAmountField.value = { show: false, amount: 0 };
+		}
+	},
+);
 
 const toggleParticipant = (memberId: Member['id']) => {
 	if (participants.value.includes(memberId)) {
@@ -105,7 +131,7 @@ const validateMemberAmounts = (): string | null => {
 	return match(typeField.value)
 		.with(BillType.Equally, () => null)
 		.with(BillType.Exact, () => {
-			const total = Object.values(memberAmounts.value).reduce((acc, cur) => acc + cur, 0);
+			const total = getTotalMemberAmount(memberAmounts.value);
 			const remainingMembers = participants.value.filter((id) => !memberAmounts.value[id]).length;
 
 			if (total > amountField.value || (total < amountField.value && remainingMembers === 0)) {
@@ -114,6 +140,8 @@ const validateMemberAmounts = (): string | null => {
 
 			return null;
 		})
+		.with(BillType.Percentage, () => null) // TODO: implement percentage
+		.with(BillType.Share, () => null) // TODO: implement share
 		.exhaustive();
 };
 
@@ -127,6 +155,12 @@ const handleTypeChange = (type: BillType) => {
 		.with(BillType.Exact, () => {
 			memberAmounts.value = getDefaultMemberAmount();
 		})
+		.with(BillType.Percentage, () => {
+			return;
+		}) //TODO: implement percentage
+		.with(BillType.Share, () => {
+			return;
+		}) //TODO: implement share
 		.exhaustive();
 };
 
@@ -143,6 +177,8 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		.returnType<BillMember>()
 		.with(BillType.Equally, () => splitEqually(amount, participants.value))
 		.with(BillType.Exact, () => splitExactly(amount, memberAmounts.value))
+		.with(BillType.Percentage, () => ({})) // TODO: implement percentage
+		.with(BillType.Share, () => ({})) // TODO: implement share
 		.exhaustive();
 
 	const formData: Omit<Bill, 'id' | 'createdAt'> = {
@@ -152,7 +188,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		createdBy,
 		name,
 		note,
-		members,
+		members: omitZeroMemberAmounts(members),
 	};
 
 	emit('submit', formData);
@@ -173,13 +209,26 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 			<!-- Amount -->
 			<FormControl
 				label="Số tiền tổng hóa đơn"
-				:error="Boolean(errors.amount)"
+				:error="Boolean(errors.amount || fixAmountField.show)"
 				class="[&_input]:w-full"
 				:helper-text="errors.amount">
 				<CurrencyInput
-					:model-value="amountField"
 					@change="(valStr) => setFieldValue('amount', Number(valStr))"
-					:input-props="{ placeholder: 'Nhập số tiền (VND)', name: 'amount' }" />
+					:input-props="{ placeholder: 'Nhập số tiền (VND)', name: 'amount' }"
+					:model-value="amountField" />
+
+				<Flex v-if="fixAmountField.show" class="gap-1 items-start" stack>
+					<Typography variant="smRegular" class="text-error">
+						{{ `Tổng số tiền các thành viên không khớp ${toVND(fixAmountField.amount)}` }}
+					</Typography>
+					<Button
+						variant="soft"
+						size="sm"
+						color="grey"
+						@click="setFieldValue('amount', fixAmountField.amount)">
+						Tự động cập nhật
+					</Button>
+				</Flex>
 			</FormControl>
 
 			<!-- Created by -->
@@ -263,6 +312,9 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 
 				<Equally v-if="typeField === BillType.Equally" />
 				<Exact v-else-if="typeField === BillType.Exact" />
+				<Typography v-else class="text-center text-slate-400 my-4">
+					Feature is coming soon
+				</Typography>
 			</Flex>
 		</Flex>
 	</Flex>

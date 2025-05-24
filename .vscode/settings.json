@@ -16,5 +16,6 @@
 		"Viet",
 		"VITE",
 		"vnode"
-	]
+	],
+	"todo-tree.tree.scanMode": "workspace only"
 }

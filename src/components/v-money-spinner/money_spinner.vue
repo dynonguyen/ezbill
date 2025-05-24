@@ -186,5 +186,13 @@ onMounted(() => {
 			signChange(val, preVal);
 		},
 	);
+	watch(
+		() => props.modelValue,
+		(val) => {
+			if (amount.model.value !== val) {
+				amount.model.value = val;
+			}
+		},
+	);
 });
 </script>

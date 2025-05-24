@@ -13,7 +13,11 @@ const value = defineModel<Bill['createdBy'] | null>('value');
 const createdByOptions = computed(() => {
 	return group.value.members
 		.map((member) => ({ ...member, value: member.id }))
-		.sort((a, b) => (a.isAccounting || b.isAccounting ? -1 : 1));
+		.sort((a, b) => {
+			if (a.isAccounting && !b.isAccounting) return -1;
+			if (!a.isAccounting && b.isAccounting) return 1;
+			return 0;
+		});
 });
 </script>
 

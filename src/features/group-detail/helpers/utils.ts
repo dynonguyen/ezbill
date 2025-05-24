@@ -46,6 +46,16 @@ export function splitEqually(amount: number, participants: Member['id'][]): Bill
 	}, {} as BillMember);
 }
 
+export function getTotalMemberAmount(memberAmounts: BillMember): number {
+	return Object.values(memberAmounts).reduce((acc, amount) => acc + (amount || 0), 0);
+}
+
+export function omitZeroMemberAmounts(memberAmounts: BillMember): BillMember {
+	return Object.fromEntries(
+		Object.entries(memberAmounts).filter(([_, amount]) => amount !== 0),
+	) as BillMember;
+}
+
 export function splitExactly(amount: number, memberAmounts: BillMember): BillMember {
 	const result = { ...memberAmounts };
 

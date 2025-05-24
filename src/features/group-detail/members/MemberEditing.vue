@@ -25,7 +25,7 @@ const open = ref(false);
 		<Flex stack class="gap-4 overflow-auto h-full">
 			<div class="p-4 rounded-lg bg-blue-100">
 				<Typography variant="smRegular" class="text-blue-700">
-					Không thể xoá các thành viên đã tồn tại trong hóa đơn bất kì.
+					Thành viên không thể xoá khi đã tồn tại trong hóa đơn bất kì.
 				</Typography>
 			</div>
 

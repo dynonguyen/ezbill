@@ -1,7 +1,7 @@
 <!-- https://github.com/joserick/v-money-spinner/ -->
 <script setup lang="ts">
 import { VMoneySpinner } from '@/components/v-money-spinner';
-import type { InputHTMLAttributes } from 'vue';
+import { type InputHTMLAttributes } from 'vue';
 
 export type CurrencyInputProps = {
 	options?: object;
@@ -36,5 +36,5 @@ const config = {
 				class: `input input-bordered bg-transparent ${inputProps?.class ? ' ' + inputProps.class : ''}`,
 			},
 		}"
-		v-bind="config"></VMoneySpinner>
+		v-bind="config" />
 </template>
