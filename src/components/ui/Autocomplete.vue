@@ -1,6 +1,8 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
+import { onKeyDown } from '@vueuse/core';
 import {
 	computed,
+	nextTick,
 	onMounted,
 	ref,
 	useTemplateRef,
@@ -35,6 +37,7 @@ const value = defineModel<string | number | null>('value');
 const input = ref<HTMLInputElement | null>(null);
 const displayedOptions = ref<Option[]>(props.options);
 const inputWrap = useTemplateRef('inputWrap');
+const focusIndex = ref<number>(0);
 
 const findOption = (value?: string | number) => props.options.find((opt) => opt.value === value);
 
@@ -48,6 +51,15 @@ const resetInputValue = () => {
 		}
 	}
 	displayedOptions.value = props.options;
+};
+
+const getRootPosition = () => {
+	if (inputWrap.value && open.value) {
+		const { top, left, width } = inputWrap.value.getBoundingClientRect();
+		return { top: top + inputWrap.value.offsetHeight, left, width };
+	}
+
+	return { top: 0, left: 0, width: 0 };
 };
 
 const handleSelect = (opt: Option) => {
@@ -85,18 +97,39 @@ const handleSearch = (e: Event) => {
 	);
 };
 
-onMounted(resetInputValue);
+const handleFocusOnKeyPress = (isDown: boolean) => {
+	return () => {
+		if (!open.value || !displayedOptions.value.length) return;
 
-const getRootPosition = () => {
-	if (inputWrap.value && open.value) {
-		const { top, left, width } = inputWrap.value.getBoundingClientRect();
-		return { top: top + inputWrap.value.offsetHeight, left, width };
-	}
+		if (isDown) {
+			if (++focusIndex.value >= displayedOptions.value.length) focusIndex.value = 0;
+		} else {
+			if (--focusIndex.value < 0) focusIndex.value = displayedOptions.value.length - 1;
+		}
 
-	return { top: 0, left: 0, width: 0 };
+		nextTick(() => {
+			document
+				.querySelector('.menu a.focused')
+				?.scrollIntoView({ behavior: 'instant', block: 'center' });
+		});
+	};
 };
 
+onMounted(resetInputValue);
+
+onKeyDown('ArrowDown', handleFocusOnKeyPress(true));
+onKeyDown('ArrowUp', handleFocusOnKeyPress(false));
+onKeyDown('Enter', (e) => {
+	if (!open.value || !displayedOptions.value.length) return;
+	e.preventDefault();
+	handleSelect(displayedOptions.value[focusIndex.value] as Option);
+});
+
 watch([value], resetInputValue, { immediate: true });
+watch(
+	() => displayedOptions.value.length,
+	() => (focusIndex.value = 0),
+);
 
 const rootPosition = computed(getRootPosition);
 </script>
@@ -137,8 +170,13 @@ const rootPosition = computed(getRootPosition);
 			<ul
 				class="menu bg-base-100 rounded-box w-full max-h-72 overflow-auto p-2 shadow-lg gap-1 flex-nowrap">
 				<template v-if="displayedOptions.length">
-					<li v-for="opt in displayedOptions" :key="opt.value" @click="handleSelect(opt as Option)">
-						<a class="w-full" :class="{ active: opt.value === value }">
+					<li
+						v-for="(opt, index) in displayedOptions"
+						:key="opt.value"
+						@click="handleSelect(opt as Option)">
+						<a
+							class="w-full"
+							:class="{ active: opt.value === value, focused: focusIndex === index }">
 							<slot
 								v-if="$slots.option"
 								name="option"
@@ -156,3 +194,9 @@ const rootPosition = computed(getRootPosition);
 		</Dialog>
 	</div>
 </template>
+
+<style>
+.menu a.focused {
+	@apply bg-base-content/10;
+}
+</style>
