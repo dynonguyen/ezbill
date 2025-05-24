@@ -109,7 +109,7 @@ const validateMemberAmounts = (): string | null => {
 			const remainingMembers = participants.value.filter((id) => !memberAmounts.value[id]).length;
 
 			if (total > amountField.value || (total < amountField.value && remainingMembers === 0)) {
-				return 'Tổng số tiền các thành viên không khớp với số tiền tổng';
+				return `Tổng số tiền các thành viên <b>${toVND(total)}</b> không khớp với số tiền tổng đã nhập <b>${toVND(amountField.value)}</b>`;
 			}
 
 			return null;
@@ -136,7 +136,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 
 	const memberAmountsError = validateMemberAmounts();
 	if (memberAmountsError) {
-		return toast.error(memberAmountsError);
+		return toast.error(memberAmountsError, { htmlMsg: true });
 	}
 
 	const members: BillMember = match(type)

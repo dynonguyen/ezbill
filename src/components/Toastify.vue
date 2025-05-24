@@ -46,9 +46,13 @@ const getHeader = (type: ToastType) => {
 		</template>
 
 		<Flex center stack class="gap-4" v-bind="store.toast.options?.pt?.root">
-			<Typography class="text-center" v-bind="store.toast.options?.pt?.message">
+			<Typography v-if="store.toast.options?.htmlMsg" class="text-center">
+				<div v-html="store.toast.message"></div>
+			</Typography>
+			<Typography v-else class="text-center" v-bind="store.toast.options?.pt?.message">
 				{{ store.toast.message }}
 			</Typography>
+			<div></div>
 		</Flex>
 
 		<template #action v-if="!store.toast.options?.hideCloseBtn">
