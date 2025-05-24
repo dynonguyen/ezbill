@@ -6,6 +6,7 @@ import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { vFocus } from '@/directives/v-focus';
 import type { MemberBankInfo } from '@/types/entities';
+import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { computed, ref, useId } from 'vue';
@@ -42,7 +43,7 @@ const bankInfo = ref<MemberBankInfo | null>(props.initialValues?.bankInfo || nul
 
 const handleAddMember = handleSubmit(async (form) => {
 	emit('submit', bankInfo.value ? { ...form, bankInfo: bankInfo.value } : form);
-});
+}, veeValidateFocusOnError);
 
 const handleChangeAvatar = (avt: string) => {
 	setFieldValue('avatar', avt);
@@ -77,6 +78,7 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 				:id="nameInputId"
 				v-model="name"
 				v-bind="nameProps"
+				name="name"
 				v-focus
 				:maxlength="MAX.NAME" />
 		</FormControl>

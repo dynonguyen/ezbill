@@ -38,15 +38,12 @@ const handleFocusOnToggle = (enabled: boolean, id: string) => {
 const remaining = computed(() => {
 	const nRemainingMembers = participants.value.filter((id) => !memberAmounts.value[id]).length;
 
-	if (nRemainingMembers === 0) return { total: 0, perMember: 0 };
+	if (nRemainingMembers === 0) return 0;
 
 	const total = getTotalMemberAmount(memberAmounts.value || {});
 	const totalRemaining = total > (amount.value ?? 0) ? 0 : (amount.value ?? 0) - total;
 
-	return {
-		total: totalRemaining,
-		perMember: totalRemaining / nRemainingMembers,
-	};
+	return totalRemaining / nRemainingMembers;
 });
 </script>
 
@@ -68,7 +65,7 @@ const remaining = computed(() => {
 					:input-props="{
 						id: `${m.id}-exact-amount`,
 						class: 'h-10 w-40 shrink-0',
-						placeholder: toVND(remaining.perMember),
+						placeholder: toVND(remaining),
 					}" />
 				<CustomCurrencyText v-else :amount="0" />
 			</template>

@@ -7,6 +7,7 @@ import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { BANKS } from '@/constants/bank';
 import type { MemberBankInfo } from '@/types/entities';
+import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { ref, useId } from 'vue';
@@ -37,7 +38,7 @@ const [accountNumber, accountNumberProps] = defineField('accountNumber');
 const handleAddBankInfo = handleSubmit(async (form) => {
 	open.value = false;
 	emit('submit', form);
-});
+}, veeValidateFocusOnError);
 
 const bankOptions: AutocompleteOption[] = BANKS.map((bank) => ({
 	value: bank.bin,
@@ -63,7 +64,8 @@ const bankOptions: AutocompleteOption[] = BANKS.map((bank) => ({
 						:options="bankOptions"
 						placeholder="Chọn ngân hàng"
 						v-model:value="bin"
-						v-model:open="openBin" />
+						v-model:open="openBin"
+						name="bin" />
 				</FormControl>
 
 				<FormControl
@@ -76,7 +78,8 @@ const bankOptions: AutocompleteOption[] = BANKS.map((bank) => ({
 						placeholder="Nhập số tài khoản"
 						v-model="accountNumber"
 						v-bind="accountNumberProps"
-						:maxlength="128" />
+						:maxlength="128"
+						name="accountNumber" />
 				</FormControl>
 			</Flex>
 		</Flex>

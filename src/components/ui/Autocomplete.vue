@@ -21,6 +21,7 @@ type AutocompleteProps = {
 	options: Option[];
 	label?: string;
 	placeholder?: string;
+	name?: string;
 	pt?: {
 		root?: HTMLAttributes;
 		inputWrap?: HTMLAttributes;
@@ -147,6 +148,8 @@ const rootPosition = computed(getRootPosition);
 				:placeholder="placeholder"
 				@input="handleSearch"
 				@blur="resetInputValue"
+				:name="name"
+				autocomplete="off"
 				v-bind="pt?.input" />
 			<span class="icon msi-arrow-drop-down" :class="{ 'rotate-180': open }"></span>
 		</div>

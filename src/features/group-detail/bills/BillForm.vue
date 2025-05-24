@@ -10,7 +10,7 @@ import { BillType, type Bill, type BillMember, type Member } from '@/types/entit
 import { toVND, veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import dayjs from 'dayjs';
-import { match } from 'ts-pattern';
+import { match, P } from 'ts-pattern';
 import { useForm } from 'vee-validate';
 import { computed, provide, ref, watch } from 'vue';
 import { z } from 'zod';
@@ -25,6 +25,8 @@ import { useGroupContext } from '../hooks/useGroupContext';
 import MemberSelect from '../MemberSelect.vue';
 import Equally from './splitting-form/Equally.vue';
 import Exact from './splitting-form/Exact.vue';
+import Percentage from './splitting-form/Percentage.vue';
+import Share from './splitting-form/Share.vue';
 import { type BillFormContextValue } from './splitting-form/useBillFormContext';
 
 type BillFormProps = { mode: 'new' | 'view-detail'; defaultBill?: Bill };
@@ -32,7 +34,7 @@ type BillForm = Pick<Bill, 'type' | 'amount' | 'createdBy' | 'name' | 'note'>;
 
 const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 const defaultEventName = `Sự kiện ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`;
-const defaultBillType = BillType.Exact;
+const defaultBillType = BillType.Percentage; // MOCK
 
 const schema = z.object({
 	type: z.nativeEnum(BillType).default(defaultBillType),
@@ -88,6 +90,7 @@ const participants = ref<Member['id'][]>(
 );
 const fixAmountField = ref<{ show: boolean; amount: number }>({ show: false, amount: 0 });
 
+// For exact bill type, to ensure that the total amount matches the sum of member amounts
 watch(
 	[() => getTotalMemberAmount(memberAmounts.value), amountField, typeField],
 	([totalMemberAmount, total]) => {
@@ -129,7 +132,7 @@ const validateMemberAmounts = (): string | null => {
 	if (participants.value.length === 0) return 'Chọn ít nhất 1 người tham gia';
 
 	return match(typeField.value)
-		.with(BillType.Equally, () => null)
+		.with(P.union(BillType.Equally, BillType.Percentage), () => null)
 		.with(BillType.Exact, () => {
 			const total = getTotalMemberAmount(memberAmounts.value);
 			const remainingMembers = participants.value.filter((id) => !memberAmounts.value[id]).length;
@@ -140,7 +143,6 @@ const validateMemberAmounts = (): string | null => {
 
 			return null;
 		})
-		.with(BillType.Percentage, () => null) // TODO: implement percentage
 		.with(BillType.Share, () => null) // TODO: implement share
 		.exhaustive();
 };
@@ -156,11 +158,12 @@ const handleTypeChange = (type: BillType) => {
 			memberAmounts.value = getDefaultMemberAmount();
 		})
 		.with(BillType.Percentage, () => {
-			return;
-		}) //TODO: implement percentage
+			memberAmounts.value = getDefaultMemberAmount();
+		})
 		.with(BillType.Share, () => {
+			//TODO: implement share
 			return;
-		}) //TODO: implement share
+		})
 		.exhaustive();
 };
 
@@ -177,7 +180,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		.returnType<BillMember>()
 		.with(BillType.Equally, () => splitEqually(amount, participants.value))
 		.with(BillType.Exact, () => splitExactly(amount, memberAmounts.value))
-		.with(BillType.Percentage, () => ({})) // TODO: implement percentage
+		.with(BillType.Percentage, () => memberAmounts.value)
 		.with(BillType.Share, () => ({})) // TODO: implement share
 		.exhaustive();
 
@@ -312,6 +315,8 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 
 				<Equally v-if="typeField === BillType.Equally" />
 				<Exact v-else-if="typeField === BillType.Exact" />
+				<Percentage v-else-if="typeField === BillType.Percentage" />
+				<Share v-else-if="typeField === BillType.Share" />
 				<Typography v-else class="text-center text-slate-400 my-4">
 					Feature is coming soon
 				</Typography>

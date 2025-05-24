@@ -26,14 +26,19 @@ const { toggleParticipant } = useBillFormContext();
 			">
 			<input type="checkbox" class="checkbox checkbox-primary" :checked="member.checked" />
 			<MemberAvatar v-bind="member" />
-			<Typography
-				variant="smMedium"
-				class="line-clamp-1 break-all"
-				:class="{ 'line-through': !member.checked }"
-				:title="member.name">
-				{{ member.name }}
-			</Typography>
-			<AccountingIcon v-if="member.isAccounting" />
+			<Flex stack class="gap-1">
+				<Flex class="gap-1">
+					<Typography
+						variant="smMedium"
+						class="line-clamp-1 break-all"
+						:class="{ 'line-through': !member.checked }"
+						:title="member.name">
+						{{ member.name }}
+					</Typography>
+					<AccountingIcon v-if="member.isAccounting" />
+				</Flex>
+				<slot name="info"></slot>
+			</Flex>
 		</Flex>
 
 		<div class="py-2 shrink-0" v-if="$slots.action">
