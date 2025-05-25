@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Loading from '@/components/Loading.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
@@ -6,7 +7,7 @@ import imageCompression from 'browser-image-compression';
 import { ref, useTemplateRef } from 'vue';
 
 /** Max file size by MB */
-const MAX_FILE_SIZE = 1;
+const MAX_FILE_SIZE = 2;
 const MAX_IMG_WIDTH = 128; // px
 
 const maxSizeText = (mbSize: number) => {
@@ -57,7 +58,12 @@ async function handleFileChange(event: Event) {
 	<Flex center stack class="gap-3">
 		<img v-if="base64Image" :srcset="base64Image" class="rounded-full size-24 object-cover" />
 
+		<Flex v-if="uploading" stack center class="min-h-[140px] gap-3">
+			<Loading />
+			<Typography variant="smRegular" class="text-gray-500">Đang tải ảnh lên...</Typography>
+		</Flex>
 		<Flex
+			v-else
 			center
 			class="w-full rounded-lg border border-dashed border-gray-400 p-4 gap-3 cursor-pointer bg-gray-50 hover:bg-gray-100"
 			stack
