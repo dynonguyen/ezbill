@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AVT_UPLOADED_PREFIX } from '@/features/group-detail/AvatarSelect.vue';
 import type { Member } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
 import type { HTMLAttributes } from 'vue';
@@ -63,12 +64,18 @@ const fontSizes: Record<NonNullable<MemberAvatarProps['size']>, TypographyProps[
 	lg: 'mdRegular',
 	full: 'mdRegular',
 };
+
+const getAvatarSrc = (avatar: string) => {
+	return avatar.startsWith(AVT_UPLOADED_PREFIX)
+		? avatar.slice(AVT_UPLOADED_PREFIX.length)
+		: getImgUrl(`avatar/${avatar}`);
+};
 </script>
 
 <template>
 	<div class="avatar" v-if="avatar">
 		<div :class="[sizes[size]]" class="rounded-full" v-bind="pt?.avatar">
-			<img :src="getImgUrl(`avatar/${avatar}`)" />
+			<img :src="getAvatarSrc(avatar)" />
 		</div>
 	</div>
 	<div v-else-if="name" class="avatar placeholder">
