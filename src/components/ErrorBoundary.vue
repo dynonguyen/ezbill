@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { createErrorLog } from '@/apis/supabase';
 import { getAssetUrl } from '@/utils/get-asset';
 import { onErrorCaptured, ref } from 'vue';
 import Button from './ui/Button.vue';
@@ -10,10 +11,12 @@ const error = ref<Error | null>(null);
 onErrorCaptured((err) => {
 	error.value = err;
 	console.error('ErrorBoundary:', error);
+	void createErrorLog({ path: window.location.href, error: err.message, ua: navigator.userAgent });
 	return false;
 });
 
 const handleReload = () => {
+	error.value = null;
 	window.location.reload();
 };
 </script>

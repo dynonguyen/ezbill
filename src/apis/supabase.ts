@@ -1,6 +1,7 @@
 import { getTotalMemberAmount } from '@/features/group-detail/helpers/utils';
 import { createClient } from '@supabase/supabase-js';
 import to from 'await-to-js';
+import dayjs from 'dayjs';
 import type { Bill, Group, Member } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 
@@ -171,4 +172,10 @@ export const deleteBill = async (data: { groupId: Group['id']; billId: Bill['id'
 	const resp = await supabase.from(getBillView(groupId)).delete().eq('id', billId);
 
 	if (resp.error) throw resp.error;
+};
+
+// Error logs
+export const createErrorLog = async (error: any) => {
+	const createdAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
+	await supabase.from('error_logs').insert({ createdAt, log: error });
 };
