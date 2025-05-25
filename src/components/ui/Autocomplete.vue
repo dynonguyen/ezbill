@@ -123,7 +123,7 @@ const handleInputBlur = () => {
 	setTimeout(() => {
 		resetInputValue();
 		handleClose();
-	}, 350);
+	}, 250);
 };
 
 onMounted(resetInputValue);

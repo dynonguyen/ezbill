@@ -128,7 +128,10 @@ export const updateMember = async (data: { groupId: Group['id']; newValue: Membe
 
 // Bill
 const isAmountValid = (bill: Partial<Bill>) => {
-	if (!bill.amount || bill.amount !== getTotalMemberAmount(bill.members || {})) {
+	if (
+		!bill.amount ||
+		Math.round(bill.amount) !== Math.round(getTotalMemberAmount(bill.members || {}))
+	) {
 		throw Error('Tổng số tiền không khớp với số tiền của các thành viên');
 	}
 

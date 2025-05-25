@@ -62,7 +62,7 @@ const initialValues = computed<Partial<BillForm>>(() => {
 	return { type, amount, createdBy, name, note };
 });
 
-const { errors, handleSubmit, defineField, setFieldValue } = useForm<BillForm>({
+const { errors, handleSubmit, defineField, setFieldValue, meta } = useForm<BillForm>({
 	validationSchema: validationSchema,
 	initialValues: initialValues.value,
 });
@@ -73,6 +73,8 @@ const [amountField] = defineField('amount');
 const [createdByField] = defineField('createdBy');
 const [nameField, nameProps] = defineField('name');
 const [noteField, noteProps] = defineField('note');
+
+const isFormDirty = defineModel<boolean>('form-dirty', { default: false });
 
 const getDefaultMemberAmount = () => {
 	return splitEqually(
@@ -108,6 +110,12 @@ watch(
 			fixAmountField.value = { show: false, amount: 0 };
 		}
 	},
+);
+
+watch(
+	() => meta.value.dirty,
+	(isDirty) => (isFormDirty.value = isDirty),
+	{ immediate: true },
 );
 
 const toggleParticipant = (memberId: Member['id']) => {

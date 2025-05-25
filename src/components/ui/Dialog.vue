@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { lockScroll, unlockScroll } from '@/utils/scrolling';
 import { onClickOutside, onKeyDown } from '@vueuse/core';
-import { computed, nextTick, onUnmounted, useTemplateRef, watch, type HTMLAttributes } from 'vue';
+import {
+	computed,
+	nextTick,
+	onUnmounted,
+	ref,
+	useTemplateRef,
+	watch,
+	type HTMLAttributes,
+} from 'vue';
 import Button, { type ButtonProps } from './Button.vue';
 import Flex from './Flex.vue';
 import Typography from './Typography.vue';
@@ -10,6 +18,11 @@ const props = defineProps<{
 	header?: string;
 	withoutBackdrop?: boolean;
 	hideCloseButton?: boolean;
+	confirmOnClose?: boolean;
+	confirmClose?: {
+		title?: string;
+		message?: string;
+	};
 	pt?: {
 		body?: HTMLAttributes;
 		contentWrap?: HTMLAttributes;
@@ -19,14 +32,29 @@ const props = defineProps<{
 	};
 }>();
 defineOptions({ inheritAttrs: false });
-
 const emit = defineEmits<{ close: [] }>();
 const open = defineModel<boolean>('open');
 const outsideClickTarget = useTemplateRef<HTMLElement>('target');
+const showConfirmCloseDialog = ref(false);
 
-const handleDialogClose = () => {
+const BASE_Z_INDEX = 1000;
+
+const handleClose = () => {
 	open.value = false;
 	emit('close');
+};
+
+const handleConfirmedClose = () => {
+	handleClose();
+	showConfirmCloseDialog.value = false;
+};
+
+const handleDialogClose = () => {
+	if (props.confirmOnClose) {
+		showConfirmCloseDialog.value = true;
+	} else {
+		handleClose();
+	}
 };
 
 const countDialogs = () => {
@@ -80,7 +108,7 @@ const backdropDisplay = computed(() => {
 		<div
 			class="dialog fixed w-screen h-screen inset-0"
 			v-bind="$attrs"
-			:style="{ zIndex: 1000 + nDialog }"
+			:style="{ zIndex: BASE_Z_INDEX + nDialog }"
 			:data-modal-index="nDialog + 1">
 			<div
 				ref="target"
@@ -95,12 +123,12 @@ const backdropDisplay = computed(() => {
 
 					<div
 						class="grow overflow-auto px-4 dialog-body"
-						:class="{ 'pt-4': $slots.header || header, 'pb-4': $slots.action || !hideCloseButton }"
+						:class="{ 'pt-4': $slots.header || header }"
 						v-bind="pt?.body">
 						<slot></slot>
 					</div>
 
-					<div v-if="!hideCloseButton" class="px-4">
+					<div v-if="!hideCloseButton" class="px-4 pt-4">
 						<Flex class="gap-2" items-fluid v-bind="pt?.actionWrap">
 							<Button variant="soft" color="grey" @click="handleDialogClose" v-bind="pt?.closeBtn">
 								Đóng
@@ -109,9 +137,47 @@ const backdropDisplay = computed(() => {
 						</Flex>
 					</div>
 
-					<div v-if="$slots.action && hideCloseButton" class="px-4">
+					<div v-if="$slots.action && hideCloseButton" class="px-4 pt-4">
 						<slot name="action"></slot>
 					</div>
+				</Flex>
+			</div>
+		</div>
+	</Teleport>
+
+	<!-- Confirmation Dialog -->
+	<Teleport v-if="showConfirmCloseDialog" to="body">
+		<div
+			class="dialog fixed w-screen h-screen inset-0"
+			:style="{ zIndex: BASE_Z_INDEX + 1 + nDialog }"
+			:data-modal-index="nDialog + 2">
+			<div class="dialog-content absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2">
+				<Flex stack class="max-h-[80dvh] overflow-hidden py-4">
+					<slot name="confirm-close-body">
+						<Typography variant="displaySemiBold" class="px-4 text-center">
+							{{ confirmClose?.title ?? 'Xác nhận đóng' }}
+						</Typography>
+
+						<div class="grow overflow-auto px-4 dialog-body pt-4">
+							<Typography class="text-center">
+								{{
+									confirmClose?.message ??
+									'Bạn có chắc chắn muốn đóng không? Mọi thao tác sẽ không thể hoàn tác.'
+								}}
+							</Typography>
+						</div>
+
+						<div class="px-4 pt-4">
+							<Flex class="gap-2" items-fluid>
+								<Button variant="soft" color="grey" @click="showConfirmCloseDialog = false">
+									Không
+								</Button>
+								<Button variant="contained" color="primary" @click="handleConfirmedClose">
+									Đồng ý
+								</Button>
+							</Flex>
+						</div>
+					</slot>
 				</Flex>
 			</div>
 		</div>
