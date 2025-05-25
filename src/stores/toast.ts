@@ -11,6 +11,7 @@ export type ToastOptions = {
 	hideCloseBtn?: boolean;
 	hideIcon?: boolean;
 	hideHeader?: boolean;
+	htmlMsg?: boolean;
 	pt?: { root?: FlexProps; message?: TypographyProps };
 };
 

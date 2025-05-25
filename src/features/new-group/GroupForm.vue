@@ -2,6 +2,7 @@
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import { vFocus } from '@/directives/v-focus';
+import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { z } from 'zod';
@@ -27,7 +28,7 @@ const { errors, handleSubmit, defineField } = useForm<GroupForm>({
 
 const handleAddGroup = handleSubmit(async (form) => {
 	emit('submit', form);
-});
+}, veeValidateFocusOnError);
 
 const [name, nameProps] = defineField('name');
 </script>
@@ -39,6 +40,7 @@ const [name, nameProps] = defineField('name');
 				type="text"
 				class="input input-bordered w-full"
 				id="name"
+				name="name"
 				placeholder="Nhập tên nhóm"
 				v-model="name"
 				v-bind="nameProps"

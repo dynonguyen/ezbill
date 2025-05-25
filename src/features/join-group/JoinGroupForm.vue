@@ -7,6 +7,7 @@ import { PATH } from '@/constants/path';
 import { vFocus } from '@/directives/v-focus';
 import { useToast } from '@/hooks/useToast';
 import { getEnv } from '@/utils/get-env';
+import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import to from 'await-to-js';
 import { useForm } from 'vee-validate';
@@ -51,7 +52,7 @@ const handleJoinGroup = handleSubmit(async ({ inviteLink }) => {
 	if (error) return showErrorMessage();
 
 	router.push(PATH.GROUP.replace(':id', groupId));
-});
+}, veeValidateFocusOnError);
 
 const handleClose = () => {
 	resetForm({});
@@ -73,6 +74,7 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 				placeholder="Nhập ID nhóm hoặc link mời tham gia."
 				v-model="inviteLink"
 				v-bind="inviteLinkProps"
+				name="inviteLink"
 				v-focus />
 		</FormControl>
 

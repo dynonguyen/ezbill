@@ -5,14 +5,12 @@ import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
-import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { useQuery } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps<{ id: Group['id'] }>();
-const localDBStore = useLocalDBStore();
 
 const queryKey = computed(() => [QUERY_KEY.GROUP, props.id]);
 const {
@@ -22,18 +20,12 @@ const {
 } = useQuery({ queryKey, queryFn: () => fetchGroup(props.id) });
 
 const MAX_AVATAR = 3;
-
-watch(error, () => {
-	if (error.value) {
-		localDBStore.removeFromGroup(props.id);
-	}
-});
 </script>
 
 <template>
 	<div class="skeleton h-24 w-full rounded-2xl" v-if="isPending" />
 	<Flex
-		v-else-if="group"
+		v-else-if="group && !error"
 		stack
 		class="gap-2 p-4 rounded-2xl bg-white shadow-lg cursor-pointer"
 		@click="$router.push(PATH.GROUP.replace(':id', group.id))">

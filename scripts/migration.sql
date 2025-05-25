@@ -36,6 +36,7 @@ create table
     "createdAt" timestamp with time zone not null default now(),
     "groupId" uuid not null,
     "name" text not null,
+		type text not null,
     amount bigint not null,
     note varchar(1024) null,
     "createdBy" text not null,

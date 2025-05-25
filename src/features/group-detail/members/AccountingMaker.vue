@@ -7,7 +7,7 @@ defineOptions({ inheritAttrs: false });
 </script>
 
 <template>
-	<div class="relative" v-bind="$attrs" v-if="show">
+	<div class="relative shrink-0" v-bind="$attrs" v-if="show">
 		<slot></slot>
 		<Flex
 			data-tip="Kế toán"

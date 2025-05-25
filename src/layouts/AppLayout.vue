@@ -7,7 +7,7 @@ import Flex from '@/components/ui/Flex.vue';
 	<Flex
 		stack
 		id="app-layout"
-		class="mx-auto max-w-screen-sm h-dvh overflow-hidden relative bg-base-100">
+		class="mx-auto max-w-screen-sm h-dvh overflow-hidden relative bg-base-100 sm:border-l sm:border-r sm:border-base-300">
 		<ErrorBoundary>
 			<RouterView />
 		</ErrorBoundary>

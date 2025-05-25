@@ -57,3 +57,8 @@ export function debounce<T extends (...args: any[]) => any>(
 		}, delay);
 	};
 }
+
+export const veeValidateFocusOnError = ({ errors }: any) => {
+	const firstField = Object.keys(errors)[0];
+	(document.querySelector(`input[name="${firstField}"]`) as HTMLInputElement)?.focus();
+};

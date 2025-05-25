@@ -57,4 +57,8 @@ export default {
 		type: Object,
 		default: () => ({}),
 	},
+	pt: {
+		type: Object,
+		default: () => ({}),
+	},
 };

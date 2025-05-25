@@ -26,11 +26,18 @@ export type Group = {
 	deleted: boolean;
 };
 
+export enum BillType {
+	Equally = 'equally',
+	Exact = 'exact',
+	Percentage = 'percentage',
+	Share = 'share',
+}
 export type BillMember = Record<Member['id'], number>;
 export type Bill = {
 	id: number;
 	name: string;
 	groupId: Group['id'];
+	type: BillType;
 	amount: number;
 	note?: string | null;
 	createdAt: string;

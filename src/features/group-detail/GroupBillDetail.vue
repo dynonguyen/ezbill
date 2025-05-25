@@ -7,6 +7,7 @@ import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
 import BalanceList from './balances/BalanceList.vue';
@@ -81,6 +82,7 @@ watch(loading, () => {
 });
 
 onUnmounted(() => observer?.disconnect());
+usePageTitle(group.value.name);
 
 provide(CONTEXT_KEY.BILLS, bills);
 </script>
@@ -190,7 +192,7 @@ provide(CONTEXT_KEY.BILLS, bills);
 	</Flex>
 
 	<!-- New bill -->
-	<NewBillPopup v-if="openNewBill" v-model:open="openNewBill" @close="openNewBill = false" />
+	<NewBillPopup v-if="openNewBill" v-model:open="openNewBill" />
 </template>
 
 <style module>
