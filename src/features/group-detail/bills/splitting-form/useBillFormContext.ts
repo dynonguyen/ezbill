@@ -6,6 +6,7 @@ export type BillFormContextValue = {
 	amount: Ref<number, number>;
 	memberAmounts: Ref<BillMember>;
 	participants: Ref<Member['id'][]>;
+	hideNonParticipants: Ref<boolean>;
 	toggleParticipant(id: Member['id']): void;
 };
 

@@ -30,7 +30,7 @@ const {
 	queryFn: () => fetchBills(group.value.id),
 });
 
-const openNewBill = ref(true); // MOCK
+const openNewBill = ref(false);
 const billTab = ref<BillTabValue>('bills');
 
 watch(error, () => {

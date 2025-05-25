@@ -34,7 +34,7 @@ type BillForm = Pick<Bill, 'type' | 'amount' | 'createdBy' | 'name' | 'note'>;
 
 const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 const defaultEventName = `Sự kiện ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`;
-const defaultBillType = BillType.Percentage; // MOCK
+const defaultBillType = BillType.Equally;
 
 const schema = z.object({
 	type: z.nativeEnum(BillType).default(defaultBillType),
@@ -89,6 +89,7 @@ const participants = ref<Member['id'][]>(
 	props.mode === 'new' ? getAllParticipantIds() : Object.keys(props.defaultBill?.members || {}),
 );
 const fixAmountField = ref<{ show: boolean; amount: number }>({ show: false, amount: 0 });
+const hideNonParticipants = ref(false);
 
 // For exact bill type, to ensure that the total amount matches the sum of member amounts
 watch(
@@ -143,28 +144,20 @@ const validateMemberAmounts = (): string | null => {
 
 			return null;
 		})
-		.with(BillType.Share, () => null) // TODO: implement share
+		.with(BillType.Share, () => {
+			return getTotalMemberAmount(memberAmounts.value)
+				? null
+				: 'Vui lòng nhập số phần cho ít nhất 1 thành viên';
+		})
 		.exhaustive();
 };
 
 const handleTypeChange = (type: BillType) => {
 	typeField.value = type;
 
-	match(type)
-		.with(BillType.Equally, () => {
-			memberAmounts.value = splitEqually(amountField.value, participants.value);
-		})
-		.with(BillType.Exact, () => {
-			memberAmounts.value = getDefaultMemberAmount();
-		})
-		.with(BillType.Percentage, () => {
-			memberAmounts.value = getDefaultMemberAmount();
-		})
-		.with(BillType.Share, () => {
-			//TODO: implement share
-			return;
-		})
-		.exhaustive();
+	memberAmounts.value = match(type)
+		.with(BillType.Equally, () => splitEqually(amountField.value, participants.value))
+		.otherwise(getDefaultMemberAmount);
 };
 
 const handleSubmitBill = handleSubmit(async (form) => {
@@ -181,7 +174,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		.with(BillType.Equally, () => splitEqually(amount, participants.value))
 		.with(BillType.Exact, () => splitExactly(amount, memberAmounts.value))
 		.with(BillType.Percentage, () => memberAmounts.value)
-		.with(BillType.Share, () => ({})) // TODO: implement share
+		.with(BillType.Share, () => memberAmounts.value)
 		.exhaustive();
 
 	const formData: Omit<Bill, 'id' | 'createdAt'> = {
@@ -201,6 +194,7 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 	amount: amountField,
 	memberAmounts,
 	participants,
+	hideNonParticipants,
 	toggleParticipant,
 });
 </script>
@@ -300,17 +294,34 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 			</Typography>
 
 			<Flex stack class="gap-2">
-				<Flex class="gap-2 px-2">
-					<input
-						id="all-participants"
-						type="checkbox"
-						class="checkbox checkbox-primary"
-						:indeterminate="participants.length > 0 && participants.length < group.members.length"
-						:checked="participants.length === group.members.length"
-						@click="toggleAllParticipants" />
-					<Typography variant="mdSemiBold" as="label" class="cursor-pointer" for="all-participants">
-						Thành viên tham gia ({{ participants.length }})
-					</Typography>
+				<Flex class="justify-between h-8 gap-2">
+					<Flex class="gap-2 px-2">
+						<input
+							id="all-participants"
+							type="checkbox"
+							class="checkbox checkbox-primary"
+							:indeterminate="participants.length > 0 && participants.length < group.members.length"
+							:checked="participants.length === group.members.length"
+							@click="toggleAllParticipants" />
+						<Typography
+							variant="mdSemiBold"
+							as="label"
+							class="cursor-pointer"
+							for="all-participants">
+							Thành viên tham gia ({{ participants.length }}/{{ group.members.length }})
+						</Typography>
+					</Flex>
+
+					<Flex
+						center
+						v-if="participants.length !== group.members.length"
+						class="tooltip tooltip-left shrink-0"
+						:data-tip="`${hideNonParticipants ? 'Hiện' : 'Ẩn'} thành viên không tham gia`">
+						<span
+							class="icon size-6 text-slate-500 cursor-pointer"
+							:class="`${hideNonParticipants ? 'msi-visibility-rounded' : 'msi-visibility-off-rounded'}`"
+							@click="hideNonParticipants = !hideNonParticipants"></span>
+					</Flex>
 				</Flex>
 
 				<Equally v-if="typeField === BillType.Equally" />
@@ -318,7 +329,13 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 				<Percentage v-else-if="typeField === BillType.Percentage" />
 				<Share v-else-if="typeField === BillType.Share" />
 				<Typography v-else class="text-center text-slate-400 my-4">
-					Feature is coming soon
+					Tính năng đang được phát triển
+				</Typography>
+
+				<Typography
+					v-if="hideNonParticipants && participants.length === 0 && group.members.length"
+					class="text-center text-slate-400 mb-2">
+					Bạn đã ẩn tất cả thành viên không tham gia.
 				</Typography>
 			</Flex>
 		</Flex>

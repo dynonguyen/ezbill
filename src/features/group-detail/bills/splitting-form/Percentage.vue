@@ -80,14 +80,15 @@ watch(
 const handleInputChange = (ev: Event, id: Member['id']) => {
 	const target = ev.target as HTMLInputElement;
 
-	if (z.coerce.number().safeParse(target.value).error) {
+	const parsed = z.coerce.number().safeParse(target.value);
+	if (parsed.error) {
 		target.value = target.value.substring(0, target.value.length - 1);
 		return;
 	}
 
-	const value = Number(target.value.trim().replace(/\.$/, ''));
+	const value = parsed.data;
 
-	if (isNaN(value) || value < 0 || target.value === '') {
+	if (value < 0 || target.value === '') {
 		target.value = '';
 		delete memberPercentage.value[id];
 		return;
@@ -128,7 +129,7 @@ const getShortPercentage = (value: number) => {
 			:member="m"
 			@toggle="handleFocusOnToggle(!m.checked, m.id)">
 			<template v-if="m.checked && m.percentage" #info>
-				<Flex class="gap-1 text-gray-500" wrap>
+				<Flex class="gap-1 text-gray-400" wrap>
 					<Typography variant="xsRegular">
 						({{ getShortPercentage(m.percentage) }} / {{ getShortPercentage(totalPercentage[1]) }})%
 						=

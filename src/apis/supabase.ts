@@ -1,3 +1,4 @@
+import { getTotalMemberAmount } from '@/features/group-detail/helpers/utils';
 import { createClient } from '@supabase/supabase-js';
 import to from 'await-to-js';
 import type { Bill, Group, Member } from '../types/entities';
@@ -126,6 +127,14 @@ export const updateMember = async (data: { groupId: Group['id']; newValue: Membe
 };
 
 // Bill
+const isAmountValid = (bill: Partial<Bill>) => {
+	if (!bill.amount || bill.amount !== getTotalMemberAmount(bill.members || {})) {
+		throw Error('Tổng số tiền không khớp với số tiền của các thành viên');
+	}
+
+	return true;
+};
+
 export const fetchBills = async (groupId: string): Promise<Bill[]> => {
 	const { data, error } = await supabase.from(getBillView(groupId)).select();
 
@@ -135,18 +144,22 @@ export const fetchBills = async (groupId: string): Promise<Bill[]> => {
 };
 
 export const createBill = async (bill: Omit<Bill, 'id' | 'createdAt'>) => {
-	const resp = await supabase.from(getBillView(bill.groupId)).insert(bill);
+	if (isAmountValid(bill)) {
+		const resp = await supabase.from(getBillView(bill.groupId)).insert(bill);
 
-	if (resp.error) throw resp.error;
+		if (resp.error) throw resp.error;
+	}
 };
 
 export const updateBill = async (updated: Omit<Bill, 'createdAt'>) => {
-	const resp = await supabase
-		.from(getBillView(updated.groupId))
-		.update(updated)
-		.eq('id', updated.id);
+	if (isAmountValid(updated)) {
+		const resp = await supabase
+			.from(getBillView(updated.groupId))
+			.update(updated)
+			.eq('id', updated.id);
 
-	if (resp.error) throw resp.error;
+		if (resp.error) throw resp.error;
+	}
 };
 
 export const deleteBill = async (data: { groupId: Group['id']; billId: Bill['id'] }) => {

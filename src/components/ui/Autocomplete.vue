@@ -88,6 +88,9 @@ const handleClose = () => {
 
 const handleSearch = (e: Event) => {
 	const keyword = (e.target as HTMLInputElement).value?.trim().toLowerCase();
+
+	if (!open.value) open.value = true;
+
 	if (!keyword) {
 		displayedOptions.value = props.options;
 		return;
@@ -114,6 +117,13 @@ const handleFocusOnKeyPress = (isDown: boolean) => {
 				?.scrollIntoView({ behavior: 'instant', block: 'center' });
 		});
 	};
+};
+
+const handleInputBlur = () => {
+	setTimeout(() => {
+		resetInputValue();
+		handleClose();
+	}, 350);
 };
 
 onMounted(resetInputValue);
@@ -147,55 +157,53 @@ const rootPosition = computed(getRootPosition);
 				class="grow"
 				:placeholder="placeholder"
 				@input="handleSearch"
-				@blur="resetInputValue"
+				@blur="handleInputBlur"
 				:name="name"
 				autocomplete="off"
 				v-bind="pt?.input" />
 			<span class="icon msi-arrow-drop-down" :class="{ 'rotate-180': open }"></span>
 		</div>
-
-		<Dialog
-			v-model:open="open"
-			without-backdrop
-			hide-close-button
-			:pt="{
-				contentWrap: {
-					style: {
-						top: `${rootPosition.top + 6}px`,
-						left: `${rootPosition.left}px`,
-						width: `${rootPosition.width}px`,
-						transform: 'none',
-					},
-				},
-				body: { class: '!p-0' },
-				content: { class: '!p-0 ' },
-			}">
-			<ul
-				class="menu bg-base-100 rounded-box w-full max-h-72 overflow-auto p-2 shadow-lg gap-1 flex-nowrap">
-				<template v-if="displayedOptions.length">
-					<li
-						v-for="(opt, index) in displayedOptions"
-						:key="opt.value"
-						@click="handleSelect(opt as Option)">
-						<a
-							class="w-full"
-							:class="{ active: opt.value === value, focused: focusIndex === index }">
-							<slot
-								v-if="$slots.option"
-								name="option"
-								:key="opt.value"
-								:option="opt"
-								:selected="opt.value === value"></slot>
-							<template v-else>{{ opt[label] }}</template>
-						</a>
-					</li>
-				</template>
-				<Typography v-else class="p-2 text-slate-400" variant="smRegular">
-					Không có lựa chọn
-				</Typography>
-			</ul>
-		</Dialog>
 	</div>
+
+	<Dialog
+		v-model:open="open"
+		without-backdrop
+		hide-close-button
+		:pt="{
+			contentWrap: {
+				style: {
+					top: `${rootPosition.top + 6}px`,
+					left: `${rootPosition.left}px`,
+					width: `${rootPosition.width}px`,
+					transform: 'none',
+				},
+			},
+			body: { class: '!p-0' },
+			content: { class: '!p-0 ' },
+		}">
+		<ul
+			class="menu bg-base-100 rounded-box w-full max-h-72 overflow-auto p-2 shadow-lg gap-1 flex-nowrap">
+			<template v-if="displayedOptions.length">
+				<li
+					v-for="(opt, index) in displayedOptions"
+					:key="opt.value"
+					@click="handleSelect(opt as Option)">
+					<a class="w-full" :class="{ active: opt.value === value, focused: focusIndex === index }">
+						<slot
+							v-if="$slots.option"
+							name="option"
+							:key="opt.value"
+							:option="opt"
+							:selected="opt.value === value"></slot>
+						<template v-else>{{ opt[label] }}</template>
+					</a>
+				</li>
+			</template>
+			<Typography v-else class="p-2 text-slate-400" variant="smRegular">
+				Không có lựa chọn
+			</Typography>
+		</ul>
+	</Dialog>
 </template>
 
 <style>

@@ -9,11 +9,12 @@ import { useBillFormContext } from './useBillFormContext';
 defineProps<{ member: Member & { checked?: boolean } }>();
 defineEmits<{ toggle: [] }>();
 
-const { toggleParticipant } = useBillFormContext();
+const { toggleParticipant, hideNonParticipants } = useBillFormContext();
 </script>
 
 <template>
 	<Flex
+		v-if="member.checked || !hideNonParticipants"
 		class="gap-2 justify-between px-2 rounded-lg cursor-pointer hover:bg-gray-100"
 		:class="{ 'opacity-50': !member.checked }">
 		<Flex

@@ -33,7 +33,7 @@ export function billTypeMapping(type: BillType): BillTypeMappingResult {
 			type: BillType.Share,
 			label: 'Chia theo phần',
 			helperText: 'Nhập số phần mà mỗi thành viên phải trả.',
-			icon: 'msi-pie-chart',
+			icon: 'msi-browse-outline',
 		}))
 		.exhaustive();
 }
