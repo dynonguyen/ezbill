@@ -35,7 +35,11 @@ const [name, nameProps] = defineField('name');
 
 <template>
 	<Flex stack class="gap-4" as="form" @submit="handleAddGroup">
-		<FormControl html-for="name" :error="Boolean(errors.name)" :helper-text="errors.name">
+		<FormControl
+			label="Tên nhóm"
+			html-for="name"
+			:error="Boolean(errors.name)"
+			:helper-text="errors.name">
 			<input
 				type="text"
 				class="input input-bordered w-full"

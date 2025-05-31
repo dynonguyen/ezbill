@@ -62,3 +62,7 @@ export const veeValidateFocusOnError = ({ errors }: any) => {
 	const firstField = Object.keys(errors)[0];
 	(document.querySelector(`input[name="${firstField}"]`) as HTMLInputElement)?.focus();
 };
+
+export const isDesktopByResolution = (): boolean => {
+	return window.innerWidth >= 1024;
+};

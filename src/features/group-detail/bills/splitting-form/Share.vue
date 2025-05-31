@@ -3,8 +3,9 @@ import CurrencyText from '@/components/CurrencyText.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { type BillMember, type Member } from '@/types/entities';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { z } from 'zod';
+import { focusOnToggleForDesktop } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
@@ -60,12 +61,10 @@ const handleInputChange = (ev: Event, id: Member['id']) => {
 	shares.value[id] = value;
 };
 
-const handleFocusOnToggle = (enabled: boolean, id: string) => {
+const handleToggle = (enabled: boolean, id: string) => {
 	delete shares.value[id];
 	if (enabled) {
-		nextTick(() => {
-			document.getElementById(`${id}-share-amount`)?.focus();
-		});
+		focusOnToggleForDesktop(`${id}-share-amount`);
 	}
 };
 
@@ -111,7 +110,7 @@ watch(
 			}))"
 			:key="m.id"
 			:member="m"
-			@toggle="handleFocusOnToggle(!m.checked, m.id)">
+			@toggle="handleToggle(!m.checked, m.id)">
 			<template v-if="m.checked && shares[m.id]" #info>
 				<Flex class="gap-1 text-gray-400" wrap>
 					<Typography variant="xsRegular">

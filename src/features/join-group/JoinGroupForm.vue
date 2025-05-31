@@ -65,7 +65,8 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 <template>
 	<Flex stack class="gap-4" as="form" @submit="handleJoinGroup">
 		<FormControl
-			html-for="name"
+			label="ID nhóm hoặc link mời"
+			html-for="inviteLink"
 			:error="Boolean(errors.inviteLink)"
 			:helper-text="errors.inviteLink">
 			<input
@@ -75,6 +76,7 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 				v-model="inviteLink"
 				v-bind="inviteLinkProps"
 				name="inviteLink"
+				id="inviteLink"
 				v-focus />
 		</FormControl>
 
