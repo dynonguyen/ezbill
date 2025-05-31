@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Loading from '@/components/Loading.vue';
 import Flex from '@/components/ui/Flex.vue';
+import { APP_NAME } from '@/constants/common';
 import type { Group } from '@/types/entities';
 import { getGroupLink, saveFileAs } from '@/utils/helpers';
-import QRCode from 'qrcode';
 import { computed, onWatcherCleanup, ref, watch } from 'vue';
 import Button from './ui/Button.vue';
 import FormControl from './ui/FormControl.vue';
@@ -20,14 +20,21 @@ const copyToClipboard = () => {
 };
 
 const downloadQR = () => {
-	saveFileAs(qrBase64.value, 'QR.jpeg');
+	saveFileAs(qrBase64.value, `${APP_NAME}_${props.id}.jpeg`);
 };
 
 watch(
 	inviteLink,
 	async () => {
-		navigator.clipboard?.writeText(inviteLink.value);
-		qrBase64.value = await QRCode.toDataURL(inviteLink.value, { width: 500, type: 'image/jpeg' });
+		if (inviteLink.value) {
+			navigator.clipboard?.writeText(inviteLink.value);
+			import('qrcode').then(async (QRCode) => {
+				qrBase64.value = await QRCode.toDataURL(inviteLink.value, {
+					width: 500,
+					type: 'image/jpeg',
+				});
+			});
+		}
 	},
 	{ immediate: true },
 );
