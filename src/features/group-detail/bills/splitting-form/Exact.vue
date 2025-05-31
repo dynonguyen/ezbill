@@ -2,7 +2,8 @@
 import CurrencyInput from '@/components/ui/CurrencyInput.vue';
 import Flex from '@/components/ui/Flex.vue';
 import type { BillMember } from '@/types/entities';
-import { debounce, toVND } from '@/utils/helpers';
+import { toVND } from '@/utils/helpers';
+import { debounce } from 'es-toolkit';
 import { computed, watch } from 'vue';
 import { focusOnToggleForDesktop, getTotalMemberAmount } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';

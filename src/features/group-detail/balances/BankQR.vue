@@ -8,7 +8,6 @@ import { saveFileAs } from '@/utils/helpers';
 import { buildVietQRData } from '@/utils/vietqr';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import QRCode from 'qrcode';
 import { ref, watch } from 'vue';
 import BankInfoDetail from '../BankInfoDetail.vue';
 import BankInfoPopup from '../BankInfoPopup.vue';
@@ -59,7 +58,9 @@ watch(
 				amount: Number(props.amount.toFixed(0)),
 			});
 
-			qrBase64.value = await QRCode.toDataURL(qrData, { width: 500, type: 'image/jpeg' });
+			import('qrcode').then(async (QRCode) => {
+				qrBase64.value = await QRCode.toDataURL(qrData, { width: 500, type: 'image/jpeg' });
+			});
 		}
 	},
 	{ immediate: true },

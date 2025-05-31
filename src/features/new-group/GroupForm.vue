@@ -5,6 +5,7 @@ import { vFocus } from '@/directives/v-focus';
 import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
+import { onMounted } from 'vue';
 import { z } from 'zod';
 
 const emit = defineEmits<{ submit: [form: GroupForm] }>();
@@ -21,14 +22,23 @@ type GroupForm = z.infer<typeof schema>;
 
 const validationSchema = toTypedSchema(schema);
 
-const { errors, handleSubmit, defineField } = useForm<GroupForm>({
+const { errors, handleSubmit, defineField, setFieldValue } = useForm<GroupForm>({
 	validationSchema,
 	initialValues: props.initialValues,
 });
 
+export type GroupFormModel = {
+	setFieldValue: typeof setFieldValue;
+};
+const model = defineModel<GroupFormModel>();
+
 const handleAddGroup = handleSubmit(async (form) => {
 	emit('submit', form);
 }, veeValidateFocusOnError);
+
+onMounted(() => {
+	model.value = { setFieldValue };
+});
 
 const [name, nameProps] = defineField('name');
 </script>
@@ -49,8 +59,11 @@ const [name, nameProps] = defineField('name');
 				v-model="name"
 				v-bind="nameProps"
 				v-focus
-				:maxlength="MAX.NAME" />
+				:maxlength="MAX.NAME"
+				autocomplete="off" />
 		</FormControl>
+
+		<slot></slot>
 
 		<slot name="form-action"></slot>
 	</Flex>

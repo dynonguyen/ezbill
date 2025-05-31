@@ -15,6 +15,7 @@ end $$;
 
 drop table if exists public.bills;
 drop table if exists public.groups;
+drop table if exists public.error_logs;
 
 drop function if exists create_group_view(uuid);
 drop function if exists create_bill_view(uuid);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createGroup } from '@/apis/supabase';
+import { createGroup, importGroup } from '@/apis/supabase';
 import InviteLink from '@/components/InviteLink.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
@@ -12,17 +12,22 @@ import type { Group } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import GroupForm from './GroupForm.vue';
+import GroupForm, { type GroupFormModel } from './GroupForm.vue';
+import ImportBackupFile, { type ImportedModel } from './ImportBackupFile.vue';
 
 const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
 
-const { isPending, mutateAsync } = useMutation({ mutationFn: createGroup });
+const createGroupMutation = useMutation({ mutationFn: createGroup });
+const importGroupMutation = useMutation({ mutationFn: importGroup });
+
 const toast = useToast();
 const router = useRouter();
 const localDBStore = useLocalDBStore();
+const importedFile = ref<ImportedModel>(null);
+const groupFormModel = ref<GroupFormModel>();
 
 const handleClose = () => {
 	open.value = false;
@@ -33,7 +38,14 @@ const handleAddGroup = async (form: Pick<Group, 'name'>) => {
 	const { name } = form;
 	const groupId = generateUUID();
 
-	const [error] = await to(mutateAsync({ name, id: groupId }));
+	const mutationAction = importedFile.value
+		? importGroupMutation.mutateAsync({
+				imported: importedFile.value.data,
+				newGroupInfo: { name, id: groupId },
+			})
+		: createGroupMutation.mutateAsync({ name, id: groupId });
+
+	const [error] = await to(mutationAction);
 
 	if (error) {
 		return toast.error(error?.message || 'Tạo nhóm thất bại');
@@ -47,6 +59,17 @@ const handleViewGroup = () => {
 	router.push({ path: PATH.GROUP.replace(':id', inviteGroupId.value) });
 	handleClose();
 };
+
+watch(
+	() => importedFile.value?.data.group.name,
+	(name) => {
+		if (name) groupFormModel.value?.setFieldValue('name', name);
+	},
+);
+
+const isPending = computed(
+	() => createGroupMutation.isPending.value || importGroupMutation.isPending.value,
+);
 </script>
 
 <template>
@@ -55,14 +78,23 @@ const handleViewGroup = () => {
 		:header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm'"
 		hide-close-button>
 		<template v-if="open">
-			<GroupForm v-if="!inviteGroupId" @close="handleClose" @submit="handleAddGroup">
-				<template #form-action>
-					<Flex class="gap-2" items-fluid>
-						<Button variant="soft" color="grey" @click="handleClose">Đóng</Button>
-						<Button type="submit" :loading="isPending">Tạo</Button>
-					</Flex>
-				</template>
-			</GroupForm>
+			<template v-if="!inviteGroupId">
+				<GroupForm
+					@close="handleClose"
+					@submit="handleAddGroup"
+					v-model:model-value="groupFormModel">
+					<template #default>
+						<ImportBackupFile v-model="importedFile" />
+					</template>
+
+					<template #form-action>
+						<Flex class="gap-2" items-fluid>
+							<Button variant="soft" color="grey" @click="handleClose">Đóng</Button>
+							<Button type="submit" :loading="isPending">Tạo</Button>
+						</Flex>
+					</template>
+				</GroupForm>
+			</template>
 			<InviteLink v-else :id="inviteGroupId">
 				<template #action>
 					<Flex class="gap-2 mt-4" items-fluid>

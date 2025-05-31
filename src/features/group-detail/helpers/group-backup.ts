@@ -3,6 +3,8 @@ import { getGroupLink, saveFileAs } from '@/utils/helpers';
 import dayjs from 'dayjs';
 import { Workbook, type Column, type Font } from 'exceljs';
 
+const BACKUP_SHEET_NAME = 'Backup';
+
 const generateInformationSheet = (wb: Workbook, group: Group) => {
 	const ROW_HEIGHT = 16;
 	const COL_COMMON_STYLE: { font: Partial<Font> } = { font: { name: 'Arial', size: 12 } };
@@ -247,13 +249,44 @@ const generateDetailSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 	});
 };
 
+const generateBackupSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
+	const ws = wb.addWorksheet(BACKUP_SHEET_NAME, { state: 'hidden' });
+
+	ws.getCell('A1').value = JSON.stringify(group || {});
+	ws.getCell('A2').value = JSON.stringify(bills || []);
+};
+
 export const exportGroupToExcel = async (group: Group, bills: Bill[]) => {
 	const wb = new Workbook();
 
 	generateOverviewSheet(wb, group, bills);
 	generateDetailSheet(wb, group, bills);
 	generateInformationSheet(wb, group);
+	generateBackupSheet(wb, group, bills);
 
 	const buffer = await wb.xlsx.writeBuffer();
 	saveFileAs(new Blob([buffer]), `${group.name}.xlsx`);
 };
+
+export type ImportedBackup = { group: Group; bills: Bill[] };
+export async function readBackupFromExcel(file: File): Promise<ImportedBackup> {
+	const wb = new Workbook();
+
+	const buffer = await file.arrayBuffer();
+
+	await wb.xlsx.load(buffer);
+	const ws = wb.getWorksheet(BACKUP_SHEET_NAME);
+
+	if (!ws) throw new Error('Backup sheet not found');
+
+	const groupCell = ws.getCell('A1').value;
+	const billsCell = ws.getCell('A2').value;
+
+	try {
+		const group = typeof groupCell === 'string' ? JSON.parse(groupCell) : {};
+		const bills = typeof billsCell === 'string' ? JSON.parse(billsCell) : [];
+		return { group, bills };
+	} catch {
+		throw new Error('Invalid backup data format');
+	}
+}

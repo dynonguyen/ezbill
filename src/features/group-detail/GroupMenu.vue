@@ -45,7 +45,7 @@ const handleClose = () => {
 };
 
 const exportGroup = () => {
-	import('./helpers/export-to-excel').then(({ exportGroupToExcel }) => {
+	import('./helpers/group-backup').then(({ exportGroupToExcel }) => {
 		exportGroupToExcel(group.value, bills.value);
 	});
 };
@@ -93,7 +93,7 @@ const items = ref<
 		action: () => (openShareGroup.value = true),
 	},
 	{
-		label: 'Xuất file excel',
+		label: 'Xuất ra file excel',
 		icon: 'icon msi-file-save-rounded size-5',
 		action: exportGroup,
 	},
