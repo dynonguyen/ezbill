@@ -189,4 +189,15 @@ const items = ref<
 			</Flex>
 		</template>
 	</Dialog>
+
+	<Dialog v-model:open="showImport" header="Nhập từ file excel">
+		<UploadBackupFile />
+
+		<template #action>
+			<Flex class="gap-2" items-fluid>
+				<Button variant="soft" color="grey" @click="showImport = false">Đóng</Button>
+				<Button color="primary">Tải lên</Button>
+			</Flex>
+		</template>
+	</Dialog>
 </template>
