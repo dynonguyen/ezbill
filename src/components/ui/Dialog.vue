@@ -123,12 +123,12 @@ const backdropDisplay = computed(() => {
 
 					<div
 						class="grow overflow-auto px-4 dialog-body"
-						:class="{ 'pt-4': $slots.header || header }"
+						:class="{ 'pt-4': $slots.header || header, 'pb-4': $slots.action || !hideCloseButton }"
 						v-bind="pt?.body">
 						<slot></slot>
 					</div>
 
-					<div v-if="!hideCloseButton" class="px-4 pt-4">
+					<div v-if="!hideCloseButton" class="px-4">
 						<Flex class="gap-2" items-fluid v-bind="pt?.actionWrap">
 							<Button variant="soft" color="grey" @click="handleDialogClose" v-bind="pt?.closeBtn">
 								Đóng
@@ -137,7 +137,7 @@ const backdropDisplay = computed(() => {
 						</Flex>
 					</div>
 
-					<div v-if="$slots.action && hideCloseButton" class="px-4 pt-4">
+					<div v-if="$slots.action && hideCloseButton" class="px-4">
 						<slot name="action"></slot>
 					</div>
 				</Flex>
@@ -158,7 +158,7 @@ const backdropDisplay = computed(() => {
 							{{ confirmClose?.title ?? 'Xác nhận đóng' }}
 						</Typography>
 
-						<div class="grow overflow-auto px-4 dialog-body pt-4">
+						<div class="grow overflow-auto px-4 dialog-body py-4">
 							<Typography class="text-center">
 								{{
 									confirmClose?.message ??
@@ -167,7 +167,7 @@ const backdropDisplay = computed(() => {
 							</Typography>
 						</div>
 
-						<div class="px-4 pt-4">
+						<div class="px-4">
 							<Flex class="gap-2" items-fluid>
 								<Button variant="soft" color="grey" @click="showConfirmCloseDialog = false">
 									Không

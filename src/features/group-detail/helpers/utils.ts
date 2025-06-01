@@ -1,5 +1,7 @@
 import { BillType, type BillMember, type Member } from '@/types/entities';
+import { isDesktopByResolution } from '@/utils/helpers';
 import { match } from 'ts-pattern';
+import { nextTick } from 'vue';
 
 type BillTypeMappingResult = {
 	type: BillType;
@@ -80,4 +82,12 @@ export function splitExactly(amount: number, memberAmounts: BillMember): BillMem
 	}
 
 	return result;
+}
+
+export function focusOnToggleForDesktop(id: string) {
+	if (isDesktopByResolution()) {
+		nextTick(() => {
+			document.getElementById(id)?.focus();
+		});
+	}
 }

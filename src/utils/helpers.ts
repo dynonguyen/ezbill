@@ -41,24 +41,11 @@ export function hasEventPassed(evName: string): boolean {
 	return getCurrentInstance()?.vnode?.props?.[evName];
 }
 
-export function debounce<T extends (...args: any[]) => any>(
-	fn: T,
-	delay: number,
-): (...args: Parameters<T>) => void {
-	let timeoutId: ReturnType<typeof setTimeout>;
-
-	return function (this: unknown, ...args: Parameters<T>) {
-		if (timeoutId) {
-			clearTimeout(timeoutId);
-		}
-
-		timeoutId = setTimeout(() => {
-			fn.apply(this, args);
-		}, delay);
-	};
-}
-
 export const veeValidateFocusOnError = ({ errors }: any) => {
 	const firstField = Object.keys(errors)[0];
 	(document.querySelector(`input[name="${firstField}"]`) as HTMLInputElement)?.focus();
+};
+
+export const isDesktopByResolution = (): boolean => {
+	return window.innerWidth >= 1024;
 };

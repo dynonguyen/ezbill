@@ -9,7 +9,11 @@ import vueDevTools from 'vite-plugin-vue-devtools';
 
 const BASE_URL = process.env.VITE_BASE_URL || '';
 
-const injectData = { baseUrl: BASE_URL, appName: 'Ezbill', releaseDate: new Date().toISOString() };
+const injectData = {
+	baseUrl: BASE_URL,
+	appName: 'Ezbill',
+	releaseDate: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+};
 
 const plugins: PluginOption[] = [vue(), ViteEjsPlugin(injectData)];
 

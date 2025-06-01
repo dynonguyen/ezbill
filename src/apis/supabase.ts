@@ -1,7 +1,9 @@
+import type { ImportedBackup } from '@/features/group-detail/helpers/group-backup';
 import { getTotalMemberAmount } from '@/features/group-detail/helpers/utils';
 import { createClient } from '@supabase/supabase-js';
 import to from 'await-to-js';
 import dayjs from 'dayjs';
+import { omit } from 'es-toolkit';
 import type { Bill, Group, Member } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 
@@ -11,7 +13,7 @@ const getGroupView = (groupId: string) => `group_${groupId}`;
 const getBillView = (groupId: string) => `bill_${groupId}`;
 
 // Group
-export const createGroup = async (group: Pick<Group, 'name' | 'id'>) => {
+export const createGroup = async (group: Pick<Group, 'name' | 'id'> & Partial<Group>) => {
 	const gData = await supabase.from('groups').insert(group);
 	if (gData.error) throw gData.error;
 
@@ -172,6 +174,34 @@ export const deleteBill = async (data: { groupId: Group['id']; billId: Bill['id'
 	const resp = await supabase.from(getBillView(groupId)).delete().eq('id', billId);
 
 	if (resp.error) throw resp.error;
+};
+
+// Import data
+export const importGroup = async (data: {
+	imported: ImportedBackup;
+	newGroupInfo: Pick<Group, 'name' | 'id'>;
+}) => {
+	return new Promise<void>((resolve, reject) => {
+		const { imported, newGroupInfo } = data;
+
+		const { id } = newGroupInfo;
+
+		createGroup({ ...imported.group, ...newGroupInfo }).then(() => {
+			const bills = imported.bills.map((bill) => ({
+				...omit(bill, ['id', 'groupId']),
+				groupId: id,
+			}));
+
+			// Waiting for group, bill view creation
+			setTimeout(async () => {
+				const resp = await supabase.from(getBillView(id)).insert(bills);
+
+				if (resp.error) reject(resp.error);
+
+				resolve();
+			}, 200);
+		});
+	});
 };
 
 // Error logs

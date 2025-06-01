@@ -2,9 +2,10 @@
 import CurrencyInput from '@/components/ui/CurrencyInput.vue';
 import Flex from '@/components/ui/Flex.vue';
 import type { BillMember } from '@/types/entities';
-import { debounce, toVND } from '@/utils/helpers';
-import { computed, nextTick, watch } from 'vue';
-import { getTotalMemberAmount } from '../../helpers/utils';
+import { toVND } from '@/utils/helpers';
+import { debounce } from 'es-toolkit';
+import { computed, watch } from 'vue';
+import { focusOnToggleForDesktop, getTotalMemberAmount } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
@@ -27,11 +28,9 @@ const handleMemberAmountChange = debounce((id: string, value: number) => {
 	memberAmounts.value[id] = value;
 }, 350);
 
-const handleFocusOnToggle = (enabled: boolean, id: string) => {
+const handleToggle = (enabled: boolean, id: string) => {
 	if (enabled) {
-		nextTick(() => {
-			document.getElementById(`${id}-exact-amount`)?.focus();
-		});
+		focusOnToggleForDesktop(`${id}-exact-amount`);
 	}
 };
 
@@ -56,7 +55,7 @@ const remaining = computed(() => {
 			}))"
 			:key="m.id"
 			:member="m"
-			@toggle="handleFocusOnToggle(!m.checked, m.id)">
+			@toggle="handleToggle(!m.checked, m.id)">
 			<template #action>
 				<CurrencyInput
 					v-if="m.checked"
