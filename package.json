@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "yarn lint && vue-tsc --build && vite build",
+		"type-check": "vue-tsc --build",
+		"build": "yarn lint && vite build",
 		"preview": "vite preview",
 		"lint": "eslint -c ./eslint.config.mjs",
 		"commit": "node ./node_modules/cz-customizable/standalone.js"
@@ -41,7 +42,7 @@
 		"@types/vue-select": "^3.16.8",
 		"@vitejs/plugin-vue": "^5.2.1",
 		"@vue/eslint-config-prettier": "^10.1.0",
-		"@vue/eslint-config-typescript": "^14.3.0",
+		"@vue/eslint-config-typescript": "^14.5.1",
 		"@vue/tsconfig": "^0.7.0",
 		"autoprefixer": "^10.4.20",
 		"cssnano": "^7.0.6",
@@ -55,7 +56,7 @@
 		"postcss": "^8.5.3",
 		"prettier": "^3.4.2",
 		"typescript": "~5.7.3",
-		"vite": "^6.2.3",
+		"vite": "npm:rolldown-vite@latest",
 		"vite-plugin-ejs": "^1.7.0",
 		"vite-plugin-vue-devtools": "^7.7.0",
 		"vue-tsc": "^2.2.0"

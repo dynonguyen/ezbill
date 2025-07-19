@@ -8,7 +8,7 @@ import Flex from '@/components/ui/Flex.vue';
 import { PATH } from '@/constants/path';
 import { useToast } from '@/hooks/useToast';
 import { useLocalDBStore } from '@/stores/local-db';
-import type { Group } from '@/types/entities';
+import { PaymentTrackingMode, type Group } from '@/types/entities';
 import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
@@ -34,16 +34,16 @@ const handleClose = () => {
 	inviteGroupId.value = '';
 };
 
-const handleAddGroup = async (form: Pick<Group, 'name'>) => {
-	const { name } = form;
+const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>) => {
+	const { name, paymentTrackingMode } = form;
 	const groupId = generateUUID();
 
 	const mutationAction = importedFile.value
 		? importGroupMutation.mutateAsync({
 				imported: importedFile.value.data,
-				newGroupInfo: { name, id: groupId },
+				newGroupInfo: { name, id: groupId, paymentTrackingMode },
 			})
-		: createGroupMutation.mutateAsync({ name, id: groupId });
+		: createGroupMutation.mutateAsync({ name, id: groupId, paymentTrackingMode });
 
 	const [error] = await to(mutationAction);
 
@@ -61,9 +61,13 @@ const handleViewGroup = () => {
 };
 
 watch(
-	() => importedFile.value?.data.group.name,
-	(name) => {
-		if (name) groupFormModel.value?.setFieldValue('name', name);
+	() => [importedFile.value?.data.group.name, importedFile.value?.data.group.paymentTrackingMode],
+	([name, paymentTrackingMode]) => {
+		groupFormModel.value?.setFieldValue('name', name ?? '');
+		groupFormModel.value?.setFieldValue(
+			'paymentTrackingMode',
+			(paymentTrackingMode || PaymentTrackingMode.Accountant) as PaymentTrackingMode,
+		);
 	},
 );
 

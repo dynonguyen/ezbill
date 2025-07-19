@@ -82,7 +82,7 @@ const items = ref<
 	Array<{ label: string; icon: string; action(): void; hasDivider?: boolean; itemClass?: string }>
 >([
 	{
-		label: 'Sửa tên nhóm',
+		label: 'Cập nhật nhóm',
 		icon: 'icon msi-edit-rounded size-5',
 		hasDivider: true,
 		action: () => (openEditGroupName.value = true),
@@ -147,7 +147,7 @@ const items = ref<
 	<Dialog v-model:open="openEditGroupName" header="Sửa tên nhóm" hide-close-button>
 		<GroupForm
 			v-if="openEditGroupName"
-			:initial-values="{ name: group.name }"
+			:initial-values="{ name: group.name, paymentTrackingMode: group.paymentTrackingMode }"
 			@submit="handleEditGroup">
 			<template #form-action>
 				<Flex class="gap-2" items-fluid>

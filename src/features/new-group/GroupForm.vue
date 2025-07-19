@@ -2,11 +2,13 @@
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import { vFocus } from '@/directives/v-focus';
+import { PaymentTrackingMode } from '@/types/entities';
 import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { onMounted } from 'vue';
 import { z } from 'zod';
+import PaymentTrackingModeSelect from './PaymentTrackingModeSelect.vue';
 
 const emit = defineEmits<{ submit: [form: GroupForm] }>();
 const props = defineProps<{ initialValues?: GroupForm }>();
@@ -16,6 +18,7 @@ const MAX = {
 };
 const schema = z.object({
 	name: z.string().trim().nonempty('Bắt buộc').default(''),
+	paymentTrackingMode: z.nativeEnum(PaymentTrackingMode).default(PaymentTrackingMode.Accountant),
 });
 
 type GroupForm = z.infer<typeof schema>;
@@ -41,6 +44,7 @@ onMounted(() => {
 });
 
 const [name, nameProps] = defineField('name');
+const [paymentTrackingMode, _] = defineField('paymentTrackingMode');
 </script>
 
 <template>
@@ -62,6 +66,8 @@ const [name, nameProps] = defineField('name');
 				:maxlength="MAX.NAME"
 				autocomplete="off" />
 		</FormControl>
+
+		<PaymentTrackingModeSelect v-model="paymentTrackingMode" />
 
 		<slot></slot>
 

@@ -10,7 +10,9 @@ const localStoreDB = useLocalDBStore();
 
 <template>
 	<Flex stack class="gap-4 h-full py-4 grow overflow-auto">
-		<Typography variant="mdSemiBold" class="px-4 text-black">Nhóm của bạn</Typography>
+		<Typography variant="mdSemiBold" class="px-4 text-black">
+			Nhóm của bạn ({{ localStoreDB.joinedGroups.length }})
+		</Typography>
 
 		<img
 			v-if="!localStoreDB.joinedGroups.length"

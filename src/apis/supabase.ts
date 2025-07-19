@@ -13,7 +13,9 @@ const getGroupView = (groupId: string) => `group_${groupId}`;
 const getBillView = (groupId: string) => `bill_${groupId}`;
 
 // Group
-export const createGroup = async (group: Pick<Group, 'name' | 'id'> & Partial<Group>) => {
+export const createGroup = async (
+	group: Pick<Group, 'name' | 'id' | 'paymentTrackingMode'> & Partial<Group>,
+) => {
 	const gData = await supabase.from('groups').insert(group);
 	if (gData.error) throw gData.error;
 
@@ -179,7 +181,7 @@ export const deleteBill = async (data: { groupId: Group['id']; billId: Bill['id'
 // Import data
 export const importGroup = async (data: {
 	imported: ImportedBackup;
-	newGroupInfo: Pick<Group, 'name' | 'id'>;
+	newGroupInfo: Pick<Group, 'name' | 'id' | 'paymentTrackingMode'>;
 }) => {
 	return new Promise<void>((resolve, reject) => {
 		const { imported, newGroupInfo } = data;
