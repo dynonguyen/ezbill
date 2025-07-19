@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { toVND } from '@/utils/helpers';
 
-defineProps<{
+export type CurrencyTextProps = {
 	amount: number;
 	amountClass?: string;
 	unitClass?: string;
 	showSign?: boolean;
 	fixed?: number;
-}>();
+};
+
+defineProps<CurrencyTextProps>();
 </script>
 
 <template>

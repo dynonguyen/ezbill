@@ -15,7 +15,7 @@ import AccountingIcon from './AccountingIcon.vue';
 import MemberEditingForm from './MemberEditingPopup.vue';
 
 const props = defineProps<{ member: Member; index: number }>();
-const { group } = useGroupContext();
+const { group, isAccountantMode } = useGroupContext();
 const bills = useBillsContext();
 const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
 	mutationFn: removeMember,
@@ -49,7 +49,7 @@ const handleDelete = async () => {
 
 <template>
 	<Flex stack>
-		<div v-if="index > 0" class="!my-2 divider" />
+		<div v-if="index > 0" class="!my-2 divider"></div>
 
 		<Flex class="gap-2 justify-between">
 			<MemberAvatar v-bind="member" :show-tooltip="false" class="shrink-0" />
@@ -58,7 +58,10 @@ const handleDelete = async () => {
 				<Typography :title="member.name" variant="smRegular" class="line-clamp-1 break-all">
 					{{ member.name }}
 				</Typography>
-				<span v-if="member.isAccounting" data-tip="Kế toán" class="tooltip tooltip-top shrink-0">
+				<span
+					v-if="isAccountantMode && member.isAccounting"
+					data-tip="Kế toán"
+					class="tooltip tooltip-top shrink-0">
 					<AccountingIcon />
 				</span>
 			</Flex>

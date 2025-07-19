@@ -7,7 +7,7 @@ import { computed } from 'vue';
 import { useGroupContext } from './hooks/useGroupContext';
 import AccountingIcon from './members/AccountingIcon.vue';
 
-const { group } = useGroupContext();
+const { group, isAccountantMode } = useGroupContext();
 const value = defineModel<Bill['createdBy'] | null>('value');
 
 const createdByOptions = computed(() => {
@@ -27,7 +27,7 @@ const createdByOptions = computed(() => {
 			<Flex class="gap-2 w-full">
 				<MemberAvatar v-bind="option" size="sm" />
 				<span>{{ option.name }}</span>
-				<AccountingIcon v-if="option.isAccounting" />
+				<AccountingIcon v-if="isAccountantMode && option.isAccounting" />
 			</Flex>
 		</template>
 	</Autocomplete>

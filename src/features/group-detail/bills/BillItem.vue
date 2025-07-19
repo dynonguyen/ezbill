@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import CurrencyText from '@/components/CurrencyText.vue';
+import CurrencyText, { type CurrencyTextProps } from '@/components/CurrencyText.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import type { Bill } from '@/types/entities';
 import { hasEventPassed } from '@/utils/helpers';
 import dayjs from 'dayjs';
+import type { HTMLAttributes } from 'vue';
 import { useGroupContext } from '../hooks/useGroupContext';
 
-defineProps<{ bill: Bill }>();
+defineProps<{ bill: Bill; pt?: { currencyText?: Partial<CurrencyTextProps> & HTMLAttributes } }>();
 defineEmits<{ delete: []; viewDetail: [] }>();
 
 const { group } = useGroupContext();
@@ -35,7 +36,8 @@ const getBillInfo = (bill: Bill) => {
 				amount-class="text-md font-semibold"
 				unit-class="text-sm"
 				class="shrink-0"
-				:fixed="0" />
+				:fixed="0"
+				v-bind="pt?.currencyText" />
 		</Flex>
 
 		<Flex class="gap-2 justify-between flex-wrap">

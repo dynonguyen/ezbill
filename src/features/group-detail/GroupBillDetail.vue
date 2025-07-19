@@ -132,7 +132,7 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 						<span :class="item[0]"></span>
 						<Typography variant="xsRegular">{{ item[1] }}</Typography>
 					</Flex>
-					<Dialog v-model:open="showPaymentModeTooltip">
+					<Dialog v-model:open="showPaymentModeTooltip" header="Chế độ theo dõi thanh toán">
 						<PaymentTrackingHelper />
 					</Dialog>
 				</Flex>
