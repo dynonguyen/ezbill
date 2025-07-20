@@ -6,18 +6,18 @@ import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import type { Member } from '@/types/entities';
 import { computed, ref } from 'vue';
-import { useBillsContext } from '../hooks/useBillsContext';
-import { useGroupContext } from '../hooks/useGroupContext';
-import AccountingMaker from '../members/AccountingMaker.vue';
+import { useBillsContext } from '../../hooks/useBillsContext';
+import { useGroupContext } from '../../hooks/useGroupContext';
+import AccountingMaker from '../../members/AccountingMaker.vue';
+import BankQR from '../BankQR.vue';
 import BalanceDetail from './BalanceDetail.vue';
-import BankQR from './BankQR.vue';
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
 
 type MemberBalance = { member: Member; paid: number; spent: number; balance: number };
 
-const amounts = computed(() => {
+const balances = computed(() => {
 	const result = group.value.members.reduce(
 		(acc, member) => {
 			acc[member.id] = { member, paid: 0, spent: 0, balance: 0 };
@@ -47,7 +47,7 @@ const detailId = ref<Member['id'] | null>(null);
 const transferId = ref<Member['id'] | null>(null);
 
 const transferInfo = computed(() =>
-	amounts.value.find((item) => item.member.id === transferId.value),
+	balances.value.find((item) => item.member.id === transferId.value),
 );
 
 const accounting = computed(() => group.value.members.find((member) => member.isAccounting));
@@ -56,7 +56,7 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 <template>
 	<Flex stack class="gap-2">
 		<Flex
-			v-for="item in amounts"
+			v-for="item in balances"
 			:key="item.member.id"
 			stack
 			class="gap-2 p-4 rounded-xl bg-gray-100 cursor-pointer hover:bg-gray-200"

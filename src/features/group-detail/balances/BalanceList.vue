@@ -3,8 +3,8 @@ import Flex from '@/components/ui/Flex.vue';
 import { getImgUrl } from '@/utils/get-asset';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
-import AccountantMode from './AccountantMode.vue';
-import TrackingMode from './TrackingMode.vue';
+import AccountantMode from './accountant-mode/AccountantMode.vue';
+import TrackingMode from './tracking-mode/TrackingMode.vue';
 
 const { isAccountantMode } = useGroupContext();
 const bills = useBillsContext();

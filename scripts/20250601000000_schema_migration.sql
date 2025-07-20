@@ -117,7 +117,24 @@ begin
     ) LOOP
         group_id_uuid := rec.id;
         PERFORM create_group_view(group_id_uuid);
-        RAISE NOTICE 'Created view for group_id: %', group_id_uuid;
+        RAISE NOTICE 'Created group view for group_id: %', group_id_uuid;
+    END LOOP;
+end;
+$$ language plpgsql security definer;
+
+create or replace function create_all_bill_views()
+returns void as $$
+declare
+    rec RECORD;
+    group_id_uuid uuid;
+begin
+		FOR rec IN (
+			SELECT id
+			FROM groups
+    ) LOOP
+        group_id_uuid := rec.id;
+        PERFORM create_bill_view(group_id_uuid);
+        RAISE NOTICE 'Created bill view for group_id: %', group_id_uuid;
     END LOOP;
 end;
 $$ language plpgsql security definer;

@@ -9,11 +9,11 @@ const tooltips = [
 		...PAYMENT_TRACKING_LABEL_MAPPING[PaymentTrackingMode.Accountant],
 		mode: PaymentTrackingMode.Tracking,
 		description:
-			'Một thành viên làm "kế toán" tạm thời sẽ tổng hợp tất cả các khoản thu chi trong suốt chuyến đi. Sau khi kết thúc, các thành viên chỉ cần chuyển tiền một lần cho người này (hoặc ngược lại).',
+			'Một thành viên được chọn làm "kế toán". Khi kết thúc, các thành viên chỉ cần chuyển tiền một lần cho người này (và ngược lại).',
 		bullets: [
 			'⭐ Dễ sử dụng, không cần theo dõi từng khoản nhỏ.',
 			'🧮 Chỉ tổng kết và thanh toán một lần sau cùng.',
-			'✅ Phù hợp cho các chuyến đi ngắn, du lịch, sự kiện trong ngày.',
+			'✅ Phù hợp cho các chuyến đi ngắn, du lịch.',
 		],
 	},
 	{
@@ -25,7 +25,7 @@ const tooltips = [
 			'⭐ Đánh dấu đã thanh toán từng khoản.',
 			'🔁 Theo dõi chi tiết và minh bạch.',
 			'🤝 Mọi người đều có thể chủ động thanh toán.',
-			'✅ Phù hợp với nhóm chơi lâu dài, bạn thân hay đồng nghiệp thường xuyên chi tiêu chung.',
+			'✅ Phù hợp với nhóm hoạt động lâu dài, bạn thân hay đồng nghiệp thường xuyên chi tiêu chung.',
 		],
 	},
 ];
