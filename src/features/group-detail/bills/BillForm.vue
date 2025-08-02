@@ -193,6 +193,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		name,
 		note,
 		members: omitZeroMemberAmounts(members),
+		paymentTracking: [],
 	};
 
 	emit('submit', formData);
@@ -218,7 +219,7 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 				class="[&_input]:w-full"
 				:helper-text="errors.amount">
 				<CurrencyInput
-					@change="(valStr) => setFieldValue('amount', Number(valStr))"
+					@change="(valStr: string) => setFieldValue('amount', Number(valStr))"
 					:input-props="{ placeholder: 'Nhập số tiền (VND)', name: 'amount' }"
 					:model-value="amountField" />
 

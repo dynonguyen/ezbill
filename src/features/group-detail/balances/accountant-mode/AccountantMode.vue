@@ -49,8 +49,21 @@ const transferId = ref<Member['id'] | null>(null);
 const transferInfo = computed(() =>
 	balances.value.find((item) => item.member.id === transferId.value),
 );
-
 const accounting = computed(() => group.value.members.find((member) => member.isAccounting));
+const transferTooltip = computed(() => {
+	if (!transferInfo.value) return '';
+	return transferInfo.value.balance < 0
+		? `Cần chuyển khoản cho kế toán <b>${accounting?.value?.name}</b> số tiền là `
+		: `Kế toán <b>${accounting?.value?.name}</b> cần chuyển khoản cho <b>${transferInfo?.value?.member.name}</b> số tiền là `;
+});
+const bankInfo = computed(() =>
+	Number(transferInfo.value?.balance) < 0
+		? accounting.value?.bankInfo
+		: transferInfo.value?.member.bankInfo,
+);
+const transferMember = computed(() =>
+	Number(transferInfo.value?.balance) < 0 ? accounting.value : transferInfo.value?.member,
+);
 </script>
 
 <template>
@@ -132,23 +145,8 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 		</Flex>
 		<Flex v-else-if="transferInfo" stack class="gap-4">
 			<Flex class="p-4 rounded-lg bg-blue-100">
-				<Typography variant="smRegular" v-if="transferInfo.balance < 0" class="text-slate-600">
-					Cần chuyển khoản cho kế toán
-					<strong>{{ accounting?.name }}</strong>
-					số tiền là
-					<CurrencyText
-						:amount="Math.abs(transferInfo.balance)"
-						:fixed="0"
-						class="inline-flex"
-						amount-class="font-semibold text-md"
-						unit-class="text-sm" />
-				</Typography>
-				<Typography v-else>
-					Kế toán
-					<strong>{{ accounting?.name }}</strong>
-					cần chuyển khoản cho
-					<strong>{{ transferInfo.member.name }}</strong>
-					số tiền là
+				<Typography variant="smRegular" class="text-slate-600">
+					<span v-html="transferTooltip"></span>
 					<CurrencyText
 						:amount="Math.abs(transferInfo.balance)"
 						:fixed="0"
@@ -158,10 +156,15 @@ const accounting = computed(() => group.value.members.find((member) => member.is
 				</Typography>
 			</Flex>
 
+			<Typography v-if="!bankInfo" variant="smRegular" class="text-amber-600">
+				Chưa có thông tin chuyển khoản của
+				<b>{{ transferMember?.name }}</b>
+			</Typography>
+
 			<BankQR
-				:bank-info="transferInfo.balance < 0 ? accounting?.bankInfo : transferInfo.member.bankInfo"
+				:bank-info="bankInfo"
 				:amount="Math.abs(transferInfo.balance)"
-				:member="transferInfo.balance < 0 ? accounting : transferInfo.member"
+				:member="transferMember!"
 				:is-accounting="transferInfo.balance < 0" />
 		</Flex>
 	</Dialog>
