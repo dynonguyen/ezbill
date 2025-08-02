@@ -91,8 +91,8 @@ const transferMember = computed(() =>
 						</Typography>
 
 						<Flex
-							class="gap-2 justify-end shrink-0 py-2"
 							v-if="item.balance !== 0 && !item.member.isAccounting"
+							class="gap-2 justify-end shrink-0 py-2"
 							@click.stop="transferId = item.member.id">
 							<Typography
 								variant="xsRegular"

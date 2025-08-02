@@ -1,4 +1,4 @@
-import { BillType, type BillMember, type Member } from '@/types/entities';
+import { BillType, type Bill, type BillMember, type Member } from '@/types/entities';
 import { isDesktopByResolution } from '@/utils/helpers';
 import { match } from 'ts-pattern';
 import { nextTick } from 'vue';
@@ -91,3 +91,13 @@ export function focusOnToggleForDesktop(id: string) {
 		});
 	}
 }
+
+export const isMemberPaid = (bill: Bill, memberId: string): boolean => {
+	return bill.paymentTracking.some((tracking) => tracking.memberId === memberId);
+};
+
+export const isAllPaid = (bill: Bill): boolean => {
+	return Object.entries(bill.members).every(([memberId, amount]) => {
+		return amount <= 0 || memberId === bill.createdBy || isMemberPaid(bill, memberId);
+	});
+};

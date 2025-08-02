@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createBill } from '@/apis/supabase';
+import { createBill, createErrorLog } from '@/apis/supabase';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import { useToast } from '@/hooks/useToast';
@@ -22,7 +22,8 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	const [error] = await to(mutateAsync(form));
 
 	if (error) {
-		return toast.error(error?.message || 'Tạo bill thất bại');
+		void createErrorLog({ error: error?.message });
+		return toast.error('Tạo bill thất bại');
 	}
 
 	open.value = false;

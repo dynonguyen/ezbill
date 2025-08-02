@@ -34,7 +34,7 @@ const {
 });
 
 const openNewBill = ref(false);
-const billTab = ref<BillTabValue>('bills');
+const billTab = ref<BillTabValue>('balances'); // MOCK
 const showPaymentModeTooltip = ref(false);
 
 watch(error, () => {

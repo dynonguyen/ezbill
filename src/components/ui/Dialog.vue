@@ -23,6 +23,7 @@ const props = defineProps<{
 		title?: string;
 		message?: string;
 	};
+	noScrollBody?: boolean;
 	pt?: {
 		body?: HTMLAttributes;
 		contentWrap?: HTMLAttributes;
@@ -122,8 +123,12 @@ const backdropDisplay = computed(() => {
 					</slot>
 
 					<div
-						class="grow overflow-auto px-4 dialog-body"
-						:class="{ 'pt-4': $slots.header || header, 'pb-4': $slots.action || !hideCloseButton }"
+						class="grow px-4 dialog-body"
+						:class="{
+							'pt-4': $slots.header || header,
+							'pb-4': $slots.action || !hideCloseButton,
+							'overflow-auto': !noScrollBody,
+						}"
 						v-bind="pt?.body">
 						<slot></slot>
 					</div>
@@ -158,7 +163,7 @@ const backdropDisplay = computed(() => {
 							{{ confirmClose?.title ?? 'Xác nhận đóng' }}
 						</Typography>
 
-						<div class="grow overflow-auto px-4 dialog-body py-4">
+						<div class="grow px-4 dialog-body py-4 overflow-auto">
 							<Typography class="text-center">
 								{{
 									confirmClose?.message ??

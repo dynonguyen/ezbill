@@ -193,7 +193,7 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		name,
 		note,
 		members: omitZeroMemberAmounts(members),
-		paymentTracking: [],
+		paymentTracking: props.mode === 'new' ? [] : props.defaultBill?.paymentTracking || [],
 	};
 
 	emit('submit', formData);

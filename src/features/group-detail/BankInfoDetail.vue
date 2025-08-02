@@ -12,7 +12,7 @@ const bank = computed(() => BANKS.find((b) => props.bankInfo?.bin === b.bin));
 </script>
 
 <template>
-	<Flex stack class="border-t border-b border-dashed border-gray-300 gap-2 py-2">
+	<Flex stack class="border-t border-b border-dashed border-gray-300 gap-2 py-2 bank-info-detail">
 		<Flex class="justify-between">
 			<Typography variant="mdSemiBold">Thông tin chuyển khoản</Typography>
 			<slot name="action"></slot>

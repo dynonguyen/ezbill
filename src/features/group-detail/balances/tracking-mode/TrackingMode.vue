@@ -9,34 +9,58 @@ import { computed, ref } from 'vue';
 import { useBillsContext } from '../../hooks/useBillsContext';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import BalanceDetail from './BalanceDetail.vue';
+import TransferPopup from './TransferPopup.vue';
 
-type MemberBalance = { member: Member; amountToPay: number; amountReceived: number };
+type MemberBalance = {
+	member: Member;
+	amountToPay: number;
+	amountReceived: number;
+	balance: number;
+};
 
 const bills = useBillsContext();
 const { group } = useGroupContext();
 const detailId = ref<Member['id'] | null>(null);
+const transferId = ref<Member['id'] | null>(null);
 
-const balances = computed<MemberBalance[]>(() => {
+const balances = computed(() => {
 	const result = group.value.members.reduce(
 		(acc, member) => {
-			acc[member.id] = { member, amountReceived: 0, amountToPay: 0 };
+			acc[member.id] = { member, amountReceived: 0, amountToPay: 0, balance: 0 };
 			return acc;
 		},
 		{} as Record<Member['id'], MemberBalance>,
 	);
 
 	bills.value.forEach((bill) => {
-		const paidMembers = bill.paymentTracking.reduce((acc, tracking) => {
-			acc.add(tracking.memberId);
-			return acc;
-		}, new Set<string>());
+		let totalPaid = 0;
 
 		Object.entries(bill.members).forEach(([id, amount]) => {
-			console.log(`☕ DYNO DEBUG ~ TrackingMode.vue:36 🦫\n`, id, amount, paidMembers);
+			const isPaid = bill.paymentTracking.some((i) => i.memberId === id);
+			if (bill.createdBy !== id && !isPaid) {
+				result[id].amountToPay += amount;
+			}
+
+			if (isPaid) {
+				totalPaid += amount;
+			}
 		});
+
+		result[bill.createdBy].amountReceived +=
+			bill.amount - totalPaid - (bill.members[bill.createdBy] || 0);
 	});
 
-	return Object.values(result);
+	return Object.values(result).map((item) => {
+		const balance = item.amountReceived - item.amountToPay;
+		return {
+			...item,
+			balance,
+			displayItems: [
+				{ label: 'Cần trả', value: -item.amountToPay },
+				{ label: 'Nhận lại', value: item.amountReceived },
+			],
+		};
+	});
 });
 </script>
 
@@ -61,26 +85,29 @@ const balances = computed<MemberBalance[]>(() => {
 							:title="item.member.name">
 							{{ item.member.name }}
 						</Typography>
+
+						<Flex
+							v-if="item.amountToPay > 0"
+							class="gap-2 justify-end shrink-0 py-2"
+							@click.stop="transferId = item.member.id">
+							<Typography
+								variant="xsRegular"
+								class="text-sky-700 hover:text-sky-800 cursor-pointer shrink-0">
+								Chuyển khoản
+							</Typography>
+						</Flex>
 					</Flex>
 
-					<Flex class="justify-between gap-2">
-						<Typography variant="xsRegular" class="text-slate-500">Nhận lại:</Typography>
+					<Flex
+						v-for="{ label, value } in item.displayItems"
+						:key="label"
+						class="justify-between gap-2">
+						<Typography variant="xsRegular" class="text-slate-500">{{ label }}</Typography>
 						<CurrencyText
-							:amount="item.amountReceived"
+							:amount="value"
 							amount-class="font-semibold text-md"
 							unit-class="text-sm"
-							class="text-green-600"
-							show-sign
-							:fixed="0" />
-					</Flex>
-
-					<Flex class="justify-between gap-2">
-						<Typography variant="xsRegular" class="text-slate-500">Cần trả:</Typography>
-						<CurrencyText
-							:amount="-item.amountToPay"
-							amount-class="font-semibold text-md"
-							unit-class="text-sm"
-							class="text-red-500"
+							:class="value < 0 ? 'text-red-500' : 'text-green-600'"
 							show-sign
 							:fixed="0" />
 					</Flex>
@@ -92,4 +119,6 @@ const balances = computed<MemberBalance[]>(() => {
 	<Dialog :open="Boolean(detailId)" @close="detailId = null" header="Chi tiết số dư">
 		<BalanceDetail v-if="detailId" :id="detailId" />
 	</Dialog>
+
+	<TransferPopup v-if="transferId" v-model:member-id="transferId" />
 </template>

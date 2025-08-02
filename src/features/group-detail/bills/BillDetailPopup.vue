@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { updateBill } from '@/apis/supabase';
+import { createErrorLog, updateBill } from '@/apis/supabase';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import { useToast } from '@/hooks/useToast';
@@ -32,7 +32,8 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	const [error] = await to(updateMutateAsync({ id: detailId.value, ...form }));
 
 	if (error) {
-		return toast.error(error?.message || 'Chỉnh sửa bill thất bại');
+		void createErrorLog({ error: error?.message });
+		return toast.error('Chỉnh sửa bill thất bại');
 	}
 
 	detailId.value = null;

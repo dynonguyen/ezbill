@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createGroup, importGroup } from '@/apis/supabase';
+import { createErrorLog, createGroup, importGroup } from '@/apis/supabase';
 import InviteLink from '@/components/InviteLink.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
@@ -48,8 +48,11 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 	const [error] = await to(mutationAction);
 
 	if (error) {
-		return toast.error(error?.message || 'Tạo nhóm thất bại');
+		void createErrorLog({ error: error?.message });
+		return toast.error('Tạo nhóm thất bại');
 	}
+
+	importedFile.value = null;
 
 	localDBStore.joinGroup(groupId);
 	inviteGroupId.value = groupId;

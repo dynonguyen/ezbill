@@ -24,40 +24,43 @@ const getBillInfo = (bill: Bill) => {
 
 <template>
 	<Flex
-		stack
-		class="gap-1 p-4 border-t border-dashed border-gray-300 cursor-pointer hover:bg-gray-100"
+		class="!items-start gap-3 w-full border-t border-dashed border-gray-300 cursor-pointer hover:bg-gray-100 pr-4 py-4"
+		:class="!$slots['start-action'] && 'pl-4'"
 		@click="$emit('viewDetail')">
-		<Flex class="justify-between gap-2">
-			<Typography variant="mdSemiBold" class="text-black grow line-clamp-1 break-all">
-				{{ bill.name }}
-			</Typography>
-			<CurrencyText
-				:amount="bill.amount"
-				amount-class="text-md font-semibold"
-				unit-class="text-sm"
-				class="shrink-0"
-				:fixed="0"
-				v-bind="pt?.currencyText" />
-		</Flex>
-
-		<Flex class="gap-2 justify-between flex-wrap">
-			<Flex stack class="gap-1 grow">
-				<Flex v-for="item in getBillInfo(bill)" :key="item[0]" class="gap-2 text-slate-500">
-					<span class="size-4 icon" :class="item[0]"></span>
-					<Typography variant="xsRegular">{{ item[1] }}</Typography>
-				</Flex>
+		<slot name="start-action"></slot>
+		<Flex stack class="gap-1 grow">
+			<Flex class="justify-between gap-2">
+				<Typography variant="mdSemiBold" class="text-black grow line-clamp-1 break-all">
+					{{ bill.name }}
+				</Typography>
+				<CurrencyText
+					:amount="bill.amount"
+					amount-class="text-md font-semibold"
+					unit-class="text-sm"
+					class="shrink-0"
+					:fixed="0"
+					v-bind="pt?.currencyText" />
 			</Flex>
 
-			<Flex class="gap-2 self-end">
-				<Typography
-					v-if="hasEventPassed('onDelete')"
-					tabindex="0"
-					role="button"
-					variant="xsRegular"
-					class="text-red-700 hover:text-red-800 cursor-pointer pt-6 pl-6"
-					@click.stop="$emit('delete')">
-					Xoá
-				</Typography>
+			<Flex class="gap-2 justify-between flex-wrap">
+				<Flex stack class="gap-1 grow">
+					<Flex v-for="item in getBillInfo(bill)" :key="item[0]" class="gap-2 text-slate-500">
+						<span class="size-4 icon" :class="item[0]"></span>
+						<Typography variant="xsRegular">{{ item[1] }}</Typography>
+					</Flex>
+				</Flex>
+
+				<Flex class="gap-2 self-end">
+					<Typography
+						v-if="hasEventPassed('onDelete')"
+						tabindex="0"
+						role="button"
+						variant="xsRegular"
+						class="text-red-700 hover:text-red-800 cursor-pointer pt-6 pl-6"
+						@click.stop="$emit('delete')">
+						Xoá
+					</Typography>
+				</Flex>
 			</Flex>
 		</Flex>
 	</Flex>

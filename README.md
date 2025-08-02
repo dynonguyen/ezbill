@@ -34,3 +34,11 @@
 <img src="./.docs/demo/7.png" height="500px" />
 
 <img src="./.docs/demo/8.png" height="500px" />
+
+# Contributors
+
+<a href="https://github.com/dynonguyen/ezbill/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=dynonguyen/ezbill" height="40" />
+</a>
+
+🎨 Thanks for the design of Nguyen Duc Thien

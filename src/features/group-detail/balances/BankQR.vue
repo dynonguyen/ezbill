@@ -68,7 +68,7 @@ watch(
 </script>
 
 <template>
-	<Flex v-if="bankInfo" stack>
+	<Flex v-if="bankInfo" stack class="w-full">
 		<BankInfoDetail :bank-info="bankInfo" :amount="amount" :recipient="member.name">
 			<template #action>
 				<Flex class="gap-2">
