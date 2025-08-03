@@ -1,5 +1,6 @@
 import type { ImportedBackup } from '@/features/group-detail/helpers/group-backup';
 import { getTotalMemberAmount } from '@/features/group-detail/helpers/utils';
+import { retryOnFailure } from '@/utils/helpers';
 import { createClient } from '@supabase/supabase-js';
 import to from 'await-to-js';
 import dayjs from 'dayjs';
@@ -201,33 +202,36 @@ export const importGroup = async (data: {
 	imported: ImportedBackup;
 	newGroupInfo: Pick<Group, 'name' | 'id' | 'paymentTrackingMode'>;
 }) => {
-	return new Promise<void>((resolve, reject) => {
-		const { imported, newGroupInfo } = data;
+	const { imported, newGroupInfo } = data;
 
-		const { id } = newGroupInfo;
+	const { id } = newGroupInfo;
 
-		createGroup({ ...imported.group, ...newGroupInfo }).then(() => {
-			const bills = imported.bills.map((bill) => ({
-				...omit(bill, ['id', 'groupId']),
-				groupId: id,
-			}));
+	// Create group and views
+	await createGroup({ ...imported.group, ...newGroupInfo });
 
-			// Waiting for group, bill view creation
-			setTimeout(async () => {
-				const resp = await supabase.from(getBillView(id)).insert(bills);
+	const billView = getBillView(id);
+	const bills = imported.bills.map((bill) => ({
+		...omit(bill, ['id', 'groupId']),
+		groupId: id,
+	}));
 
-				if (resp.error) reject(resp.error);
-
-				resolve();
-			}, 200);
-		});
-	});
+	// Await to bill view creation before inserting bills
+	await retryOnFailure(
+		async () => {
+			const resp = await supabase.from(billView).insert(bills);
+			if (resp.status === 404) throw new Error('Failed to import bills');
+			if (resp.error) throw resp.error;
+		},
+		10,
+		500,
+	);
 };
 
 // Error logs
 export const createErrorLog = async (error: any) => {
 	const createdAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
-	await supabase
-		.from('error_logs')
-		.insert({ createdAt, log: error, path: window.location.href, ua: navigator.userAgent });
+	await supabase.from('error_logs').insert({
+		createdAt,
+		log: { path: window.location.href, ua: navigator.userAgent, error },
+	});
 };

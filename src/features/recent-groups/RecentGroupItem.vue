@@ -5,13 +5,15 @@ import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
+import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { useQuery } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 
 const props = defineProps<{ id: Group['id'] }>();
+const localStoreDB = useLocalDBStore();
 
 const queryKey = computed(() => [QUERY_KEY.GROUP, props.id]);
 const {
@@ -22,6 +24,12 @@ const {
 
 const MAX_AVATAR = 3;
 const groupDetailPath = computed(() => PATH.GROUP.replace(':id', props.id));
+
+watch(error, () => {
+	if (error.value?.message.includes('does not exist')) {
+		localStoreDB.removeFromGroup(props.id);
+	}
+});
 </script>
 
 <template>

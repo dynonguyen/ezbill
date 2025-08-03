@@ -54,7 +54,7 @@
 		"postcss": "^8.5.3",
 		"prettier": "^3.4.2",
 		"typescript": "~5.7.3",
-		"vite": "npm:rolldown-vite@latest",
+		"vite": "^7.0.6",
 		"vite-plugin-ejs": "^1.7.0",
 		"vite-plugin-vue-devtools": "^7.7.0",
 		"vue-tsc": "^2.2.0"

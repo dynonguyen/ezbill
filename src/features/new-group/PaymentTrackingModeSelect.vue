@@ -25,7 +25,7 @@ const options = Object.values(PaymentTrackingMode).map((mode) => ({
 			</Flex>
 		</Flex>
 
-		<Flex class="gap-4">
+		<Flex class="gap-4" wrap>
 			<Flex
 				v-for="opt in options"
 				:key="opt.value"

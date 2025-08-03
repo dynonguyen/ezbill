@@ -49,3 +49,24 @@ export const veeValidateFocusOnError = ({ errors }: any) => {
 export const isDesktopByResolution = (): boolean => {
 	return window.innerWidth >= 1024;
 };
+
+export const retryOnFailure = async <T>(
+	fn: () => Promise<T>,
+	retries = 3,
+	delay = 1000,
+): Promise<T> => {
+	let lastError: Error | null = null;
+
+	for (let i = 0; i < retries; i++) {
+		try {
+			return await fn();
+		} catch (error) {
+			lastError = error as Error;
+			if (i < retries - 1) {
+				await new Promise((resolve) => setTimeout(resolve, delay));
+			}
+		}
+	}
+
+	throw lastError;
+};

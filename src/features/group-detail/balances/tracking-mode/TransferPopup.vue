@@ -38,7 +38,8 @@ const memberBills = computed(() => {
 				b.members[memberId.value] > 0 &&
 				!isMemberPaid(b, memberId.value),
 		)
-		.map((b) => ({ ...b, amount: -b.members[memberId.value] }));
+		.map((b) => ({ ...b, amount: -b.members[memberId.value] }))
+		.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 });
 
 const totalPaid = computed(() => {
@@ -112,7 +113,7 @@ const handleMarkAsPaid = async () => {
 		:open="Boolean(memberId)"
 		@close="handleClose"
 		header="Thanh toán dư nợ"
-		:pt="{ body: { class: selected.size ? 'pb-0' : 'pb-4' } }">
+		:pt="{ body: { class: selected.size ? '!pb-0' : 'pb-4' } }">
 		<Flex stack class="gap-2 h-full">
 			<Flex class="pl-2 pr-4 py-2 justify-between">
 				<Flex as="label" class="cursor-pointer gap-2">
@@ -163,9 +164,7 @@ const handleMarkAsPaid = async () => {
 		</Flex>
 
 		<template #action>
-			<Button :disabled="!selected.size" @click="confirmMarkPaid = true">
-				Đánh dấu đã thanh toán
-			</Button>
+			<Button :disabled="!selected.size" @click="confirmMarkPaid = true">Đánh dấu đã trả</Button>
 		</template>
 	</Dialog>
 

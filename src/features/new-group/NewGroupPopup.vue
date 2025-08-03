@@ -83,6 +83,7 @@ const isPending = computed(
 	<Dialog
 		v-model:open="open"
 		:header="inviteGroupId ? 'Mời tham gia nhóm' : 'Tạo nhóm'"
+		@close="handleClose"
 		hide-close-button>
 		<template v-if="open">
 			<template v-if="!inviteGroupId">
