@@ -10,6 +10,6 @@ export const PAYMENT_TRACKING_LABEL_MAPPING: Record<
 	},
 	[PaymentTrackingMode.Tracking]: {
 		label: 'Thanh toán linh hoạt',
-		icon: 'icon msi-playlist-add-check-circle-rounded',
+		icon: 'icon msi-list-alt-check-rounded',
 	},
 };

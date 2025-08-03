@@ -12,6 +12,7 @@ import { PATH } from '@/constants/path';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
+import { RouterLink } from 'vue-router';
 import PaymentTrackingHelper from '../new-group/PaymentTrackingHelper.vue';
 import BalanceList from './balances/BalanceList.vue';
 import BillList from './bills/BillList.vue';
@@ -34,7 +35,7 @@ const {
 });
 
 const openNewBill = ref(false);
-const billTab = ref<BillTabValue>('balances'); // MOCK
+const billTab = ref<BillTabValue>('bills');
 const showPaymentModeTooltip = ref(false);
 
 watch(error, () => {
@@ -107,14 +108,15 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 	<Flex v-else stack class="bg-indigo-50 min-h-dvh overflow-auto" id="group-detail">
 		<!-- Header -->
 		<Flex class="px-4 py-2 gap-2 justify-between">
-			<Button
-				variant="soft"
-				color="grey"
-				shape="circle"
-				size="sm"
-				class="bg-base-300 border-base-300 shrink-0"
-				start-icon="icon msi-home-rounded"
-				@click="$router.push(PATH.HOME)" />
+			<RouterLink :to="PATH.HOME">
+				<Button
+					variant="soft"
+					color="grey"
+					shape="circle"
+					size="sm"
+					class="bg-base-300 border-base-300 shrink-0"
+					start-icon="icon msi-home-rounded"></Button>
+			</RouterLink>
 
 			<Flex stack class="grow gap-1" center>
 				<Typography

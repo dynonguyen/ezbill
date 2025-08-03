@@ -1,4 +1,3 @@
-import 'vue-select/dist/vue-select.css';
 import './main.css';
 
 import { QueryClient, VueQueryPlugin, type VueQueryPluginOptions } from '@tanstack/vue-query';

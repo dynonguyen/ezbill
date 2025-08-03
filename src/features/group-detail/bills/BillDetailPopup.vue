@@ -6,20 +6,23 @@ import { useToast } from '@/hooks/useToast';
 import type { Bill } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useBillsContext } from '../hooks/useBillsContext';
+import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useRealtimeChannel';
 import BillForm from './BillForm.vue';
+import ReadonlyBillDetail from './ReadonlyBillDetail.vue';
 
 const bills = useBillsContext();
 const toast = useToast();
+const { isAccountantMode } = useGroupContext();
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: updateBill,
 });
 const { refetchBills } = useGroupQueryControl();
 
-const detailId = defineModel<Bill['id'] | null>({ default: null });
+const detailId = defineModel<Bill['id'] | null>({ default: -1 });
 const isDirty = ref(false);
 
 const handleCloseDetail = () => {
@@ -39,6 +42,14 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	detailId.value = null;
 	refetchBills();
 };
+
+const bill = computed(() => {
+	return bills.value.find((b) => b.id === detailId.value);
+});
+
+const readOnly = computed(
+	() => !isAccountantMode.value && Number(bill.value?.paymentTracking.length) > 0,
+);
 </script>
 
 <template>
@@ -47,14 +58,16 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 		:open="Boolean(detailId)"
 		@close="handleCloseDetail"
 		:confirm-on-close="isDirty">
+		<ReadonlyBillDetail v-if="readOnly && bill" :bill="bill" />
 		<BillForm
+			v-else
 			v-model:form-dirty="isDirty"
-			:default-bill="bills.find((b) => b.id === detailId)"
+			:default-bill="bill"
 			@submit="handleUpdateBill"
 			mode="view-detail"
 			id="bill-form" />
 
-		<template #action>
+		<template #action v-if="!readOnly">
 			<Button type="submit" form="bill-form" :loading="isUpdating">Cập nhật</Button>
 		</template>
 	</Dialog>

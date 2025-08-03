@@ -13,7 +13,7 @@ import {
 import Dialog from './Dialog.vue';
 import Typography from './Typography.vue';
 
-export type AutocompleteOption<T = unknown> = T & { value: string | number };
+export type AutocompleteOption<T = unknown, V = string | number> = T & { value: V };
 
 type Option = AutocompleteOption<T>;
 

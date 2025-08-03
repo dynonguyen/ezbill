@@ -5,21 +5,28 @@ import Typography from '@/components/ui/Typography.vue';
 import type { Bill } from '@/types/entities';
 import { hasEventPassed } from '@/utils/helpers';
 import dayjs from 'dayjs';
-import type { HTMLAttributes } from 'vue';
+import { computed, type HTMLAttributes } from 'vue';
+import { getPaidStatus } from '../helpers/utils';
 import { useGroupContext } from '../hooks/useGroupContext';
 
-defineProps<{ bill: Bill; pt?: { currencyText?: Partial<CurrencyTextProps> & HTMLAttributes } }>();
+const props = defineProps<{
+	bill: Bill;
+	pt?: { currencyText?: Partial<CurrencyTextProps> & HTMLAttributes };
+}>();
 defineEmits<{ delete: []; viewDetail: [] }>();
 
-const { group } = useGroupContext();
+const { group, isAccountantMode } = useGroupContext();
 
 const getBillInfo = (bill: Bill) => {
 	return [
 		['msi-calendar-month-rounded', dayjs(bill.createdAt).format('DD/MM/YYYY HH:mm')],
 		['msi-payments', group.value.members?.find((m) => m.id === bill.createdBy)?.name || 'Unknown'],
 		['msi-group', Object.keys(bill.members).length],
+		...(isAccountantMode.value ? [] : [['msi-list-alt-check-rounded', getPaidStatus(bill)]]),
 	];
 };
+
+const hasPaid = computed(() => props.bill.paymentTracking.length > 0);
 </script>
 
 <template>
@@ -50,7 +57,7 @@ const getBillInfo = (bill: Bill) => {
 					</Flex>
 				</Flex>
 
-				<Flex class="gap-2 self-end">
+				<Flex class="gap-2 self-end" v-if="isAccountantMode || !hasPaid">
 					<Typography
 						v-if="hasEventPassed('onDelete')"
 						tabindex="0"

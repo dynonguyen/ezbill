@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Autocomplete, { type AutocompleteOption } from '@/components/ui/Autocomplete.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
@@ -10,7 +11,9 @@ import dayjs from 'dayjs';
 import { debounce } from 'es-toolkit';
 import { match } from 'ts-pattern';
 import { computed, ref, useTemplateRef } from 'vue';
+import { isAllPaid } from '../helpers/utils';
 import { useBillsContext } from '../hooks/useBillsContext';
+import { useGroupContext } from '../hooks/useGroupContext';
 import MemberSelect from '../MemberSelect.vue';
 import BillDeletePopup from './BillDeletePopup.vue';
 import BillDetailPopup from './BillDetailPopup.vue';
@@ -18,7 +21,9 @@ import BillItem from './BillItem.vue';
 import FilterItemReset from './FilterItemReset.vue';
 
 const bills = useBillsContext();
+const { isAccountantMode } = useGroupContext();
 
+type PaymentStatus = 'paid' | 'unpaid' | 'partiallyPaid';
 type SortOption = { key: string; by: keyof Bill; order: 'asc' | 'desc'; label: string };
 const sortOptions = [
 	{ by: 'createdAt', order: 'desc', label: 'Mới nhất trước' },
@@ -35,7 +40,9 @@ const deleteId = ref<Bill['id'] | null>(null);
 const keyword = ref<string>('');
 const showSortDialog = ref(false);
 const showFilterDialog = ref(false);
-const filter = ref<{ createdBy?: Member['id']; participant?: Member['id'] }>({});
+const filter = ref<
+	Partial<{ createdBy: Member['id']; participant: Member['id']; paymentStatus: PaymentStatus }>
+>({});
 const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 const sort = ref<SortOption['key']>(sortOptions[0].key);
 const isViewAll = ref(false);
@@ -86,7 +93,7 @@ const displayedBills = computed<Bill[]>(() => {
 			}
 
 			if (hasFilter.value) {
-				const { createdBy, participant } = filter.value;
+				const { createdBy, participant, paymentStatus } = filter.value;
 
 				if (createdBy) {
 					result.push(bill.createdBy === createdBy);
@@ -94,6 +101,16 @@ const displayedBills = computed<Bill[]>(() => {
 
 				if (participant) {
 					result.push(Boolean(bill.members[participant]));
+				}
+
+				if (paymentStatus) {
+					result.push(
+						match(paymentStatus)
+							.with('paid', () => isAllPaid(bill))
+							.with('unpaid', () => bill.paymentTracking.length === 0)
+							.with('partiallyPaid', () => bill.paymentTracking.length > 0 && !isAllPaid(bill))
+							.otherwise(() => true),
+					);
 				}
 			}
 
@@ -115,6 +132,14 @@ const handleResetSearchFilter = () => {
 	filter.value = {};
 	if (searchRef.value) searchRef.value.value = '';
 };
+
+const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
+	return [
+		{ label: 'Đã thanh toán', value: 'paid' },
+		{ label: 'Chưa thanh toán', value: 'unpaid' },
+		{ label: 'Thanh toán một phần', value: 'partiallyPaid' },
+	];
+});
 </script>
 
 <template>
@@ -189,7 +214,7 @@ const handleResetSearchFilter = () => {
 				</Button>
 			</Flex>
 
-			<BillDetailPopup v-model="detailId" />
+			<BillDetailPopup v-if="detailId" v-model="detailId" />
 			<BillDeletePopup v-model="deleteId" />
 		</template>
 	</Flex>
@@ -228,6 +253,16 @@ const handleResetSearchFilter = () => {
 					<FilterItemReset @click="delete filter.participant" label="Theo người tham gia" />
 				</template>
 				<MemberSelect placeholder="Chọn thành viên" v-model:value="filter.participant!" />
+			</FormControl>
+
+			<FormControl v-if="!isAccountantMode" label="Theo trạng thái thanh toán">
+				<template #label>
+					<FilterItemReset @click="delete filter.participant" label="Theo trạng thái thanh toán" />
+				</template>
+				<Autocomplete
+					:options="paymentStatusOptions"
+					v-model:value="filter.paymentStatus"
+					placeholder="Chọn trạng thái" />
 			</FormControl>
 		</Flex>
 

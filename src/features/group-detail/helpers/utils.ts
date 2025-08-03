@@ -101,3 +101,16 @@ export const isAllPaid = (bill: Bill): boolean => {
 		return amount <= 0 || memberId === bill.createdBy || isMemberPaid(bill, memberId);
 	});
 };
+
+export const getPaidStatus = (bill: Bill): string => {
+	const total = Object.keys(bill.members).reduce((acc, id) => {
+		if (bill.createdBy === id) return acc;
+		return acc + 1;
+	}, 0);
+	const paidCount = bill.paymentTracking.length;
+
+	let result = `${paidCount}/${total}`;
+	if (paidCount === total) result += ' ✅';
+
+	return result;
+};

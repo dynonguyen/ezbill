@@ -109,13 +109,12 @@ const handleMarkAsPaid = async () => {
 
 <template>
 	<Dialog
-		v-if="memberBills.length"
 		:open="Boolean(memberId)"
 		@close="handleClose"
 		header="Thanh toán dư nợ"
 		:pt="{ body: { class: selected.size ? 'pb-0' : 'pb-4' } }">
 		<Flex stack class="gap-2 h-full">
-			<Flex class="pl-2 pr-4 py-2">
+			<Flex class="pl-2 pr-4 py-2 justify-between">
 				<Flex as="label" class="cursor-pointer gap-2">
 					<input
 						type="checkbox"

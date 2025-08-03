@@ -78,7 +78,7 @@ const tabs: Array<{ value: Tab; label: string }> = [
 						class: bill.amount > 0 ? 'text-green-600' : 'text-red-500',
 					},
 				}" />
-			<BillDetailPopup v-model="detailId" />
+			<BillDetailPopup v-if="detailId" v-model="detailId" />
 		</template>
 		<template v-else>
 			<Typography class="text-center text-gray-500 my-8">Không có hoá đơn</Typography>
