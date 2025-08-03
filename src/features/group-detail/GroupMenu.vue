@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { deleteGroup, updateGroup } from '@/apis/supabase';
+import { createErrorLog, deleteGroup, updateGroup } from '@/apis/supabase';
 import InviteLink from '@/components/InviteLink.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
@@ -54,7 +54,8 @@ const handleEditGroup = async (form: Partial<Group>) => {
 	const [error] = await to(updateMutateAsync({ updated: form, id: group.value.id }));
 
 	if (error) {
-		return toast.error(error?.message || 'Chỉnh sửa thất bại');
+		void createErrorLog({ error: error?.message });
+		return toast.error('Chỉnh sửa thất bại');
 	}
 
 	openEditGroupName.value = false;
@@ -66,7 +67,8 @@ const handleDeleteGroup = async () => {
 	const [error] = await to(deleteMutateAsync(group.value.id));
 
 	if (error) {
-		return toast.error(error?.message || 'Xoá nhóm thất bại');
+		void createErrorLog({ error: error?.message });
+		return toast.error('Xoá nhóm thất bại');
 	}
 
 	localDBStore.removeFromGroup(group.value.id);
@@ -82,7 +84,7 @@ const items = ref<
 	Array<{ label: string; icon: string; action(): void; hasDivider?: boolean; itemClass?: string }>
 >([
 	{
-		label: 'Sửa tên nhóm',
+		label: 'Cập nhật nhóm',
 		icon: 'icon msi-edit-rounded size-5',
 		hasDivider: true,
 		action: () => (openEditGroupName.value = true),
@@ -147,7 +149,7 @@ const items = ref<
 	<Dialog v-model:open="openEditGroupName" header="Sửa tên nhóm" hide-close-button>
 		<GroupForm
 			v-if="openEditGroupName"
-			:initial-values="{ name: group.name }"
+			:initial-values="{ name: group.name, paymentTrackingMode: group.paymentTrackingMode }"
 			@submit="handleEditGroup">
 			<template #form-action>
 				<Flex class="gap-2" items-fluid>

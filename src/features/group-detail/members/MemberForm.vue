@@ -18,7 +18,7 @@ import { useGroupContext } from '../hooks/useGroupContext';
 
 const emit = defineEmits<{ submit: [form: MemberFormData & { bankInfo?: MemberBankInfo }] }>();
 const props = defineProps<{ initialValues?: MemberFormData & { bankInfo?: MemberBankInfo } }>();
-const { group } = useGroupContext();
+const { group, isAccountantMode } = useGroupContext();
 
 const nameInputId = useId();
 
@@ -83,7 +83,7 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 				:maxlength="MAX.NAME" />
 		</FormControl>
 
-		<Flex class="gap-2 text-slate-500">
+		<Flex v-if="isAccountantMode" class="gap-2 text-slate-500">
 			<input
 				type="checkbox"
 				class="checkbox checkbox-sm"

@@ -13,7 +13,9 @@ const getGroupView = (groupId: string) => `group_${groupId}`;
 const getBillView = (groupId: string) => `bill_${groupId}`;
 
 // Group
-export const createGroup = async (group: Pick<Group, 'name' | 'id'> & Partial<Group>) => {
+export const createGroup = async (
+	group: Pick<Group, 'name' | 'id' | 'paymentTrackingMode'> & Partial<Group>,
+) => {
 	const gData = await supabase.from('groups').insert(group);
 	if (gData.error) throw gData.error;
 
@@ -176,10 +178,28 @@ export const deleteBill = async (data: { groupId: Group['id']; billId: Bill['id'
 	if (resp.error) throw resp.error;
 };
 
+export const markBillsAsPaid = async (data: {
+	groupId: Group['id'];
+	memberId: Member['id'];
+	billIds: Bill['id'][];
+}) => {
+	const { groupId, memberId, billIds } = data;
+
+	// Use RPC function for batch update
+	const resp = await supabase.rpc('mark_bills_as_paid', {
+		bill_view_name: getBillView(groupId),
+		member_id: memberId,
+		bill_ids: billIds,
+		payment_timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+	});
+
+	if (resp.error) throw resp.error;
+};
+
 // Import data
 export const importGroup = async (data: {
 	imported: ImportedBackup;
-	newGroupInfo: Pick<Group, 'name' | 'id'>;
+	newGroupInfo: Pick<Group, 'name' | 'id' | 'paymentTrackingMode'>;
 }) => {
 	return new Promise<void>((resolve, reject) => {
 		const { imported, newGroupInfo } = data;
@@ -207,5 +227,7 @@ export const importGroup = async (data: {
 // Error logs
 export const createErrorLog = async (error: any) => {
 	const createdAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
-	await supabase.from('error_logs').insert({ createdAt, log: error });
+	await supabase
+		.from('error_logs')
+		.insert({ createdAt, log: error, path: window.location.href, ua: navigator.userAgent });
 };

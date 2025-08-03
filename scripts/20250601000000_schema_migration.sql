@@ -17,9 +17,6 @@ drop table if exists public.bills;
 drop table if exists public.groups;
 drop table if exists public.error_logs;
 
-drop function if exists create_group_view(uuid);
-drop function if exists create_bill_view(uuid);
-
 -- Create tables
 create table
   public.groups (
@@ -81,6 +78,8 @@ declare
 begin
     view_name := format('group_%s', group_id);
 
+		execute format('drop view if exists %I', view_name);
+
     execute format(
         'create view %I as select * from groups where id = %L;',
         view_name,
@@ -96,11 +95,47 @@ declare
 begin
     view_name := format('bill_%s', group_id);
 
+		execute format('drop view if exists %I', view_name);
+
     execute format(
         'create view %I as select * from bills where "groupId" = %L;',
         view_name,
         group_id
     );
+end;
+$$ language plpgsql security definer;
+
+create or replace function create_all_group_views()
+returns void as $$
+declare
+    rec RECORD;
+    group_id_uuid uuid;
+begin
+		FOR rec IN (
+			SELECT id
+			FROM groups
+    ) LOOP
+        group_id_uuid := rec.id;
+        PERFORM create_group_view(group_id_uuid);
+        RAISE NOTICE 'Created group view for group_id: %', group_id_uuid;
+    END LOOP;
+end;
+$$ language plpgsql security definer;
+
+create or replace function create_all_bill_views()
+returns void as $$
+declare
+    rec RECORD;
+    group_id_uuid uuid;
+begin
+		FOR rec IN (
+			SELECT id
+			FROM groups
+    ) LOOP
+        group_id_uuid := rec.id;
+        PERFORM create_bill_view(group_id_uuid);
+        RAISE NOTICE 'Created bill view for group_id: %', group_id_uuid;
+    END LOOP;
 end;
 $$ language plpgsql security definer;
 

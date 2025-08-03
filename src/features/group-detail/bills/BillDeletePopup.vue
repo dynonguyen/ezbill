@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { deleteBill } from '@/apis/supabase';
+import { createErrorLog, deleteBill } from '@/apis/supabase';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Typography from '@/components/ui/Typography.vue';
@@ -28,7 +28,8 @@ const handleDeleteBill = async () => {
 	const [error] = await to(deleteMutateAsync({ groupId: group.value.id, billId: deleteId.value }));
 
 	if (error) {
-		return toast.error(error?.message || 'Xoá bill thất bại');
+		void createErrorLog({ error: error?.message });
+		return toast.error('Xoá bill thất bại');
 	}
 
 	deleteId.value = null;

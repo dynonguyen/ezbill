@@ -3,13 +3,17 @@ import { fetchBills } from '@/apis/supabase';
 import CurrencyText from '@/components/CurrencyText.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
+import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
+import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
+import { RouterLink } from 'vue-router';
+import PaymentTrackingHelper from '../new-group/PaymentTrackingHelper.vue';
 import BalanceList from './balances/BalanceList.vue';
 import BillList from './bills/BillList.vue';
 import NewBillPopup from './bills/NewBillPopup.vue';
@@ -32,6 +36,7 @@ const {
 
 const openNewBill = ref(false);
 const billTab = ref<BillTabValue>('bills');
+const showPaymentModeTooltip = ref(false);
 
 watch(error, () => {
 	if (error.value) throw error.value;
@@ -85,6 +90,15 @@ onUnmounted(() => observer?.disconnect());
 usePageTitle(group.value.name);
 
 provide(CONTEXT_KEY.BILLS, bills);
+
+const summary = computed<Array<[string, string | number, action?: () => void]>>(() => {
+	const ptm = PAYMENT_TRACKING_LABEL_MAPPING[group.value.paymentTrackingMode];
+	return [
+		['icon msi-group-rounded', group.value.members?.length || 0],
+		['icon msi-receipt-long-rounded', bills.value?.length || 0],
+		[ptm.icon, '', () => (showPaymentModeTooltip.value = true)],
+	];
+});
 </script>
 
 <template>
@@ -94,32 +108,35 @@ provide(CONTEXT_KEY.BILLS, bills);
 	<Flex v-else stack class="bg-indigo-50 min-h-dvh overflow-auto" id="group-detail">
 		<!-- Header -->
 		<Flex class="px-4 py-2 gap-2 justify-between">
-			<Button
-				variant="soft"
-				color="grey"
-				shape="circle"
-				size="sm"
-				class="bg-base-300 border-base-300 shrink-0"
-				start-icon="icon msi-home-rounded"
-				@click="$router.push(PATH.HOME)" />
+			<RouterLink :to="PATH.HOME">
+				<Button
+					variant="soft"
+					color="grey"
+					shape="circle"
+					size="sm"
+					class="bg-base-300 border-base-300 shrink-0"
+					start-icon="icon msi-home-rounded"></Button>
+			</RouterLink>
 
-			<Flex stack class="grow" center>
+			<Flex stack class="grow gap-1" center>
 				<Typography
 					variant="mdSemiBold"
 					class="text-black line-clamp-1 break-all"
 					:title="group.name">
 					{{ group.name }}
 				</Typography>
-				<Flex class="gap-4">
-					<Flex class="gap-1 text-slate-500">
-						<span class="icon msi-group-rounded"></span>
-						<Typography variant="xsRegular">{{ group.members.length }}</Typography>
+				<Flex class="gap-3">
+					<Flex
+						v-for="(item, index) in summary"
+						:key="index"
+						class="gap-1 text-slate-500"
+						@click="item[2]">
+						<span :class="item[0]"></span>
+						<Typography variant="xsRegular">{{ item[1] }}</Typography>
 					</Flex>
-
-					<Flex class="gap-1 text-slate-500">
-						<span class="icon msi-receipt-long-rounded"></span>
-						<Typography variant="xsRegular">{{ bills?.length || 0 }}</Typography>
-					</Flex>
+					<Dialog v-model:open="showPaymentModeTooltip" header="Chế độ theo dõi thanh toán">
+						<PaymentTrackingHelper />
+					</Dialog>
 				</Flex>
 			</Flex>
 

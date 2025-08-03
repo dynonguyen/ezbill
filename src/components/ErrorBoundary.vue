@@ -11,7 +11,7 @@ const error = ref<Error | null>(null);
 onErrorCaptured((err) => {
 	error.value = err;
 	console.error('ErrorBoundary:', error);
-	void createErrorLog({ path: window.location.href, error: err.message, ua: navigator.userAgent });
+	void createErrorLog({ error: err.message });
 	return false;
 });
 

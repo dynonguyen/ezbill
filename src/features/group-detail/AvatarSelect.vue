@@ -21,11 +21,11 @@ type Tab = {
 };
 
 const tabs: Tab[] = [
-	{ title: 'Animals', folder: 'animal', noAvtSet: 24 },
 	{ title: 'Capybara', folder: 'capybara', noAvtSet: 30 },
 	{ title: 'Couple', folder: 'couple', noAvtSet: 18 },
 	{ title: 'Meme', folder: 'meme', noAvtSet: 42 },
 	{ title: '3D', folder: '3d', noAvtSet: 30 },
+	{ title: 'Animals', folder: 'animal', noAvtSet: 24 },
 	{ key: 'upload', title: 'Upload', icon: 'msi-upload-rounded', folder: 'upload', noAvtSet: 0 },
 ];
 

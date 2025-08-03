@@ -3,6 +3,7 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import type { Member } from '@/types/entities';
+import { useGroupContext } from '../../hooks/useGroupContext';
 import AccountingIcon from '../../members/AccountingIcon.vue';
 import { useBillFormContext } from './useBillFormContext';
 
@@ -10,6 +11,7 @@ defineProps<{ member: Member & { checked?: boolean } }>();
 defineEmits<{ toggle: [] }>();
 
 const { toggleParticipant, hideNonParticipants } = useBillFormContext();
+const { isAccountantMode } = useGroupContext();
 </script>
 
 <template>
@@ -36,7 +38,7 @@ const { toggleParticipant, hideNonParticipants } = useBillFormContext();
 						:title="member.name">
 						{{ member.name }}
 					</Typography>
-					<AccountingIcon v-if="member.isAccounting" />
+					<AccountingIcon v-if="isAccountantMode && member.isAccounting" />
 				</Flex>
 				<slot name="info"></slot>
 			</Flex>

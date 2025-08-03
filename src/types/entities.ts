@@ -18,12 +18,23 @@ export type Member = {
 	isAccounting?: boolean; // isAccounting: true means this member is responsible for accounting
 };
 
+export enum PaymentTrackingMode {
+	Accountant = 'accountant',
+	Tracking = 'tracking',
+}
+
+export type PaymentTracking = {
+	createdAt: string;
+	memberId: Member['id'];
+};
+
 export type Group = {
 	id: string;
 	name: string;
 	members: Member[];
 	createdAt: string;
 	deleted: boolean;
+	paymentTrackingMode: PaymentTrackingMode;
 };
 
 export enum BillType {
@@ -43,4 +54,5 @@ export type Bill = {
 	createdAt: string;
 	members: BillMember;
 	createdBy: Member['id'];
+	paymentTracking: PaymentTracking[];
 };

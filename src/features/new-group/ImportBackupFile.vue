@@ -62,6 +62,9 @@ const importedInfo = computed<Array<[string, string | number, LabelValueProps['p
 		<Loading />
 	</Flex>
 	<template v-else>
+		<div class="divider my-0">
+			<span class="text-sm text-gray-500">Hoặc</span>
+		</div>
 		<Flex
 			v-if="!imported"
 			class="gap-1 text-slate-500 hover:text-slate-600 cursor-pointer"
