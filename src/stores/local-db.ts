@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 import { LS_KEY, STORE_KEY } from '../constants/key';
+import type { GroupId } from '../types/entities';
 import { safeJSONParse } from '../utils/helpers';
 
 type JoinedGroup = {
-	groupId: string;
+	groupId: GroupId;
 };
 
 export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
@@ -18,16 +19,20 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 
 	watch([joinedGroups], persistToLocalStorage);
 
-	const joinGroup = (groupId: string) => {
+	const joinGroup = (groupId: GroupId) => {
 		joinedGroups.value = [
 			{ groupId },
 			...joinedGroups.value.filter((group) => group.groupId !== groupId),
 		];
 	};
 
-	const removeFromGroup = (groupId: string) => {
+	const removeFromGroup = (groupId: GroupId) => {
 		joinedGroups.value = joinedGroups.value.filter((group) => group.groupId !== groupId);
 	};
 
-	return { joinedGroups, joinGroup, removeFromGroup };
+	const removeFromGroups = (groupIds: GroupId[]) => {
+		joinedGroups.value = joinedGroups.value.filter((group) => !groupIds.includes(group.groupId));
+	};
+
+	return { joinedGroups, joinGroup, removeFromGroup, removeFromGroups };
 });

@@ -1,4 +1,4 @@
-import { BillType, type Bill, type BillMember, type Member } from '@/types/entities';
+import { BillType, type Bill, type BillMember, type MemberId } from '@/types/entities';
 import { isDesktopByResolution } from '@/utils/helpers';
 import { match } from 'ts-pattern';
 import { nextTick } from 'vue';
@@ -40,7 +40,7 @@ export function billTypeMapping(type: BillType): BillTypeMappingResult {
 		.exhaustive();
 }
 
-export function splitEqually(amount: number, participants: Member['id'][]): BillMember {
+export function splitEqually(amount: number, participants: MemberId[]): BillMember {
 	const len = participants.length;
 	return participants.reduce((acc, id) => {
 		acc[id] = amount / len;

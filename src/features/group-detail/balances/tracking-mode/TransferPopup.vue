@@ -6,7 +6,7 @@ import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Bill, Member } from '@/types/entities';
+import type { BillId, Member, MemberId } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
@@ -26,7 +26,7 @@ const { isPending: updating, mutateAsync } = useMutation({ mutationFn: markBills
 const { refetchBills } = useGroupQueryControl();
 const { group } = useGroupContext();
 
-const selected = ref<Set<Bill['id']>>(new Set());
+const selected = ref<Set<BillId>>(new Set());
 const showDetail = ref(false);
 const confirmMarkPaid = ref(false);
 
@@ -50,7 +50,7 @@ const totalPaid = computed(() => {
 });
 
 const recipients = computed(() => {
-	const recipientMap: Record<Member['id'], { member: Member; amount: number }> = {};
+	const recipientMap: Record<MemberId, { member: Member; amount: number }> = {};
 
 	Array.from(selected.value).forEach((billId) => {
 		const bill = memberBills.value.find((b) => b.id === billId);
@@ -68,7 +68,7 @@ const recipients = computed(() => {
 	return Object.values(recipientMap);
 });
 
-const toggleBillSelection = (billId: Bill['id']) => {
+const toggleBillSelection = (billId: BillId) => {
 	if (selected.value.has(billId)) {
 		selected.value.delete(billId);
 	} else {

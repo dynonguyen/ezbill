@@ -16,6 +16,7 @@ export const CONTEXT_KEY = {
 };
 
 export const QUERY_KEY = {
+	GROUPS: 'groups',
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',
 };

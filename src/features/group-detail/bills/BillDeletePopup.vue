@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Bill } from '@/types/entities';
+import type { BillId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { useBillsContext } from '../hooks/useBillsContext';
@@ -20,7 +20,7 @@ const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
 	mutationFn: deleteBill,
 });
 
-const deleteId = defineModel<Bill['id'] | null>({ default: null });
+const deleteId = defineModel<BillId | null>({ default: null });
 
 const handleDeleteBill = async () => {
 	if (!deleteId.value) return;

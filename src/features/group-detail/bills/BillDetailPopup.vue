@@ -3,7 +3,7 @@ import { createErrorLog, updateBill } from '@/apis/supabase';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Bill } from '@/types/entities';
+import type { Bill, BillId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
@@ -22,7 +22,7 @@ const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 });
 const { refetchBills } = useGroupQueryControl();
 
-const detailId = defineModel<Bill['id'] | null>({ default: null });
+const detailId = defineModel<BillId | null>({ default: null });
 const isDirty = ref(false);
 
 const handleCloseDetail = () => {

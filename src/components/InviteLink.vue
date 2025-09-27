@@ -2,13 +2,13 @@
 import Loading from '@/components/Loading.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { APP_NAME } from '@/constants/common';
-import type { Group } from '@/types/entities';
+import type { GroupId } from '@/types/entities';
 import { getGroupLink, saveFileAs } from '@/utils/helpers';
 import { computed, onWatcherCleanup, ref, watch } from 'vue';
 import Button from './ui/Button.vue';
 import FormControl from './ui/FormControl.vue';
 
-const props = defineProps<{ id: Group['id'] }>();
+const props = defineProps<{ id: GroupId }>();
 
 const inviteLink = computed(() => getGroupLink(props.id));
 const qrBase64 = ref('');

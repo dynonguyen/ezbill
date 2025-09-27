@@ -1,45 +1,26 @@
 <script setup lang="ts">
-import { fetchGroup } from '@/apis/supabase';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
-import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
-import { useQuery } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 
-const props = defineProps<{ id: Group['id'] }>();
-const localStoreDB = useLocalDBStore();
-
-const queryKey = computed(() => [QUERY_KEY.GROUP, props.id]);
-const {
-	data: group,
-	isPending,
-	error,
-} = useQuery({ queryKey, queryFn: () => fetchGroup(props.id) });
+const props = defineProps<{ group: Group }>();
 
 const MAX_AVATAR = 3;
-const groupDetailPath = computed(() => PATH.GROUP.replace(':id', props.id));
-
-watch(error, () => {
-	if (error.value?.message.includes('does not exist')) {
-		localStoreDB.removeFromGroup(props.id);
-	}
-});
+const groupDetailPath = computed(() => PATH.GROUP.replace(':id', props.group.id));
 </script>
 
 <template>
-	<div class="skeleton h-24 w-full rounded-2xl" v-if="isPending" />
-	<RouterLink v-else-if="group && !error" :to="groupDetailPath">
+	<RouterLink :to="groupDetailPath">
 		<Flex stack class="gap-2 p-4 rounded-2xl bg-white shadow-lg cursor-pointer">
 			<Typography variant="xlSemiBold" class="text-black line-clamp-1 break-all">
 				{{ group.name }}
 			</Typography>
-			<Flex class="justify-between">
+			<Flex class="justify-between" wrap>
 				<Flex class="gap-1">
 					<div :class="$style.tag">
 						<span class="icon msi-calendar-clock-rounded"></span>

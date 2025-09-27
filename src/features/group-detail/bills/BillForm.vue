@@ -6,7 +6,7 @@ import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY } from '@/constants/key';
 import { useToast } from '@/hooks/useToast';
-import { BillType, type Bill, type BillMember, type Member } from '@/types/entities';
+import { BillType, type Bill, type BillMember, type MemberId } from '@/types/entities';
 import { toVND, veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
 import dayjs from 'dayjs';
@@ -87,7 +87,7 @@ const getAllParticipantIds = () => group.value.members.map((m) => m.id);
 const memberAmounts = ref<BillMember>(
 	props.mode === 'new' ? getDefaultMemberAmount() : props.defaultBill?.members || {},
 );
-const participants = ref<Member['id'][]>(
+const participants = ref<MemberId[]>(
 	props.mode === 'new' ? getAllParticipantIds() : Object.keys(props.defaultBill?.members || {}),
 );
 const fixAmountField = ref<{ show: boolean; amount: number }>({ show: false, amount: 0 });
@@ -118,7 +118,7 @@ watch(
 	{ immediate: true },
 );
 
-const toggleParticipant = (memberId: Member['id']) => {
+const toggleParticipant = (memberId: MemberId) => {
 	if (participants.value.includes(memberId)) {
 		participants.value = participants.value.filter((id) => id !== memberId);
 	} else {

@@ -4,7 +4,7 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Member } from '@/types/entities';
+import type { Member, MemberId } from '@/types/entities';
 import { computed, ref } from 'vue';
 import { useBillsContext } from '../../hooks/useBillsContext';
 import { useGroupContext } from '../../hooks/useGroupContext';
@@ -23,7 +23,7 @@ const balances = computed(() => {
 			acc[member.id] = { member, paid: 0, spent: 0, balance: 0 };
 			return acc;
 		},
-		{} as Record<Member['id'], MemberBalance>,
+		{} as Record<MemberId, MemberBalance>,
 	);
 
 	bills.value.forEach((bill) => {
@@ -43,8 +43,8 @@ const balances = computed(() => {
 	return Object.values(result);
 });
 
-const detailId = ref<Member['id'] | null>(null);
-const transferId = ref<Member['id'] | null>(null);
+const detailId = ref<MemberId | null>(null);
+const transferId = ref<MemberId | null>(null);
 
 const transferInfo = computed(() =>
 	balances.value.find((item) => item.member.id === transferId.value),
