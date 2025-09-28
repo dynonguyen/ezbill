@@ -18,12 +18,24 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 			number
 		>,
 	);
+	const pinnedGroups = ref<GroupId[]>(
+		safeJSONParse(localStorage.getItem(LS_KEY.PINNED_GROUPS), []) || [],
+	);
+	const hiddenGroups = ref<GroupId[]>(
+		safeJSONParse(localStorage.getItem(LS_KEY.HIDDEN_GROUPS), []) || [],
+	);
 
 	watch([joinedGroups], () => {
 		localStorage.setItem(LS_KEY.JOINED_GROUP, JSON.stringify(joinedGroups.value));
 	});
 	watch([lastOpenedGroups], () => {
 		localStorage.setItem(LS_KEY.LAST_OPENED_GROUPS, JSON.stringify(lastOpenedGroups.value));
+	});
+	watch([pinnedGroups], () => {
+		localStorage.setItem(LS_KEY.PINNED_GROUPS, JSON.stringify(pinnedGroups.value));
+	});
+	watch([hiddenGroups], () => {
+		localStorage.setItem(LS_KEY.HIDDEN_GROUPS, JSON.stringify(hiddenGroups.value));
 	});
 
 	const joinGroup = (groupId: GroupId) => {
@@ -49,12 +61,36 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 		lastOpenedGroups.value[groupId] = new Date().getTime();
 	};
 
+	const pinRecentGroup = (groupId: GroupId) => {
+		if (pinnedGroups.value.includes(groupId)) return;
+		pinnedGroups.value.push(groupId);
+	};
+
+	const unpinRecentGroup = (groupId: GroupId) => {
+		pinnedGroups.value = pinnedGroups.value.filter((id) => id !== groupId);
+	};
+
+	const hideRecentGroup = (groupId: GroupId) => {
+		if (hiddenGroups.value.includes(groupId)) return;
+		hiddenGroups.value.push(groupId);
+	};
+
+	const unhideRecentGroup = (groupId: GroupId) => {
+		hiddenGroups.value = hiddenGroups.value.filter((id) => id !== groupId);
+	};
+
 	return {
 		joinedGroups,
 		lastOpenedGroups,
+		pinnedGroups,
+		hiddenGroups,
 		joinGroup,
 		removeFromGroup,
 		removeFromGroups,
 		updateLastOpenedGroup,
+		pinRecentGroup,
+		unpinRecentGroup,
+		hideRecentGroup,
+		unhideRecentGroup,
 	};
 });

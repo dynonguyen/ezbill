@@ -15,7 +15,8 @@
 		"Toastify",
 		"Viet",
 		"VITE",
-		"vnode"
+		"vnode",
+		"vueuse"
 	],
 	"todo-tree.tree.scanMode": "workspace only"
 }

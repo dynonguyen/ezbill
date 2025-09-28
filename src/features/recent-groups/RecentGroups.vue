@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { fetchGroups } from '@/apis/supabase';
+import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { LS_KEY, QUERY_KEY } from '@/constants/key';
@@ -13,21 +14,24 @@ import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
 
 const localStoreDB = useLocalDBStore();
+const showHidden = ref(false);
+
 const groupIds = computed(() => localStoreDB.joinedGroups.map((group) => group.groupId));
 const queryKey = computed(() => [QUERY_KEY.GROUP, groupIds]);
+const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
 
 const { isPending, data, isError } = useQuery({
 	queryKey,
 	queryFn: () => fetchGroups(groupIds.value),
 });
 
-const getDefaultSort = () => {
-	const savedSortKey = localStorage.getItem(LS_KEY.RECENT_GROUP_SORT_KEY);
-	if (!savedSortKey) return sortOptions[0];
-	return sortOptions.find((opt) => opt.key === savedSortKey) || sortOptions[0];
-};
-
-const sort = ref(getDefaultSort());
+const sortOpt = ref(
+	(() => {
+		const savedSortKey = localStorage.getItem(LS_KEY.RECENT_GROUP_SORT_KEY);
+		if (!savedSortKey) return sortOptions[0];
+		return sortOptions.find((opt) => opt.key === savedSortKey) || sortOptions[0];
+	})(),
+);
 
 // Remove not found groups from local store
 watch(
@@ -38,7 +42,7 @@ watch(
 );
 
 const sortGroups = (groups: Group[]) => {
-	const { by, order } = sort.value;
+	const { by, order } = sortOpt.value;
 
 	const compareFn = match([by, order])
 		.returnType<((a: Group, b: Group) => number) | null>()
@@ -70,9 +74,21 @@ const sortGroups = (groups: Group[]) => {
 };
 
 const groups = computed<Group[]>(() => {
-	const result = data.value?.groups || [];
+	const pinned: Group[] = [];
+	const unpinned: Group[] = [];
+	const filtered =
+		(hasHiddenGroups.value && showHidden.value) || !hasHiddenGroups.value
+			? data.value?.groups
+			: data.value?.groups.filter((g) => !localStoreDB.hiddenGroups.includes(g.id));
 
-	return sort.value ? sortGroups(result) : result;
+	filtered?.forEach((g) => {
+		localStoreDB.pinnedGroups.includes(g.id) ? pinned.push(g) : unpinned.push(g);
+	});
+
+	return [
+		...(sortOpt.value ? sortGroups(pinned) : pinned),
+		...(sortOpt.value ? sortGroups(unpinned) : unpinned),
+	];
 });
 </script>
 
@@ -81,7 +97,20 @@ const groups = computed<Group[]>(() => {
 		<Flex class="justify-between px-4 gap-1">
 			<Typography variant="lgSemiBold" class="text-black">Nhóm của bạn</Typography>
 			<Flex class="gap-2 shrink-0">
-				<Sorting v-model="sort" />
+				<Button
+					v-if="hasHiddenGroups"
+					variant="outlined"
+					shape="rounded"
+					color="neutral"
+					size="sm"
+					class="shrink-0 border-gray-400 gap-1"
+					@click="showHidden = !showHidden">
+					<span
+						class="icon"
+						:class="showHidden ? 'msi-visibility-off-rounded' : 'msi-visibility-rounded'"></span>
+					({{ localStoreDB.hiddenGroups.length }})
+				</Button>
+				<Sorting v-model="sortOpt" />
 			</Flex>
 		</Flex>
 
