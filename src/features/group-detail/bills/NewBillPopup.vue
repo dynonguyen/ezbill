@@ -23,7 +23,7 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 
 	if (error) {
 		void createErrorLog({ error: error?.message });
-		return toast.error('Tạo bill thất bại');
+		return toast.errorWithRetry('Tạo bill thất bại', () => handleAddBill(form));
 	}
 
 	open.value = false;

@@ -27,7 +27,9 @@ const handleAddMember = async (form: MemberFormData) => {
 	const [error] = await to(mutateAsync({ groupId: group.value.id, member: newMember }));
 
 	if (error) {
-		return toast.error(error.message || 'Thêm thành viên thất bại');
+		return toast.errorWithRetry(error.message || 'Thêm thành viên thất bại', () =>
+			handleAddMember(form),
+		);
 	}
 
 	refetchGroup();

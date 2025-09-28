@@ -13,6 +13,7 @@ export type ToastOptions = {
 	hideHeader?: boolean;
 	htmlMsg?: boolean;
 	pt?: { root?: FlexProps; message?: TypographyProps };
+	retryOnFailure?: () => void;
 };
 
 export type Toast = {

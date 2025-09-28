@@ -33,7 +33,10 @@ provide(CONTEXT_KEY.GROUP, group);
 provide(CONTEXT_KEY.REALTIME_CLIENT, realtimeClient);
 
 watch(group, () => {
-	if (group.value) localDBStore.joinGroup(groupId.value);
+	if (group.value) {
+		localDBStore.joinGroup(groupId.value);
+		localDBStore.updateLastOpenedGroup(groupId.value);
+	}
 });
 
 const realtimeEventListener = () => {

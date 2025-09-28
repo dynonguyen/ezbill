@@ -1,11 +1,14 @@
 <script lang="ts">
 export const sortOptions = [
+	{ by: 'lastOpened', order: 'desc', label: 'Truy cập gần nhất' },
 	{ by: 'updatedAt', order: 'desc', label: 'Cập nhật gần nhất' },
 	{ by: 'name', order: 'asc', label: 'Tên A-Z' },
 	{ by: 'name', order: 'desc', label: 'Tên Z-A' },
 	{ by: 'createdAt', order: 'desc', label: 'Mới nhất trước' },
 	{ by: 'createdAt', order: 'asc', label: 'Cũ nhất trước' },
-].map((opt) => ({ ...opt, key: `${opt.by}-${opt.order}` })) as SortOption<keyof Group>[];
+].map((opt) => ({ ...opt, key: `${opt.by}-${opt.order}` })) as SortOption<
+	keyof Group | 'lastOpened'
+>[];
 </script>
 
 <script setup lang="ts">
@@ -30,10 +33,10 @@ const handleSortChange = (opt: SortOption) => {
 <template>
 	<Button
 		variant="outlined"
-		color="primary"
 		shape="rounded"
+		color="neutral"
 		size="sm"
-		class="shrink-0"
+		class="shrink-0 border-gray-400"
 		@click="showSortDialog = true">
 		<span class="icon other-sort"></span>
 	</Button>

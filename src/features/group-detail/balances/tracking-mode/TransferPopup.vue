@@ -100,7 +100,7 @@ const handleMarkAsPaid = async () => {
 
 	if (error) {
 		void createErrorLog({ error: error?.message });
-		return toast.error('Cập nhật thất bại');
+		return toast.errorWithRetry('Cập nhật thất bại', () => handleMarkAsPaid());
 	}
 
 	refetchBills();

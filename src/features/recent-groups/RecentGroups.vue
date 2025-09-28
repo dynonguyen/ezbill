@@ -8,7 +8,7 @@ import type { Group } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
 import { match } from 'ts-pattern';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, toRaw, watch } from 'vue';
 import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
 
@@ -41,7 +41,7 @@ const sortGroups = (groups: Group[]) => {
 	const { by, order } = sort.value;
 
 	const compareFn = match([by, order])
-		.returnType<(a: Group, b: Group) => number>()
+		.returnType<((a: Group, b: Group) => number) | null>()
 		.with(
 			['createdAt', 'desc'],
 			() => (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -56,9 +56,17 @@ const sortGroups = (groups: Group[]) => {
 			['updatedAt', 'desc'],
 			() => (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
 		)
-		.otherwise(() => () => 0);
+		.with(['lastOpened', 'desc'], () => {
+			const lastOpened = toRaw(localStoreDB.lastOpenedGroups);
+			if (!Object.keys(lastOpened).length) return null;
 
-	return [...groups].sort(compareFn);
+			return (a, b) => {
+				return (lastOpened[b.id] || 0) - (lastOpened[a.id] || 0);
+			};
+		})
+		.otherwise(() => null);
+
+	return compareFn ? [...groups].sort(compareFn) : groups;
 };
 
 const groups = computed<Group[]>(() => {

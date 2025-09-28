@@ -36,7 +36,7 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 
 	if (error) {
 		void createErrorLog({ error: error?.message });
-		return toast.error('Chỉnh sửa bill thất bại');
+		return toast.errorWithRetry('Chỉnh sửa bill thất bại', () => handleUpdateBill(form));
 	}
 
 	detailId.value = null;

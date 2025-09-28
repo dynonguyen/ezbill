@@ -29,7 +29,7 @@ const handleDeleteBill = async () => {
 
 	if (error) {
 		void createErrorLog({ error: error?.message });
-		return toast.error('Xoá bill thất bại');
+		return toast.errorWithRetry('Xoá bill thất bại', () => handleDeleteBill());
 	}
 
 	deleteId.value = null;

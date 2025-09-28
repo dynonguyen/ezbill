@@ -55,7 +55,7 @@ const handleEditGroup = async (form: Partial<Group>) => {
 
 	if (error) {
 		void createErrorLog({ error: error?.message });
-		return toast.error('Chỉnh sửa thất bại');
+		return toast.errorWithRetry('Chỉnh sửa thất bại', () => handleEditGroup(form));
 	}
 
 	openEditGroupName.value = false;
@@ -68,7 +68,7 @@ const handleDeleteGroup = async () => {
 
 	if (error) {
 		void createErrorLog({ error: error?.message });
-		return toast.error('Xoá nhóm thất bại');
+		return toast.errorWithRetry('Xoá nhóm thất bại', () => handleDeleteGroup());
 	}
 
 	localDBStore.removeFromGroup(group.value.id);

@@ -12,12 +12,19 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 	const joinedGroups = ref<JoinedGroup[]>(
 		(safeJSONParse(localStorage.getItem(LS_KEY.JOINED_GROUP), []) || []) as JoinedGroup[],
 	);
+	const lastOpenedGroups = ref(
+		(safeJSONParse(localStorage.getItem(LS_KEY.LAST_OPENED_GROUPS), {}) || {}) as Record<
+			GroupId,
+			number
+		>,
+	);
 
-	const persistToLocalStorage = () => {
+	watch([joinedGroups], () => {
 		localStorage.setItem(LS_KEY.JOINED_GROUP, JSON.stringify(joinedGroups.value));
-	};
-
-	watch([joinedGroups], persistToLocalStorage);
+	});
+	watch([lastOpenedGroups], () => {
+		localStorage.setItem(LS_KEY.LAST_OPENED_GROUPS, JSON.stringify(lastOpenedGroups.value));
+	});
 
 	const joinGroup = (groupId: GroupId) => {
 		joinedGroups.value = [
@@ -34,5 +41,20 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 		joinedGroups.value = joinedGroups.value.filter((group) => !groupIds.includes(group.groupId));
 	};
 
-	return { joinedGroups, joinGroup, removeFromGroup, removeFromGroups };
+	const updateLastOpenedGroup = (groupId: GroupId) => {
+		if (!lastOpenedGroups.value) {
+			lastOpenedGroups.value = { [groupId]: new Date().getTime() };
+			return;
+		}
+		lastOpenedGroups.value[groupId] = new Date().getTime();
+	};
+
+	return {
+		joinedGroups,
+		lastOpenedGroups,
+		joinGroup,
+		removeFromGroup,
+		removeFromGroups,
+		updateLastOpenedGroup,
+	};
 });

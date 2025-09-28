@@ -85,7 +85,7 @@ export const fetchGroups = async (
 		),
 	);
 
-	return { groups, notFoundIds };
+	return { groups: groups.sort((a, b) => a.id.localeCompare(b.id)), notFoundIds };
 };
 
 // Member
