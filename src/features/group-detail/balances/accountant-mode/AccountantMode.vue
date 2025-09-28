@@ -97,7 +97,7 @@ const transferMember = computed(() =>
 							<Typography
 								variant="xsRegular"
 								class="text-sky-700 hover:text-sky-800 cursor-pointer shrink-0">
-								Chuyển khoản
+								{{ item.balance < 0 ? 'Thanh toán dư nợ' : 'Nhận chuyển khoản' }}
 							</Typography>
 						</Flex>
 					</Flex>

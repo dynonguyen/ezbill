@@ -95,7 +95,7 @@ const groups = computed<Group[]>(() => {
 			v-else-if="!groups.length"
 			:src="getImgUrl('no-groups.svg')"
 			class="size-[300px] mx-auto" />
-		<Flex v-else stack class="gap-4 px-4 overflow-auto">
+		<Flex v-else stack class="gap-4 px-4 pb-4 overflow-auto">
 			<RecentGroupItem v-for="group in groups" :key="group.id" :group="group" />
 		</Flex>
 	</Flex>
