@@ -1,13 +1,13 @@
 import { CONTEXT_KEY } from '@/constants/key';
-import type { BillMember, Member } from '@/types/entities';
+import type { BillMember, MemberId } from '@/types/entities';
 import { inject, type Ref } from 'vue';
 
 export type BillFormContextValue = {
 	amount: Ref<number, number>;
 	memberAmounts: Ref<BillMember>;
-	participants: Ref<Member['id'][]>;
+	participants: Ref<MemberId[]>;
 	hideNonParticipants: Ref<boolean>;
-	toggleParticipant(id: Member['id']): void;
+	toggleParticipant(id: MemberId): void;
 };
 
 export const useBillFormContext = () => {

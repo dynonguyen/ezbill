@@ -5,7 +5,7 @@ import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Bill, Member } from '@/types/entities';
+import type { Bill, BillId, MemberId } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
 import dayjs from 'dayjs';
 import { debounce } from 'es-toolkit';
@@ -35,13 +35,13 @@ const sortOptions = [
 ].map((opt) => ({ ...opt, key: `${opt.by}${opt.order}` })) as SortOption[];
 const FIRST_VIEW_LIMIT = 10;
 
-const detailId = ref<Bill['id'] | null>(null);
-const deleteId = ref<Bill['id'] | null>(null);
+const detailId = ref<BillId | null>(null);
+const deleteId = ref<BillId | null>(null);
 const keyword = ref<string>('');
 const showSortDialog = ref(false);
 const showFilterDialog = ref(false);
 const filter = ref<
-	Partial<{ createdBy: Member['id']; participant: Member['id']; paymentStatus: PaymentStatus }>
+	Partial<{ createdBy: MemberId; participant: MemberId; paymentStatus: PaymentStatus }>
 >({});
 const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 const sort = ref<SortOption['key']>(sortOptions[0].key);

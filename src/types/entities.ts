@@ -17,6 +17,7 @@ export type Member = {
 	bankInfo?: MemberBankInfo;
 	isAccounting?: boolean; // isAccounting: true means this member is responsible for accounting
 };
+export type MemberId = Member['id'];
 
 export enum PaymentTrackingMode {
 	Accountant = 'accountant',
@@ -25,17 +26,19 @@ export enum PaymentTrackingMode {
 
 export type PaymentTracking = {
 	createdAt: string;
-	memberId: Member['id'];
+	memberId: MemberId;
 };
 
 export type Group = {
 	id: string;
 	name: string;
 	members: Member[];
-	createdAt: string;
 	deleted: boolean;
 	paymentTrackingMode: PaymentTrackingMode;
+	createdAt: string;
+	updatedAt: string;
 };
+export type GroupId = Group['id'];
 
 export enum BillType {
 	Equally = 'equally',
@@ -43,16 +46,17 @@ export enum BillType {
 	Percentage = 'percentage',
 	Share = 'share',
 }
-export type BillMember = Record<Member['id'], number>;
+export type BillMember = Record<MemberId, number>;
 export type Bill = {
 	id: number;
 	name: string;
-	groupId: Group['id'];
+	groupId: GroupId;
 	type: BillType;
 	amount: number;
 	note?: string | null;
 	createdAt: string;
 	members: BillMember;
-	createdBy: Member['id'];
+	createdBy: MemberId;
 	paymentTracking: PaymentTracking[];
 };
+export type BillId = Bill['id'];

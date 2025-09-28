@@ -49,7 +49,9 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 
 	if (error) {
 		void createErrorLog({ error: error?.message });
-		return toast.error('Tạo nhóm thất bại');
+		return toast.errorWithRetry('Tạo nhóm thất bại', () => {
+			handleAddGroup(form);
+		});
 	}
 
 	importedFile.value = null;

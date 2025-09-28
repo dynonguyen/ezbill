@@ -1,5 +1,9 @@
 export const LS_KEY = {
 	JOINED_GROUP: 'ezbill-joined-group',
+	RECENT_GROUP_SORT_KEY: 'ezbill-recent-group-sort-key',
+	LAST_OPENED_GROUPS: 'ezbill-last-opened-groups',
+	PINNED_GROUPS: 'ezbill-pinned-groups',
+	HIDDEN_GROUPS: 'ezbill-hidden-groups',
 };
 
 export const STORE_KEY = {
@@ -16,6 +20,7 @@ export const CONTEXT_KEY = {
 };
 
 export const QUERY_KEY = {
+	GROUPS: 'groups',
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',
 };

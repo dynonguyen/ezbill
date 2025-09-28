@@ -2,21 +2,22 @@
 import Loading from '@/components/Loading.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { APP_NAME } from '@/constants/common';
-import type { Group } from '@/types/entities';
-import { getGroupLink, saveFileAs } from '@/utils/helpers';
+import type { GroupId } from '@/types/entities';
+import { copyToClipboard, getGroupLink, saveFileAs } from '@/utils/helpers';
 import { computed, onWatcherCleanup, ref, watch } from 'vue';
 import Button from './ui/Button.vue';
 import FormControl from './ui/FormControl.vue';
 
-const props = defineProps<{ id: Group['id'] }>();
+const props = defineProps<{ id: GroupId }>();
 
 const inviteLink = computed(() => getGroupLink(props.id));
 const qrBase64 = ref('');
 const copied = ref(false);
 
-const copyToClipboard = () => {
-	navigator.clipboard?.writeText(inviteLink.value);
-	copied.value = true;
+const handleCopyClick = () => {
+	copyToClipboard(inviteLink.value).then(() => {
+		copied.value = true;
+	});
 };
 
 const downloadQR = () => {
@@ -27,7 +28,7 @@ watch(
 	inviteLink,
 	async () => {
 		if (inviteLink.value) {
-			navigator.clipboard?.writeText(inviteLink.value);
+			copyToClipboard(inviteLink.value);
 			import('qrcode').then(async (QRCode) => {
 				qrBase64.value = await QRCode.toDataURL(inviteLink.value, {
 					width: 500,
@@ -67,7 +68,7 @@ watch(copied, () => {
 			variant="soft"
 			shape="square"
 			class="shrink-0"
-			@click="copyToClipboard"></Button>
+			@click="handleCopyClick"></Button>
 	</Flex>
 
 	<div class="divider" align="center">

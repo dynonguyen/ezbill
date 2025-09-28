@@ -30,7 +30,9 @@ const handleUpdate = async (form: MemberFormData) => {
 	);
 
 	if (error) {
-		return toast.error(error.message || 'Không thể cập nhật thành viên');
+		return toast.errorWithRetry(error.message || 'Không thể cập nhật thành viên', () =>
+			handleUpdate(form),
+		);
 	}
 
 	open.value = false;

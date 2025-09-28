@@ -28,6 +28,13 @@ const getHeader = (type: ToastType) => {
 
 	return header[type];
 };
+
+const handleTryAgain = () => {
+	if (store.toast.options?.retryOnFailure) {
+		store.toast.options.retryOnFailure();
+		store.close();
+	}
+};
 </script>
 
 <template>
@@ -56,7 +63,12 @@ const getHeader = (type: ToastType) => {
 		</Flex>
 
 		<template #action v-if="!store.toast.options?.hideCloseBtn">
-			<Button variant="soft" color="grey" class="w-full" @click="store.close">Đóng</Button>
+			<Flex class="gap-2" items-fluid>
+				<Button variant="soft" color="grey" class="w-full" @click="store.close">Đóng</Button>
+				<Button v-if="store.toast.options?.retryOnFailure" class="w-full" @click="handleTryAgain">
+					Thử lại
+				</Button>
+			</Flex>
 		</template>
 	</Dialog>
 </template>

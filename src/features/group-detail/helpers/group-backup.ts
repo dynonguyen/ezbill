@@ -1,4 +1,4 @@
-import type { Bill, BillMember, Group, Member } from '@/types/entities';
+import type { Bill, BillMember, Group, Member, MemberId } from '@/types/entities';
 import { getGroupLink, saveFileAs } from '@/utils/helpers';
 import dayjs from 'dayjs';
 import { Workbook, type Column, type Font } from 'exceljs';
@@ -101,7 +101,7 @@ const generateOverviewSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 			acc[member.id] = { name: member.name, paid: 0, spent: 0, balance: 0 };
 			return acc;
 		},
-		{} as Record<Member['id'], RowValue>,
+		{} as Record<MemberId, RowValue>,
 	);
 
 	bills.forEach((bill) => {
@@ -211,7 +211,7 @@ const generateDetailSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 	// Prepare data
 	const groupMember = group.members.reduce(
 		(acc, member) => ({ ...acc, [member.id]: member.name }),
-		{} as Record<Member['id'], Member['name']>,
+		{} as Record<MemberId, Member['name']>,
 	);
 	bills.forEach((bill) => {
 		ws.addRow({

@@ -7,7 +7,7 @@ import Typography, { type TypographyProps } from './ui/Typography.vue';
 
 type MemberAvatarProps = Member & {
 	size?: 'sm' | 'md' | 'lg' | 'full';
-	pt?: { avatar?: HTMLAttributes; text?: HTMLAttributes };
+	pt?: { avatar?: HTMLAttributes; text?: HTMLAttributes; img?: HTMLAttributes };
 };
 
 withDefaults(defineProps<MemberAvatarProps>(), { size: 'md' });
@@ -75,7 +75,7 @@ const getAvatarSrc = (avatar: string) => {
 <template>
 	<div class="avatar" v-if="avatar">
 		<div :class="[sizes[size]]" class="rounded-full" v-bind="pt?.avatar">
-			<img :src="getAvatarSrc(avatar)" />
+			<img :src="getAvatarSrc(avatar)" v-bind="pt?.img" />
 		</div>
 	</div>
 	<div v-else-if="name" class="avatar placeholder">

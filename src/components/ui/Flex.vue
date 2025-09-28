@@ -13,7 +13,6 @@ withDefaults(defineProps<FlexProps>(), {
 	center: false,
 	as: 'div',
 });
-
 defineOptions({ inheritAttrs: false });
 </script>
 

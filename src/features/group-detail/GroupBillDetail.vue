@@ -12,7 +12,7 @@ import { PATH } from '@/constants/path';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import PaymentTrackingHelper from '../new-group/PaymentTrackingHelper.vue';
 import BalanceList from './balances/BalanceList.vue';
 import BillList from './bills/BillList.vue';
@@ -24,6 +24,7 @@ import MemberList from './members/MemberList.vue';
 type BillTabValue = 'bills' | 'balances';
 
 const { group } = useGroupContext();
+const router = useRouter();
 
 const {
 	data: bills,
@@ -35,19 +36,20 @@ const {
 });
 
 const openNewBill = ref(false);
-const billTab = ref<BillTabValue>('bills');
 const showPaymentModeTooltip = ref(false);
 
 watch(error, () => {
 	if (error.value) throw error.value;
 });
 
+const billTab = computed(() => (router.currentRoute.value.query.tab as BillTabValue) ?? 'bills');
 const total = computed(() => bills.value?.reduce((acc, bill) => acc + bill.amount, 0) || 0);
 const billTabs = computed<Array<[BillTabValue, string]>>(() => [
 	['bills', `Hoá đơn (${bills.value?.length || 0})`],
 	['balances', 'Số dư'],
 ]);
 const loading = computed(() => isPending.value || error.value);
+let observer: IntersectionObserver | null = null;
 
 const handleToggleStatistic = () => {
 	const stickyStatistic = document.getElementById('sticky-statistic');
@@ -65,7 +67,9 @@ const handleToggleStatistic = () => {
 	}
 };
 
-let observer: IntersectionObserver | null = null;
+const handleTabChange = (tab: BillTabValue) => {
+	router.push({ query: { tab } });
+};
 
 const setupObserver = () => {
 	const target = document.getElementById('observer-target');
@@ -196,7 +200,7 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 					role="tab"
 					class="tab"
 					:class="{ 'tab-active': billTab === value }"
-					@click="billTab = value">
+					@click="handleTabChange(value)">
 					{{ label }}
 				</a>
 			</div>

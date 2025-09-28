@@ -4,7 +4,7 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Member } from '@/types/entities';
+import type { Member, MemberId } from '@/types/entities';
 import { computed, ref } from 'vue';
 import { useBillsContext } from '../../hooks/useBillsContext';
 import { useGroupContext } from '../../hooks/useGroupContext';
@@ -20,8 +20,8 @@ type MemberBalance = {
 
 const bills = useBillsContext();
 const { group } = useGroupContext();
-const detailId = ref<Member['id'] | null>(null);
-const transferId = ref<Member['id'] | null>(null);
+const detailId = ref<MemberId | null>(null);
+const transferId = ref<MemberId | null>(null);
 
 const balances = computed(() => {
 	const result = group.value.members.reduce(
@@ -29,7 +29,7 @@ const balances = computed(() => {
 			acc[member.id] = { member, amountReceived: 0, amountToPay: 0, balance: 0 };
 			return acc;
 		},
-		{} as Record<Member['id'], MemberBalance>,
+		{} as Record<MemberId, MemberBalance>,
 	);
 
 	bills.value.forEach((bill) => {
@@ -93,7 +93,7 @@ const balances = computed(() => {
 							<Typography
 								variant="xsRegular"
 								class="text-sky-700 hover:text-sky-800 cursor-pointer shrink-0">
-								Chuyển khoản
+								Thanh toán dư nợ
 							</Typography>
 						</Flex>
 					</Flex>

@@ -2,7 +2,7 @@
 import CurrencyText from '@/components/CurrencyText.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { BillMember, Member } from '@/types/entities';
+import type { BillMember, MemberId } from '@/types/entities';
 import { computed, ref, watch } from 'vue';
 import { z } from 'zod';
 import { focusOnToggleForDesktop, getTotalMemberAmount } from '../../helpers/utils';
@@ -77,7 +77,7 @@ watch(
 	{ deep: true, immediate: true },
 );
 
-const handleInputChange = (ev: Event, id: Member['id']) => {
+const handleInputChange = (ev: Event, id: MemberId) => {
 	const target = ev.target as HTMLInputElement;
 
 	const parsed = z.coerce.number().safeParse(target.value);

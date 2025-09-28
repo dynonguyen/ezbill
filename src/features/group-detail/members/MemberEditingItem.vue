@@ -40,7 +40,7 @@ const handleDelete = async () => {
 	);
 
 	if (error) {
-		return toast.error(error.message || 'Không thể Xoá thành viên');
+		return toast.errorWithRetry(error.message || 'Không thể Xoá thành viên', () => handleDelete());
 	}
 
 	refetchGroup();

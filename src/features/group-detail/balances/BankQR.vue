@@ -38,7 +38,9 @@ const handleUpdateBankInfo = async (form?: MemberBankInfo) => {
 	);
 
 	if (error) {
-		return toast.error(error.message || 'Không thể cập nhật thông tin');
+		return toast.errorWithRetry(error.message || 'Không thể cập nhật thông tin', () =>
+			handleUpdateBankInfo(form),
+		);
 	}
 
 	refetchGroup();

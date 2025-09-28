@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Bill, Member } from '@/types/entities';
+import type { BillId, MemberId } from '@/types/entities';
 import { match } from 'ts-pattern';
 import { computed, ref } from 'vue';
 import BillDetailPopup from '../../bills/BillDetailPopup.vue';
@@ -9,11 +9,11 @@ import BillItem from '../../bills/BillItem.vue';
 import { useBillsContext } from '../../hooks/useBillsContext';
 
 type Tab = 'all' | 'paid' | 'spent';
-const props = defineProps<{ id: Member['id'] }>();
+const props = defineProps<{ id: MemberId }>();
 
 const bills = useBillsContext();
 
-const detailId = ref<Bill['id'] | null>(null);
+const detailId = ref<BillId | null>(null);
 const activeTab = ref<Tab>('all');
 
 const memberBills = computed(() => {

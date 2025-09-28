@@ -2,7 +2,7 @@
 import CurrencyText from '@/components/CurrencyText.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { type BillMember, type Member } from '@/types/entities';
+import { type BillMember, type MemberId } from '@/types/entities';
 import { computed, ref, watch } from 'vue';
 import { z } from 'zod';
 import { focusOnToggleForDesktop } from '../../helpers/utils';
@@ -35,7 +35,7 @@ const calculateShares = (memberAmounts: BillMember): BillMember => {
 
 const shares = ref<BillMember>(calculateShares(memberAmounts.value));
 
-const handleInputChange = (ev: Event, id: Member['id']) => {
+const handleInputChange = (ev: Event, id: MemberId) => {
 	const target = ev.target as HTMLInputElement;
 
 	const parsed = z.coerce.number().safeParse(target.value);

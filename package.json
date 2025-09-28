@@ -16,6 +16,8 @@
 		"@tanstack/vue-query": "^5.66.0",
 		"@vee-validate/zod": "^4.15.0",
 		"@vueuse/core": "^13.1.0",
+		"@vueuse/gesture": "^2.0.0",
+		"@vueuse/motion": "^3.0.3",
 		"await-to-js": "^3.0.0",
 		"browser-image-compression": "^2.0.2",
 		"dayjs": "^1.11.13",
