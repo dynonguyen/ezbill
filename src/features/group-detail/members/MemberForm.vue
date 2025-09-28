@@ -79,7 +79,7 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 				v-model="name"
 				v-bind="nameProps"
 				name="name"
-				v-focus
+				v-focus="{ disabled: Boolean(initialValues) }"
 				:maxlength="MAX.NAME" />
 		</FormControl>
 

@@ -25,7 +25,11 @@ const localDBStore = useLocalDBStore();
 
 const dragRef = ref();
 const { motionProperties } = useMotionProperties(dragRef, { cursor: 'grab', x: 0, y: 0 });
-const { set } = useSpring(motionProperties as Partial<PermissiveMotionProperties>);
+const { set } = useSpring(motionProperties as Partial<PermissiveMotionProperties>, {
+	damping: 40,
+	stiffness: 500,
+	mass: 1,
+});
 const isDragging = ref(false);
 const hasSwipedLeft = ref(false);
 const hasMoved = ref(false);

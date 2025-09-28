@@ -62,8 +62,9 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 	};
 
 	const pinRecentGroup = (groupId: GroupId) => {
-		if (pinnedGroups.value.includes(groupId)) return;
-		pinnedGroups.value.push(groupId);
+		if (!pinnedGroups.value.includes(groupId)) {
+			pinnedGroups.value = [...pinnedGroups.value, groupId];
+		}
 	};
 
 	const unpinRecentGroup = (groupId: GroupId) => {
@@ -71,8 +72,9 @@ export const useLocalDBStore = defineStore(STORE_KEY.LOCAL_DB, () => {
 	};
 
 	const hideRecentGroup = (groupId: GroupId) => {
-		if (hiddenGroups.value.includes(groupId)) return;
-		hiddenGroups.value.push(groupId);
+		if (!hiddenGroups.value.includes(groupId)) {
+			hiddenGroups.value = [...hiddenGroups.value, groupId];
+		}
 	};
 
 	const unhideRecentGroup = (groupId: GroupId) => {
