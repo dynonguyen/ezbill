@@ -1,21 +1,30 @@
+<script lang="ts">
+export const sortOptions = [
+	{ by: 'updatedAt', order: 'desc', label: 'Cập nhật gần nhất' },
+	{ by: 'name', order: 'asc', label: 'Tên A-Z' },
+	{ by: 'name', order: 'desc', label: 'Tên Z-A' },
+	{ by: 'createdAt', order: 'desc', label: 'Mới nhất trước' },
+	{ by: 'createdAt', order: 'asc', label: 'Cũ nhất trước' },
+].map((opt) => ({ ...opt, key: `${opt.by}-${opt.order}` })) as SortOption<keyof Group>[];
+</script>
+
 <script setup lang="ts">
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
+import { LS_KEY } from '@/constants/key';
+import type { SortOption } from '@/types/common';
+import type { Group } from '@/types/entities';
 import { ref } from 'vue';
 
-type SortOption = { key: string; order: 'asc' | 'desc'; label: string };
-const sortOptions = [
-	{ by: 'updatedAt', order: 'desc', label: 'Cập nhật gần nhất' },
-	{ by: 'name', order: 'asc', label: 'Tên Z-A' },
-	{ by: 'name', order: 'desc', label: 'Tên A-Z' },
-	{ by: 'createdAt', order: 'desc', label: 'Mới nhất trước' },
-	{ by: 'createdAt', order: 'asc', label: 'Cũ nhất trước' },
-].map((opt) => ({ ...opt, key: `${opt.by}${opt.order}` })) as SortOption[];
-
 const showSortDialog = ref(false);
-const sort = ref<SortOption['key']>(sortOptions[0].key);
+const sortModel = defineModel<SortOption>();
+
+const handleSortChange = (opt: SortOption) => {
+	sortModel.value = opt;
+	localStorage.setItem(LS_KEY.RECENT_GROUP_SORT_KEY, opt.key);
+};
 </script>
 
 <template>
@@ -32,17 +41,17 @@ const sort = ref<SortOption['key']>(sortOptions[0].key);
 	<!-- Sort dialog -->
 	<Dialog v-model:open="showSortDialog" header="Sắp xếp">
 		<Flex stack>
-			<Flex v-for="{ key, label } of sortOptions" :key="key" class="gap-3 py-2 cursor-pointer">
+			<Flex v-for="opt of sortOptions" :key="opt.key" class="gap-3 py-2 cursor-pointer">
 				<input
-					:id="`sort-opt-${key}`"
+					:id="`sort-opt-${opt.key}`"
 					type="radio"
 					name="sort-option"
 					class="radio radio-primary"
-					:value="key"
-					v-model="sort"
-					:checked="sort === key" />
-				<Typography class="cursor-pointer grow" as="label" :for="`sort-opt-${key}`">
-					{{ label }}
+					:value="opt.key"
+					:checked="sortModel?.key === opt.key"
+					@change="handleSortChange(opt)" />
+				<Typography class="cursor-pointer grow" as="label" :for="`sort-opt-${opt.key}`">
+					{{ opt.label }}
 				</Typography>
 			</Flex>
 		</Flex>

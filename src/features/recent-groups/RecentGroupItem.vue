@@ -2,6 +2,7 @@
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
+import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
 import type { Group } from '@/types/entities';
 import dayjs from 'dayjs';
@@ -24,12 +25,18 @@ const groupDetailPath = computed(() => PATH.GROUP.replace(':id', props.group.id)
 				<Flex class="gap-1">
 					<div :class="$style.tag">
 						<span class="icon msi-calendar-clock-rounded"></span>
-						<span class="tag-content">{{ dayjs(group.createdAt).format('DD/MM/YYYY HH:mm') }}</span>
+						<span class="tag-content">{{ dayjs(group.createdAt).format('DD/MM/YYYY') }}</span>
 					</div>
 
 					<div :class="$style.tag">
 						<span class="icon msi-group-rounded"></span>
 						<span class="tag-content">{{ group.members.length }}</span>
+					</div>
+
+					<div :class="$style.tag">
+						<span
+							class="icon"
+							:class="PAYMENT_TRACKING_LABEL_MAPPING[group.paymentTrackingMode]?.icon"></span>
 					</div>
 				</Flex>
 

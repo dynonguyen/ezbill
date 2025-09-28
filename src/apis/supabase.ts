@@ -39,12 +39,22 @@ export const fetchGroup = async (id: string): Promise<Group> => {
 	return data as Group;
 };
 
+const updateGroupUpdatedAt = async (id: GroupId, updatedAt?: Date) => {
+	const resp = await supabase
+		.from(getGroupView(id))
+		.update({ updatedAt: updatedAt ?? new Date().toISOString() })
+		.eq('id', id);
+	if (resp.error) throw resp.error;
+};
+
 export const updateGroup = async (data: { id: string; updated: Partial<Group> }) => {
 	const { id, updated } = data;
 
 	const resp = await supabase.from(getGroupView(id)).update(updated).eq('id', id);
 
 	if (resp.error) throw resp.error;
+
+	void updateGroupUpdatedAt(id);
 };
 
 export const deleteGroup = async (id: GroupId) => {
@@ -105,6 +115,8 @@ export const addMember = async (data: { groupId: GroupId; member: Member }) => {
 		.eq('id', groupId);
 
 	if (resp.error) throw resp.error;
+
+	void updateGroupUpdatedAt(groupId);
 };
 
 export const removeMember = async (data: { groupId: GroupId; memberId: MemberId }) => {
@@ -131,6 +143,8 @@ export const removeMember = async (data: { groupId: GroupId; memberId: MemberId 
 		.eq('id', groupId);
 
 	if (resp.error) throw resp.error;
+
+	void updateGroupUpdatedAt(groupId);
 };
 
 export const updateMember = async (data: { groupId: GroupId; newValue: Member }) => {
@@ -156,6 +170,8 @@ export const updateMember = async (data: { groupId: GroupId; newValue: Member })
 		.eq('id', groupId);
 
 	if (resp.error) throw resp.error;
+
+	void updateGroupUpdatedAt(groupId);
 };
 
 // Bill
@@ -183,6 +199,8 @@ export const createBill = async (bill: Omit<Bill, 'id' | 'createdAt'>) => {
 		const resp = await supabase.from(getBillView(bill.groupId)).insert(bill);
 
 		if (resp.error) throw resp.error;
+
+		void updateGroupUpdatedAt(bill.groupId);
 	}
 };
 
@@ -194,6 +212,8 @@ export const updateBill = async (updated: Omit<Bill, 'createdAt'>) => {
 			.eq('id', updated.id);
 
 		if (resp.error) throw resp.error;
+
+		void updateGroupUpdatedAt(updated.groupId);
 	}
 };
 
@@ -203,6 +223,8 @@ export const deleteBill = async (data: { groupId: GroupId; billId: BillId }) => 
 	const resp = await supabase.from(getBillView(groupId)).delete().eq('id', billId);
 
 	if (resp.error) throw resp.error;
+
+	void updateGroupUpdatedAt(groupId);
 };
 
 export const markBillsAsPaid = async (data: {
@@ -221,6 +243,8 @@ export const markBillsAsPaid = async (data: {
 	});
 
 	if (resp.error) throw resp.error;
+
+	void updateGroupUpdatedAt(groupId);
 };
 
 // Import data
@@ -251,6 +275,8 @@ export const importGroup = async (data: {
 		10,
 		500,
 	);
+
+	await updateGroupUpdatedAt(id);
 };
 
 // Error logs

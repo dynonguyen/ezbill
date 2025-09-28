@@ -1,5 +1,6 @@
 export const LS_KEY = {
 	JOINED_GROUP: 'ezbill-joined-group',
+	RECENT_GROUP_SORT_KEY: 'ezbill-recent-group-sort-key',
 };
 
 export const STORE_KEY = {

@@ -2,19 +2,32 @@
 import { fetchGroups } from '@/apis/supabase';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
+import { LS_KEY, QUERY_KEY } from '@/constants/key';
 import { useLocalDBStore } from '@/stores/local-db';
+import type { Group } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
-import { computed, watch } from 'vue';
+import { match } from 'ts-pattern';
+import { computed, ref, watch } from 'vue';
 import RecentGroupItem from './RecentGroupItem.vue';
-import Sorting from './Sorting.vue';
+import Sorting, { sortOptions } from './Sorting.vue';
 
 const localStoreDB = useLocalDBStore();
-const groupIds = localStoreDB.joinedGroups.map((group) => group.groupId);
+const groupIds = computed(() => localStoreDB.joinedGroups.map((group) => group.groupId));
 const queryKey = computed(() => [QUERY_KEY.GROUP, groupIds]);
 
-const { isPending, data, isError } = useQuery({ queryKey, queryFn: () => fetchGroups(groupIds) });
+const { isPending, data, isError } = useQuery({
+	queryKey,
+	queryFn: () => fetchGroups(groupIds.value),
+});
+
+const getDefaultSort = () => {
+	const savedSortKey = localStorage.getItem(LS_KEY.RECENT_GROUP_SORT_KEY);
+	if (!savedSortKey) return sortOptions[0];
+	return sortOptions.find((opt) => opt.key === savedSortKey) || sortOptions[0];
+};
+
+const sort = ref(getDefaultSort());
 
 // Remove not found groups from local store
 watch(
@@ -23,14 +36,44 @@ watch(
 		notFoundIds?.length && localStoreDB.removeFromGroups(notFoundIds);
 	},
 );
+
+const sortGroups = (groups: Group[]) => {
+	const { by, order } = sort.value;
+
+	const compareFn = match([by, order])
+		.returnType<(a: Group, b: Group) => number>()
+		.with(
+			['createdAt', 'desc'],
+			() => (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+		)
+		.with(
+			['createdAt', 'asc'],
+			() => (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+		)
+		.with(['name', 'asc'], () => (a, b) => a.name.localeCompare(b.name))
+		.with(['name', 'desc'], () => (a, b) => b.name.localeCompare(a.name))
+		.with(
+			['updatedAt', 'desc'],
+			() => (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+		)
+		.otherwise(() => () => 0);
+
+	return [...groups].sort(compareFn);
+};
+
+const groups = computed<Group[]>(() => {
+	const result = data.value?.groups || [];
+
+	return sort.value ? sortGroups(result) : result;
+});
 </script>
 
 <template>
-	<Flex stack class="gap-4 h-full py-4 grow overflow-auto">
+	<Flex stack class="gap-4 h-full py-4 grow overflow-hidden">
 		<Flex class="justify-between px-4 gap-1">
-			<Typography variant="mdSemiBold" class="text-black">Nhóm của bạn</Typography>
+			<Typography variant="lgSemiBold" class="text-black">Nhóm của bạn</Typography>
 			<Flex class="gap-2 shrink-0">
-				<Sorting />
+				<Sorting v-model="sort" />
 			</Flex>
 		</Flex>
 
@@ -41,11 +84,11 @@ watch(
 			Đã có lỗi xảy ra, vui lòng thử lại sau
 		</Typography>
 		<img
-			v-else-if="!data?.groups?.length"
+			v-else-if="!groups.length"
 			:src="getImgUrl('no-groups.svg')"
 			class="size-[300px] mx-auto" />
-		<Flex v-else stack class="gap-4 px-4">
-			<RecentGroupItem v-for="group in data.groups" :key="group.id" :group="group" />
+		<Flex v-else stack class="gap-4 px-4 overflow-auto">
+			<RecentGroupItem v-for="group in groups" :key="group.id" :group="group" />
 		</Flex>
 	</Flex>
 </template>
