@@ -68,7 +68,7 @@ const handleToggleStatistic = () => {
 };
 
 const handleTabChange = (tab: BillTabValue) => {
-	router.push({ query: { tab } });
+	router.replace({ query: { tab } });
 };
 
 const setupObserver = () => {
