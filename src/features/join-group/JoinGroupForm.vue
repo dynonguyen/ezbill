@@ -4,7 +4,6 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import { PATH } from '@/constants/path';
-import { vFocus } from '@/directives/v-focus';
 import { useToast } from '@/hooks/useToast';
 import { getEnv } from '@/utils/get-env';
 import { veeValidateFocusOnError } from '@/utils/helpers';
@@ -76,8 +75,7 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 				v-model="inviteLink"
 				v-bind="inviteLinkProps"
 				name="inviteLink"
-				id="inviteLink"
-				v-focus />
+				id="inviteLink" />
 		</FormControl>
 
 		<Flex class="gap-2" items-fluid>

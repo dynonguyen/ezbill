@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
-import { vFocus } from '@/directives/v-focus';
 import { PaymentTrackingMode } from '@/types/entities';
 import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
@@ -62,7 +61,6 @@ const [paymentTrackingMode, _] = defineField('paymentTrackingMode');
 				placeholder="Nhập tên nhóm"
 				v-model="name"
 				v-bind="nameProps"
-				v-focus
 				:maxlength="MAX.NAME"
 				autocomplete="off" />
 		</FormControl>

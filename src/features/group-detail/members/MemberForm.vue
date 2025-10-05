@@ -4,7 +4,6 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { vFocus } from '@/directives/v-focus';
 import type { MemberBankInfo } from '@/types/entities';
 import { veeValidateFocusOnError } from '@/utils/helpers';
 import { toTypedSchema } from '@vee-validate/zod';
@@ -79,7 +78,6 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 				v-model="name"
 				v-bind="nameProps"
 				name="name"
-				v-focus="{ disabled: Boolean(initialValues) }"
 				:maxlength="MAX.NAME" />
 		</FormControl>
 
