@@ -19,6 +19,7 @@ const generalInfo = computed(() => [
 	['Tên sự kiện', props.bill.name],
 	['Người trả', group.value.members.find((m) => m.id === props.bill.createdBy)?.name],
 	['Loại chia', billTypeMapping(props.bill.type).label],
+	...(props.bill.note ? [['Mô tả', props.bill.note]] : []),
 	['Ngày tạo', dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm:ss')],
 	['Đã thanh toán', getPaidStatus(props.bill)],
 ]);
