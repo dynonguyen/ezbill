@@ -14,39 +14,17 @@ import { useGroupContext } from '../hooks/useGroupContext';
 const { group } = useGroupContext();
 const props = defineProps<{ bill: Bill }>();
 
-const LONG_TEXT_THRESHOLD = 100;
-
-const expandedItems = ref<Set<string>>(new Set());
-
-const toggleExpanded = (key: string) => {
-	if (expandedItems.value.has(key)) expandedItems.value.delete(key);
-	else expandedItems.value.add(key);
-};
-
-const isLongText = (text: unknown): text is string =>
-	typeof text === 'string' && text.length > LONG_TEXT_THRESHOLD;
-
-const getExpandableClasses = (label: string, value: unknown) => [
-	'transition-all overflow-hidden',
-	...(isLongText(value)
-		? [
-				'cursor-pointer',
-				expandedItems.value.has(label) ? 'break-words overflow-wrap-anywhere' : 'truncate',
-			]
-		: ['break-words']),
-];
-
-const getExpandableHandler = (label: string, value: unknown) =>
-	isLongText(value) ? () => toggleExpanded(label) : undefined;
+const isNoteExpanded = ref(false);
+const toggleNoteExpanded = () => (isNoteExpanded.value = !isNoteExpanded.value);
 
 const generalInfo = computed(() => [
-	['Số tiền tổng', toVND(props.bill.amount)],
-	['Tên sự kiện', props.bill.name],
-	['Người trả', group.value.members.find((m) => m.id === props.bill.createdBy)?.name],
-	['Loại chia', billTypeMapping(props.bill.type).label],
-	...(props.bill.note ? [['Mô tả', props.bill.note]] : []),
-	['Ngày tạo', dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm:ss')],
-	['Đã thanh toán', getPaidStatus(props.bill)],
+	['Số tiền tổng', toVND(props.bill.amount), false],
+	['Tên sự kiện', props.bill.name, false],
+	['Người trả', group.value.members.find((m) => m.id === props.bill.createdBy)?.name, false],
+	['Loại chia', billTypeMapping(props.bill.type).label, false],
+	...(props.bill.note ? [['Mô tả', props.bill.note, true]] : []),
+	['Ngày tạo', dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm:ss'), false],
+	['Đã thanh toán', getPaidStatus(props.bill), false],
 ]);
 
 const memberDetails = computed(() => {
@@ -76,23 +54,20 @@ const memberDetails = computed(() => {
 	<Flex stack class="gap-4">
 		<!-- General Information -->
 		<Flex stack class="gap-2">
-			<template v-for="[label, value] in generalInfo" :key="label">
-				<LabelValue
-					:label="label"
-					:value="value"
-					:pt="{
-						value: {
-							class: getExpandableClasses(String(label), value),
-							onClick: getExpandableHandler(String(label), value),
-						},
-					}" />
-				<Typography
-					v-if="isLongText(value)"
-					variant="xsRegular"
-					class="text-blue-500 cursor-pointer hover:text-blue-700 -mt-2 ml-[6.75rem]"
-					@click="toggleExpanded(String(label))">
-					{{ expandedItems.has(String(label)) ? 'Thu gọn' : 'Xem thêm' }}
-				</Typography>
+			<template v-for="[label, value, expandable] in generalInfo" :key="label">
+				<LabelValue v-if="expandable" :label="label">
+					<template #value>
+						<Typography
+							variant="smRegular"
+							class="transition-all w-full break-all cursor-pointer"
+							:class="{ 'line-clamp-1': !isNoteExpanded }"
+							:title="value"
+							@click="toggleNoteExpanded">
+							{{ value }}
+						</Typography>
+					</template>
+				</LabelValue>
+				<LabelValue v-else :label="label" :value="value" />
 			</template>
 		</Flex>
 
