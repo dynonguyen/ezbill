@@ -19,7 +19,7 @@ withDefaults(defineProps<LabelValueProps>(), { variant: 'smRegular' });
 </script>
 
 <template>
-	<Flex v-if="value" class="gap-2 !items-start">
+	<Flex v-if="value || $slots.value" class="gap-2 !items-start">
 		<Typography
 			:variant="variant"
 			class="text-slate-500 shrink-0"
@@ -27,8 +27,10 @@ withDefaults(defineProps<LabelValueProps>(), { variant: 'smRegular' });
 			v-bind="pt?.label">
 			{{ label }}:
 		</Typography>
-		<Typography :variant="variant" v-bind="pt?.value">
-			{{ value }}
-		</Typography>
+		<slot name="value" :value="value">
+			<Typography :variant="variant" v-bind="pt?.value">
+				{{ value }}
+			</Typography>
+		</slot>
 	</Flex>
 </template>

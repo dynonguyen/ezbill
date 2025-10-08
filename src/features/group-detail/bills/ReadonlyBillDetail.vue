@@ -7,20 +7,24 @@ import Typography from '@/components/ui/Typography.vue';
 import type { Bill, PaymentTracking } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import dayjs from 'dayjs';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { billTypeMapping, getPaidStatus } from '../helpers/utils';
 import { useGroupContext } from '../hooks/useGroupContext';
 
 const { group } = useGroupContext();
 const props = defineProps<{ bill: Bill }>();
 
+const isNoteExpanded = ref(false);
+const toggleNoteExpanded = () => (isNoteExpanded.value = !isNoteExpanded.value);
+
 const generalInfo = computed(() => [
-	['Số tiền tổng', toVND(props.bill.amount)],
-	['Tên sự kiện', props.bill.name],
-	['Người trả', group.value.members.find((m) => m.id === props.bill.createdBy)?.name],
-	['Loại chia', billTypeMapping(props.bill.type).label],
-	['Ngày tạo', dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm:ss')],
-	['Đã thanh toán', getPaidStatus(props.bill)],
+	['Số tiền tổng', toVND(props.bill.amount), false],
+	['Tên sự kiện', props.bill.name, false],
+	['Người trả', group.value.members.find((m) => m.id === props.bill.createdBy)?.name, false],
+	['Loại chia', billTypeMapping(props.bill.type).label, false],
+	...(props.bill.note ? [['Mô tả', props.bill.note, true]] : []),
+	['Ngày tạo', dayjs(props.bill.createdAt).format('DD/MM/YYYY HH:mm:ss'), false],
+	['Đã thanh toán', getPaidStatus(props.bill), false],
 ]);
 
 const memberDetails = computed(() => {
@@ -49,12 +53,22 @@ const memberDetails = computed(() => {
 <template>
 	<Flex stack class="gap-4">
 		<!-- General Information -->
-		<Flex stack class="gap-3">
-			<LabelValue
-				v-for="[label, value] in generalInfo"
-				:key="label"
-				:label="label"
-				:value="value" />
+		<Flex stack class="gap-2">
+			<template v-for="[label, value, expandable] in generalInfo" :key="label">
+				<LabelValue v-if="expandable" :label="label">
+					<template #value>
+						<Typography
+							variant="smRegular"
+							class="transition-all w-full break-all cursor-pointer"
+							:class="{ 'line-clamp-1': !isNoteExpanded }"
+							:title="value"
+							@click="toggleNoteExpanded">
+							{{ value }}
+						</Typography>
+					</template>
+				</LabelValue>
+				<LabelValue v-else :label="label" :value="value" />
+			</template>
 		</Flex>
 
 		<!-- Members breakdown -->
