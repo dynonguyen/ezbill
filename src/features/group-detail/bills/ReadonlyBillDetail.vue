@@ -7,12 +7,35 @@ import Typography from '@/components/ui/Typography.vue';
 import type { Bill, PaymentTracking } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import dayjs from 'dayjs';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { billTypeMapping, getPaidStatus } from '../helpers/utils';
 import { useGroupContext } from '../hooks/useGroupContext';
 
 const { group } = useGroupContext();
 const props = defineProps<{ bill: Bill }>();
+
+const LONG_TEXT_THRESHOLD = 100;
+
+const expandedItems = ref<Set<string>>(new Set());
+
+const toggleExpanded = (key: string) => {
+	if (expandedItems.value.has(key)) expandedItems.value.delete(key);
+	else expandedItems.value.add(key);
+};
+
+const isLongText = (text: unknown): text is string =>
+	typeof text === 'string' && text.length > LONG_TEXT_THRESHOLD;
+
+const getExpandableClasses = (label: string, value: unknown) => [
+	'transition-all overflow-hidden',
+	isLongText(value)
+		? 'cursor-pointer ' +
+			(expandedItems.value.has(label) ? 'break-words overflow-wrap-anywhere' : 'truncate')
+		: 'break-words',
+];
+
+const getExpandableHandler = (label: string, value: unknown) =>
+	isLongText(value) ? () => toggleExpanded(label) : undefined;
 
 const generalInfo = computed(() => [
 	['Số tiền tổng', toVND(props.bill.amount)],
@@ -50,12 +73,25 @@ const memberDetails = computed(() => {
 <template>
 	<Flex stack class="gap-4">
 		<!-- General Information -->
-		<Flex stack class="gap-3">
-			<LabelValue
-				v-for="[label, value] in generalInfo"
-				:key="label"
-				:label="label"
-				:value="value" />
+		<Flex stack class="gap-2">
+			<template v-for="[label, value] in generalInfo" :key="label">
+				<LabelValue
+					:label="label"
+					:value="value"
+					:pt="{
+						value: {
+							class: getExpandableClasses(String(label), value),
+							onClick: getExpandableHandler(String(label), value),
+						},
+					}" />
+				<Typography
+					v-if="isLongText(value)"
+					variant="xsRegular"
+					class="text-blue-500 cursor-pointer hover:text-blue-700 -mt-2 ml-[6.75rem]"
+					@click="toggleExpanded(String(label))">
+					{{ expandedItems.has(String(label)) ? 'Thu gọn' : 'Xem thêm' }}
+				</Typography>
+			</template>
 		</Flex>
 
 		<!-- Members breakdown -->
