@@ -28,10 +28,12 @@ const isLongText = (text: unknown): text is string =>
 
 const getExpandableClasses = (label: string, value: unknown) => [
 	'transition-all overflow-hidden',
-	isLongText(value)
-		? 'cursor-pointer ' +
-			(expandedItems.value.has(label) ? 'break-words overflow-wrap-anywhere' : 'truncate')
-		: 'break-words',
+	...(isLongText(value)
+		? [
+				'cursor-pointer',
+				expandedItems.value.has(label) ? 'break-words overflow-wrap-anywhere' : 'truncate',
+			]
+		: ['break-words']),
 ];
 
 const getExpandableHandler = (label: string, value: unknown) =>
