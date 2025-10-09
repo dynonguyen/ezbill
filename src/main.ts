@@ -4,6 +4,7 @@ import { QueryClient, VueQueryPlugin, type VueQueryPluginOptions } from '@tansta
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import App from './App.vue';
+import { vDesktopFocus } from './directives/v-desktop-focus';
 import router from './routes/router';
 
 const app = createApp(App);
@@ -15,5 +16,7 @@ app.use(VueQueryPlugin, {
 } as VueQueryPluginOptions);
 
 app.use(createPinia());
+
+app.directive('desktop-focus', vDesktopFocus);
 
 app.mount('#app');

@@ -75,7 +75,8 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 				v-model="inviteLink"
 				v-bind="inviteLinkProps"
 				name="inviteLink"
-				id="inviteLink" />
+				id="inviteLink"
+				v-desktop-focus />
 		</FormControl>
 
 		<Flex class="gap-2" items-fluid>

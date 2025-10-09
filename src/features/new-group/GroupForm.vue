@@ -62,7 +62,8 @@ const [paymentTrackingMode, _] = defineField('paymentTrackingMode');
 				v-model="name"
 				v-bind="nameProps"
 				:maxlength="MAX.NAME"
-				autocomplete="off" />
+				autocomplete="off"
+				v-desktop-focus />
 		</FormControl>
 
 		<PaymentTrackingModeSelect v-model="paymentTrackingMode" />

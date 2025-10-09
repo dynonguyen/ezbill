@@ -65,6 +65,7 @@ const handleEditGroup = async (form: Partial<Group>) => {
 
 const handleDeleteGroup = async () => {
 	const [error] = await to(deleteMutateAsync(group.value.id));
+	localDBStore.unhideRecentGroup(group.value.id);
 
 	if (error) {
 		void createErrorLog({ error: error?.message });

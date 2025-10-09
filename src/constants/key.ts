@@ -4,6 +4,7 @@ export const LS_KEY = {
 	LAST_OPENED_GROUPS: 'ezbill-last-opened-groups',
 	PINNED_GROUPS: 'ezbill-pinned-groups',
 	HIDDEN_GROUPS: 'ezbill-hidden-groups',
+	SHOW_HIDDEN_GROUPS: 'ezbill-show-hidden-groups',
 };
 
 export const STORE_KEY = {

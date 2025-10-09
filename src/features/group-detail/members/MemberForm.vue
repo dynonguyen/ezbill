@@ -78,7 +78,8 @@ const [isAccounting, isAccountingProps] = defineField('isAccounting');
 				v-model="name"
 				v-bind="nameProps"
 				name="name"
-				:maxlength="MAX.NAME" />
+				:maxlength="MAX.NAME"
+				v-desktop-focus />
 		</FormControl>
 
 		<Flex v-if="isAccountantMode" class="gap-2 text-slate-500">
