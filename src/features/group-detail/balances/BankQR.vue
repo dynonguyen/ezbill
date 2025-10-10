@@ -98,7 +98,7 @@ watch(
 
 <template>
 	<Flex v-if="bankInfo" stack class="w-full gap-3">
-		<BankInfoDetail :bank-info="bankInfo" :amount="amount" :recipient="member.name">
+		<BankInfoDetail :bank-info="bankInfo" :amount="amount" :recipient="member">
 			<template #action>
 				<Flex class="gap-2">
 					<span
@@ -110,7 +110,8 @@ watch(
 				</Flex>
 			</template>
 		</BankInfoDetail>
-		<img v-if="qrBase64" :src="qrBase64" class="size-50 mx-auto" />
+		<img v-if="qrBase64" :src="qrBase64" class="size-48 mx-auto" />
+		<div v-else class="skeleton size-48 mx-auto rounded-lg"></div>
 		<Flex center class="w-full">
 			<Button
 				variant="link"

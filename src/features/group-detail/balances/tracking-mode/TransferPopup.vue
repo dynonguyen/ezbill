@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { createErrorLog, markBillsAsPaid } from '@/apis/supabase';
-import MemberAvatar from '@/components/MemberAvatar.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
@@ -175,8 +174,6 @@ const handleMarkAsPaid = async () => {
 				:key="recipient.member.id"
 				class="gap-3 py-3 !items-start"
 				:class="{ 'border-t border-dashed border-gray-300': index > 0 }">
-				<MemberAvatar v-bind="recipient.member" size="lg" />
-
 				<Flex stack class="gap-2 grow" :class="$style['custom-bank-info']">
 					<Typography v-if="!recipient.member.bankInfo" variant="smRegular">
 						Số tiền cần chuyển cho
