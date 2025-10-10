@@ -50,13 +50,18 @@ const downloadQR = () => {
 	saveFileAs(qrBase64.value, `QR-thanh-toan-${props.bankInfo?.accountNumber}.jpeg`);
 };
 
-const imageUrlToBase64 = async (url: string): Promise<string | ArrayBuffer | null> => {
+const imageUrlToBase64 = async (url: string): Promise<string> => {
 	const response = await fetch(url);
-	const blob = await response.blob();
+	if (!response.ok)
+		throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
 
+	const blob = await response.blob();
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
-		reader.onloadend = () => resolve(reader.result);
+		reader.onloadend = () => {
+			if (typeof reader.result === 'string') resolve(reader.result);
+			else reject(new Error('Failed to convert image to base64 string.'));
+		};
 		reader.onerror = reject;
 		reader.readAsDataURL(blob);
 	});
@@ -75,7 +80,7 @@ watch(
 			const [err, base64] = await to(imageUrlToBase64(url));
 
 			if (!err && base64) {
-				qrBase64.value = base64 as string;
+				qrBase64.value = base64;
 			} else {
 				const qrData = buildVietQRData({
 					accountNumber: props.bankInfo.accountNumber,
