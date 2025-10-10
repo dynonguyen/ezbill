@@ -55,3 +55,12 @@ export function buildVietQRData(data: VietQRData): string {
 
 	return payload;
 }
+
+export const buildVietQRUrl = (transfer: VietQRData): string => {
+	const url = new URL('https://img.vietqr.io/image/');
+	url.pathname += `${transfer.bin}-${transfer.accountNumber}-compact.png`;
+	url.searchParams.set('amount', `${transfer.amount}`);
+	url.searchParams.set('addInfo', transfer.content || DEFAULT_TRANSFER_CONTENT);
+	url.searchParams.set('accountName', transfer.content || DEFAULT_TRANSFER_CONTENT);
+	return url.toString();
+};
