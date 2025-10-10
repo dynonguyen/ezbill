@@ -14,7 +14,7 @@ import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
 
 const localStoreDB = useLocalDBStore();
-const showHidden = ref(false);
+const showHidden = ref(Boolean(localStorage.getItem(LS_KEY.SHOW_HIDDEN_GROUPS)));
 
 const groupIds = computed(() => localStoreDB.joinedGroups.map((group) => group.groupId));
 const queryKey = computed(() => [QUERY_KEY.GROUP, groupIds]);
@@ -73,6 +73,13 @@ const sortGroups = (groups: Group[]) => {
 	return compareFn ? [...groups].sort(compareFn) : groups;
 };
 
+const toggleShowHidden = () => {
+	showHidden.value = !showHidden.value;
+	showHidden.value
+		? localStorage.setItem(LS_KEY.SHOW_HIDDEN_GROUPS, '1')
+		: localStorage.removeItem(LS_KEY.SHOW_HIDDEN_GROUPS);
+};
+
 const groups = computed<Group[]>(() => {
 	const pinned: Group[] = [];
 	const unpinned: Group[] = [];
@@ -104,7 +111,7 @@ const groups = computed<Group[]>(() => {
 					color="neutral"
 					size="sm"
 					class="shrink-0 border-gray-400 gap-1"
-					@click="showHidden = !showHidden">
+					@click="toggleShowHidden">
 					<span
 						class="icon"
 						:class="showHidden ? 'msi-visibility-off-rounded' : 'msi-visibility-rounded'"></span>
