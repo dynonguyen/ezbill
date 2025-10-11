@@ -11,6 +11,8 @@ import dayjs from 'dayjs';
 import { debounce } from 'es-toolkit';
 import { match } from 'ts-pattern';
 import { computed, ref, useTemplateRef } from 'vue';
+import CategoryList from '../category/CategoryList.vue';
+import NewCategory from '../category/NewCategory.vue';
 import { isAllPaid } from '../helpers/utils';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
@@ -21,7 +23,8 @@ import BillItem from './BillItem.vue';
 import FilterItemReset from './FilterItemReset.vue';
 
 const bills = useBillsContext();
-const { isAccountantMode } = useGroupContext();
+const { group, isAccountantMode } = useGroupContext();
+const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 
 type PaymentStatus = 'paid' | 'unpaid' | 'partiallyPaid';
 type SortOption = { key: string; by: keyof Bill; order: 'asc' | 'desc'; label: string };
@@ -43,9 +46,10 @@ const showFilterDialog = ref(false);
 const filter = ref<
 	Partial<{ createdBy: MemberId; participant: MemberId; paymentStatus: PaymentStatus }>
 >({});
-const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 const sort = ref<SortOption['key']>(sortOptions[0].key);
 const isViewAll = ref(false);
+// MOCK: change to false when done
+const showCategory = ref(true);
 
 const hasFilter = computed(() => Object.keys(filter.value).length > 0);
 
@@ -174,13 +178,23 @@ const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
 					size="sm"
 					class="shrink-0 gap-1"
 					@click="showFilterDialog = true">
-					<span class="icon msi-filter-alt"></span>
+					<span class="icon other-filter"></span>
 					<Flex
 						v-if="hasFilter"
 						center
 						class="size-4 rounded-full bg-secondary text-[8px] text-white">
 						{{ Object.keys(filter).length }}
 					</Flex>
+				</Button>
+
+				<Button
+					variant="soft"
+					color="grey"
+					shape="rounded"
+					size="sm"
+					class="shrink-0"
+					@click="showCategory = true">
+					<span class="icon msi-category-outline-rounded"></span>
 				</Button>
 			</Flex>
 		</Flex>
@@ -271,5 +285,18 @@ const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
 		<template #action>
 			<Button color="danger" @click="filter = {}">Thiết lập lại</Button>
 		</template>
+	</Dialog>
+
+	<!-- Category dialog -->
+	<Dialog v-model:open="showCategory" header="Danh mục">
+		<Flex stack class="gap-4">
+			<Flex stack class="gap-1">
+				<Typography variant="mdMedium">Thêm danh mục mới</Typography>
+				<NewCategory :group-id="group.id" />
+			</Flex>
+			<div v-if="group.categories?.length" class="max-h-60 overflow-y-auto">
+				<CategoryList />
+			</div>
+		</Flex>
 	</Dialog>
 </template>
