@@ -2,7 +2,7 @@
 import CurrencyText, { type CurrencyTextProps } from '@/components/CurrencyText.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Bill } from '@/types/entities';
+import { type Bill, type Category } from '@/types/entities';
 import { hasEventPassed } from '@/utils/helpers';
 import dayjs from 'dayjs';
 import { computed, type HTMLAttributes } from 'vue';
@@ -27,6 +27,13 @@ const getBillInfo = (bill: Bill) => {
 };
 
 const hasPaid = computed(() => props.bill.paymentTracking.length > 0);
+const categories = computed<Category[]>(() => {
+	if (!props.bill.categoryIds?.length || !group.value.categories?.length) return [];
+
+	const cateMap = new Map(group.value.categories.map((c) => [c.id, c]));
+
+	return props.bill.categoryIds.map((id) => cateMap.get(id)).filter(Boolean) as Category[];
+});
 </script>
 
 <template>
@@ -68,6 +75,15 @@ const hasPaid = computed(() => props.bill.paymentTracking.length > 0);
 						Xoá
 					</Typography>
 				</Flex>
+			</Flex>
+
+			<Flex v-if="bill.categoryIds?.length" class="gap-1" wrap>
+				<div
+					v-for="category in categories"
+					:key="category.id"
+					class="size-3 rounded-full tooltip tooltip-bottom"
+					:style="{ backgroundColor: category.color }"
+					:data-tip="category.label"></div>
 			</Flex>
 		</Flex>
 	</Flex>

@@ -5,12 +5,15 @@ import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Bill, BillId, MemberId } from '@/types/entities';
+import type { Bill, BillId, CategoryId, MemberId } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
 import dayjs from 'dayjs';
 import { debounce } from 'es-toolkit';
 import { match } from 'ts-pattern';
 import { computed, ref, useTemplateRef } from 'vue';
+import CategoryItem from '../category/CategoryItem.vue';
+import CategoryList from '../category/CategoryList.vue';
+import NewCategory from '../category/NewCategory.vue';
 import { isAllPaid } from '../helpers/utils';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
@@ -21,7 +24,8 @@ import BillItem from './BillItem.vue';
 import FilterItemReset from './FilterItemReset.vue';
 
 const bills = useBillsContext();
-const { isAccountantMode } = useGroupContext();
+const { group, isAccountantMode } = useGroupContext();
+const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 
 type PaymentStatus = 'paid' | 'unpaid' | 'partiallyPaid';
 type SortOption = { key: string; by: keyof Bill; order: 'asc' | 'desc'; label: string };
@@ -41,11 +45,16 @@ const keyword = ref<string>('');
 const showSortDialog = ref(false);
 const showFilterDialog = ref(false);
 const filter = ref<
-	Partial<{ createdBy: MemberId; participant: MemberId; paymentStatus: PaymentStatus }>
+	Partial<{
+		createdBy: MemberId;
+		participant: MemberId;
+		paymentStatus: PaymentStatus;
+		categories: Set<CategoryId>;
+	}>
 >({});
-const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 const sort = ref<SortOption['key']>(sortOptions[0].key);
 const isViewAll = ref(false);
+const showCategory = ref(false);
 
 const hasFilter = computed(() => Object.keys(filter.value).length > 0);
 
@@ -112,6 +121,11 @@ const displayedBills = computed<Bill[]>(() => {
 							.otherwise(() => true),
 					);
 				}
+
+				if (filter.value.categories?.size) {
+					if (!bill.categoryIds?.length) return false;
+					result.push(bill.categoryIds.some((id) => filter.value.categories?.has(id)));
+				}
 			}
 
 			return result.every((r) => r);
@@ -121,6 +135,14 @@ const displayedBills = computed<Bill[]>(() => {
 	}
 
 	return sortBills(bills.value);
+});
+
+const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
+	return [
+		{ label: 'Đã thanh toán', value: 'paid' },
+		{ label: 'Chưa thanh toán', value: 'unpaid' },
+		{ label: 'Thanh toán một phần', value: 'partiallyPaid' },
+	];
 });
 
 const handleSearchChange = debounce((ev: Event) => {
@@ -133,13 +155,19 @@ const handleResetSearchFilter = () => {
 	if (searchRef.value) searchRef.value.value = '';
 };
 
-const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
-	return [
-		{ label: 'Đã thanh toán', value: 'paid' },
-		{ label: 'Chưa thanh toán', value: 'unpaid' },
-		{ label: 'Thanh toán một phần', value: 'partiallyPaid' },
-	];
-});
+const handleFilterCategory = (categoryId: CategoryId) => {
+	filter.value.categories = filter.value.categories || new Set();
+	if (filter.value.categories.has(categoryId)) {
+		filter.value.categories.delete(categoryId);
+		filter.value.categories.size === 0 && handleResetFilter('categories');
+	} else {
+		filter.value.categories.add(categoryId);
+	}
+};
+
+const handleResetFilter = (field: keyof typeof filter.value) => {
+	delete filter.value[field];
+};
 </script>
 
 <template>
@@ -174,13 +202,23 @@ const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
 					size="sm"
 					class="shrink-0 gap-1"
 					@click="showFilterDialog = true">
-					<span class="icon msi-filter-alt"></span>
+					<span class="icon other-filter"></span>
 					<Flex
 						v-if="hasFilter"
 						center
 						class="size-4 rounded-full bg-secondary text-[8px] text-white">
 						{{ Object.keys(filter).length }}
 					</Flex>
+				</Button>
+
+				<Button
+					variant="soft"
+					color="grey"
+					shape="rounded"
+					size="sm"
+					class="shrink-0"
+					@click="showCategory = true">
+					<span class="icon msi-category-outline-rounded"></span>
 				</Button>
 			</Flex>
 		</Flex>
@@ -243,14 +281,14 @@ const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
 		<Flex stack class="gap-4">
 			<FormControl label="Theo người trả">
 				<template #label>
-					<FilterItemReset @click="delete filter.createdBy" label="Theo người trả" />
+					<FilterItemReset @click="handleResetFilter('createdBy')" label="Theo người trả" />
 				</template>
 				<MemberSelect placeholder="Chọn người trả" v-model:value="filter.createdBy!" />
 			</FormControl>
 
 			<FormControl label="Theo người tham gia">
 				<template #label>
-					<FilterItemReset @click="delete filter.participant" label="Theo người tham gia" />
+					<FilterItemReset @click="handleResetFilter('participant')" label="Theo người tham gia" />
 				</template>
 				<MemberSelect placeholder="Chọn thành viên" v-model:value="filter.participant!" />
 			</FormControl>
@@ -258,7 +296,7 @@ const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
 			<FormControl v-if="!isAccountantMode" label="Theo trạng thái thanh toán">
 				<template #label>
 					<FilterItemReset
-						@click="delete filter.paymentStatus"
+						@click="handleResetFilter('paymentStatus')"
 						label="Theo trạng thái thanh toán" />
 				</template>
 				<Autocomplete
@@ -266,10 +304,38 @@ const paymentStatusOptions = computed<AutocompleteOption[]>(() => {
 					v-model:value="filter.paymentStatus"
 					placeholder="Chọn trạng thái" />
 			</FormControl>
+
+			<Flex stack class="gap-2" v-if="group.categories?.length">
+				<FilterItemReset label="Theo danh mục" @click="handleResetFilter('categories')" />
+				<Flex class="gap-2" wrap>
+					<CategoryItem
+						v-for="category in group.categories"
+						:key="category.id"
+						:category="category"
+						@click="handleFilterCategory(category.id)">
+						<template #end v-if="filter.categories?.has(category.id)">
+							<span class="icon msi-check-rounded size-4 self-center"></span>
+						</template>
+					</CategoryItem>
+				</Flex>
+			</Flex>
 		</Flex>
 
 		<template #action>
 			<Button color="danger" @click="filter = {}">Thiết lập lại</Button>
 		</template>
+	</Dialog>
+
+	<!-- Category dialog -->
+	<Dialog v-model:open="showCategory" header="Danh mục">
+		<Flex stack class="gap-4">
+			<Flex stack class="gap-1">
+				<Typography variant="mdMedium">Thêm danh mục mới</Typography>
+				<NewCategory />
+			</Flex>
+			<div v-if="group.categories?.length" class="max-h-60 overflow-y-auto">
+				<CategoryList />
+			</div>
+		</Flex>
 	</Dialog>
 </template>

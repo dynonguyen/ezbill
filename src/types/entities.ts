@@ -24,6 +24,14 @@ export enum PaymentTrackingMode {
 	Tracking = 'tracking',
 }
 
+export type Category = {
+	id: string;
+	color?: string;
+	label: string;
+	createdAt: string;
+};
+export type CategoryId = Category['id'];
+
 export type PaymentTracking = {
 	createdAt: string;
 	memberId: MemberId;
@@ -37,6 +45,7 @@ export type Group = {
 	paymentTrackingMode: PaymentTrackingMode;
 	createdAt: string;
 	updatedAt: string;
+	categories?: Category[];
 };
 export type GroupId = Group['id'];
 
@@ -58,5 +67,6 @@ export type Bill = {
 	members: BillMember;
 	createdBy: MemberId;
 	paymentTracking: PaymentTracking[];
+	categoryIds?: CategoryId[];
 };
 export type BillId = Bill['id'];

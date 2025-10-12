@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import to from 'await-to-js';
 import dayjs from 'dayjs';
 import { omit } from 'es-toolkit';
-import type { Bill, BillId, Group, GroupId, Member, MemberId } from '../types/entities';
+import type { Bill, BillId, CategoryId, Group, GroupId, Member, MemberId } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 
 export const supabase = createClient(getEnv('VITE_SUPABASE_URL'), getEnv('VITE_SUPABASE_KEY'));
@@ -243,6 +243,50 @@ export const markBillsAsPaid = async (data: {
 	});
 
 	if (resp.error) throw resp.error;
+
+	void updateGroupUpdatedAt(groupId);
+};
+
+export const deleteCategory = async (data: { groupId: GroupId; categoryId: CategoryId }) => {
+	const { groupId, categoryId } = data;
+
+	const [gError, group] = await to(fetchGroup(groupId));
+	const [bError, bills] = await to(fetchBills(groupId));
+
+	if (gError || bError) {
+		throw new Error('Không thể xoá danh mục');
+	}
+
+	// Remove category from group
+	const newCategories = group.categories?.filter((c) => c.id !== categoryId) || [];
+
+	const resp = await supabase
+		.from(getGroupView(groupId))
+		.update({ categories: newCategories })
+		.eq('id', groupId);
+
+	if (resp.error) throw resp.error;
+
+	// Remove category from all bills that reference it
+	const billsWithCategory = bills.filter((bill) => bill.categoryIds?.includes(categoryId));
+
+	if (billsWithCategory.length > 0) {
+		const billView = getBillView(groupId);
+		const updatePromises = billsWithCategory.map((bill) => {
+			const updatedCategoryIds = bill.categoryIds?.filter((id) => id !== categoryId) || [];
+			return supabase.from(billView).update({ categoryIds: updatedCategoryIds }).eq('id', bill.id);
+		});
+
+		const results = await Promise.allSettled(updatePromises);
+		const failed = results.find(
+			(result) =>
+				result.status === 'rejected' || (result.status === 'fulfilled' && result.value.error),
+		);
+
+		if (failed) {
+			throw new Error('Không thể cập nhật các hoá đơn liên quan');
+		}
+	}
 
 	void updateGroupUpdatedAt(groupId);
 };
