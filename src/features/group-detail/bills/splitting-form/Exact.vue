@@ -59,7 +59,7 @@ const remaining = computed(() => {
 			<template #action>
 				<CurrencyInput
 					v-if="m.checked"
-					@change="(v) => handleMemberAmountChange(m.id, Number(v))"
+					@change="(v: any) => handleMemberAmountChange(m.id, Number(v))"
 					:model-value="m.checked ? memberAmounts[m.id] || 0 : 0"
 					:input-props="{
 						id: `${m.id}-exact-amount`,

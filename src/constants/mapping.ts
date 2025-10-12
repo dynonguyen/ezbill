@@ -5,11 +5,11 @@ export const PAYMENT_TRACKING_LABEL_MAPPING: Record<
 	{ label: string; icon: string }
 > = {
 	[PaymentTrackingMode.Accountant]: {
-		label: 'Thanh toán tập trung',
+		label: 'Có kế toán',
 		icon: 'icon msi-person-check-rounded',
 	},
 	[PaymentTrackingMode.Tracking]: {
-		label: 'Thanh toán linh hoạt',
+		label: 'Không có kế toán',
 		icon: 'icon msi-list-alt-check-rounded',
 	},
 };

@@ -14,6 +14,7 @@ import { match, P } from 'ts-pattern';
 import { useForm } from 'vee-validate';
 import { computed, provide, ref, watch } from 'vue';
 import { z } from 'zod';
+import CategoryItem from '../category/CategoryItem.vue';
 import {
 	billTypeMapping,
 	getTotalMemberAmount,
@@ -30,7 +31,7 @@ import Share from './splitting-form/Share.vue';
 import { type BillFormContextValue } from './splitting-form/useBillFormContext';
 
 type BillFormProps = { mode: 'new' | 'view-detail'; defaultBill?: Bill };
-type BillForm = Pick<Bill, 'type' | 'amount' | 'createdBy' | 'name' | 'note'>;
+type BillForm = Pick<Bill, 'type' | 'amount' | 'createdBy' | 'name' | 'note' | 'categoryIds'>;
 
 const MAX = { AMOUNT: 100_000_000_000, NOTE: 1000, NAME: 250 };
 const defaultEventName = `Sự kiện ${dayjs().format('DD/MM/YYYY HH:mm:ss')}`;
@@ -45,6 +46,7 @@ const schema = z.object({
 		.max(MAX.AMOUNT, `Tối đa ${toVND(MAX.AMOUNT)}`),
 	name: z.string({ message: 'Nhập tên sự kiện' }).max(MAX.NAME, `Tối đa ${MAX.NAME}`).optional(),
 	note: z.string().max(MAX.NOTE).optional().nullable(),
+	categoryIds: z.array(z.string()).optional(),
 });
 
 const props = withDefaults(defineProps<BillFormProps>(), { mode: 'new' });
@@ -55,11 +57,12 @@ const { group } = useGroupContext();
 const validationSchema = toTypedSchema(schema);
 
 const initialValues = computed<Partial<BillForm>>(() => {
-	if (props.mode === 'new' || !props.defaultBill) return { type: defaultBillType, createdBy: '' };
+	if (props.mode === 'new' || !props.defaultBill)
+		return { type: defaultBillType, createdBy: '', categoryIds: [] };
 
-	const { type, amount, createdBy, name, note } = props.defaultBill;
+	const { type, amount, createdBy, name, note, categoryIds } = props.defaultBill;
 
-	return { type, amount, createdBy, name, note };
+	return { type, amount, createdBy, name, note, categoryIds };
 });
 
 const { errors, handleSubmit, defineField, setFieldValue, meta } = useForm<BillForm>({
@@ -73,6 +76,7 @@ const [amountField] = defineField('amount');
 const [createdByField] = defineField('createdBy');
 const [nameField, nameProps] = defineField('name');
 const [noteField, noteProps] = defineField('note');
+const [categoryIdsField] = defineField('categoryIds');
 
 const isFormDirty = defineModel<boolean>('form-dirty', { default: false });
 
@@ -92,6 +96,7 @@ const participants = ref<MemberId[]>(
 );
 const fixAmountField = ref<{ show: boolean; amount: number }>({ show: false, amount: 0 });
 const hideNonParticipants = ref(false);
+const openCategories = ref(props.defaultBill?.categoryIds?.length ? true : false);
 
 // For exact bill type, to ensure that the total amount matches the sum of member amounts
 watch(
@@ -171,6 +176,7 @@ const handleTypeChange = (type: BillType) => {
 const handleSubmitBill = handleSubmit(async (form) => {
 	const { amount, type, createdBy, note } = form;
 	const name = form.name?.trim() || defaultEventName;
+	const categoryIds = categoryIdsField.value || [];
 
 	const memberAmountsError = validateMemberAmounts();
 	if (memberAmountsError) {
@@ -193,11 +199,25 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		name,
 		note,
 		members: omitZeroMemberAmounts(members),
+		categoryIds,
 		paymentTracking: props.mode === 'new' ? [] : props.defaultBill?.paymentTracking || [],
 	};
 
 	emit('submit', formData);
 }, veeValidateFocusOnError);
+
+const hasCategory = (categoryId: string) => {
+	return categoryIdsField.value?.includes(categoryId);
+};
+
+const handleSelectCategory = (categoryId: string) => {
+	setFieldValue(
+		'categoryIds',
+		hasCategory(categoryId)
+			? (categoryIdsField.value?.filter((id) => id !== categoryId) ?? [])
+			: [...(categoryIdsField.value || []), categoryId],
+	);
+};
 
 provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 	amount: amountField,
@@ -274,6 +294,35 @@ provide<BillFormContextValue>(CONTEXT_KEY.BILL_FORM, {
 					v-model="noteField"
 					v-bind="noteProps" />
 			</FormControl>
+
+			<!-- Categories -->
+			<Flex stack class="gap-2">
+				<Flex class="cursor-pointer" @click="openCategories = !openCategories">
+					<Typography variant="smRegular">
+						Danh mục
+						<span v-if="categoryIdsField?.length">({{ categoryIdsField.length }})</span>
+					</Typography>
+					<span
+						class="icon msi-arrow-drop-down-rounded size-5"
+						:class="{ 'rotate-180': openCategories }"></span>
+				</Flex>
+				<template v-if="openCategories">
+					<Flex v-if="group.categories?.length" wrap class="gap-2">
+						<CategoryItem
+							v-for="category in group.categories"
+							:key="category.id"
+							:category="category"
+							@click="handleSelectCategory(category.id)">
+							<template v-if="hasCategory(category.id)" #end>
+								<span class="icon msi-check size-4 self-center"></span>
+							</template>
+						</CategoryItem>
+					</Flex>
+					<Typography v-else variant="smRegular" class="text-slate-400">
+						Chưa có danh mục, hãy thêm danh mục trước.
+					</Typography>
+				</template>
+			</Flex>
 		</Flex>
 
 		<Typography variant="mdSemiBold" class="text-black">Chia tiền</Typography>
