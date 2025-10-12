@@ -331,7 +331,7 @@ const handleResetFilter = (field: keyof typeof filter.value) => {
 		<Flex stack class="gap-4">
 			<Flex stack class="gap-1">
 				<Typography variant="mdMedium">Thêm danh mục mới</Typography>
-				<NewCategory :group-id="group.id" />
+				<NewCategory />
 			</Flex>
 			<div v-if="group.categories?.length" class="max-h-60 overflow-y-auto">
 				<CategoryList />
