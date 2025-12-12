@@ -5,12 +5,12 @@ import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import CategoryForm, { type CategoryFormData, type ExposedCategoryForm } from './CategoryForm.vue';
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { group } = useGroupContext();
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: client.updateGroup,

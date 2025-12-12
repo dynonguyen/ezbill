@@ -1,7 +1,9 @@
 import type { ImportedBackup } from '../features/group-detail/helpers/group-backup';
 import type { Bill, BillId, CategoryId, Group, GroupId, Member, MemberId } from '../types/entities';
 
-export interface IApiClient {
+// DEPRECATED: Remove this after migration
+/** @deprecated Use IApiClient instead */
+export interface ILegacyApiClient {
 	// Group
 	fetchGroups(ids: GroupId[]): Promise<{ groups: Group[]; notFoundIds: GroupId[] }>;
 	createGroup(
@@ -34,4 +36,56 @@ export interface IApiClient {
 
 	// Error log
 	createErrorLog(error: any): Promise<void>;
+}
+
+// -- Base API Response ---
+export type BaseApiResp<Data> = {
+	statusCode: number;
+	errorCode: number | null;
+	errorDetails: string[] | null;
+	success: boolean;
+	message: string;
+	data: Data | null;
+};
+
+export enum SortOrder {
+	Asc = 'asc',
+	Desc = 'desc',
+}
+export type PaginatedReq = {
+	offset: number;
+	limit: number;
+	sortBy: string;
+	order: SortOrder;
+};
+
+type MustResolvedPromise<T> = Promise<T>;
+export type ResolvedApiResp<Data> = MustResolvedPromise<BaseApiResp<Data>>;
+
+// Models
+// --- Sessions ---
+export type ApiCreateSessionData = { value: string };
+
+// --- Groups ---
+export type ApiCreateGroupReq = Pick<Group, 'name' | 'paymentTrackingMode'>;
+export type ApiCreateGroupData = Pick<Group, 'id'>;
+
+export type ApiFetchGroupsReq = PaginatedReq;
+export type ApiFetchGroupsData = {
+	total: number;
+	limit: number;
+	data: Group[];
+};
+
+export type ApiUpdateGroupReq = Partial<Pick<Group, 'name' | 'paymentTrackingMode'>>;
+
+export interface IApiClient {
+	// Sessions
+	createSession(): ResolvedApiResp<ApiCreateSessionData>;
+
+	// Groups
+	createGroup(req: ApiCreateGroupReq): ResolvedApiResp<ApiCreateGroupData>;
+	fetchGroups(req: ApiFetchGroupsReq): ResolvedApiResp<ApiFetchGroupsData>;
+	fetchGroup(id: GroupId): ResolvedApiResp<Group>;
+	updateGroup(id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>;
 }

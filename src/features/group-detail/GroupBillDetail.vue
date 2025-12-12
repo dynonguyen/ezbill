@@ -12,7 +12,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { useApiClient } from '../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../hooks/useApiClient';
 import PaymentTrackingHelper from '../new-group/PaymentTrackingHelper.vue';
 import BalanceList from './balances/BalanceList.vue';
 import BillList from './bills/BillList.vue';
@@ -26,7 +26,7 @@ type BillTabValue = 'bills' | 'balances';
 const { group } = useGroupContext();
 const router = useRouter();
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const {
 	data: bills,
 	isPending,

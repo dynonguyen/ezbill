@@ -6,7 +6,7 @@ import type { Bill, BillId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
@@ -17,7 +17,7 @@ const bills = useBillsContext();
 const toast = useToast();
 const { isAccountantMode } = useGroupContext();
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: client.updateBill,
 });

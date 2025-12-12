@@ -8,13 +8,13 @@ import type { Category } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import type { CategoryFormData } from './CategoryForm.vue';
 import CategoryForm from './CategoryForm.vue';
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const props = withDefaults(
 	defineProps<{ category: Category; billCount?: number; editable?: boolean }>(),
 	{ editable: false },

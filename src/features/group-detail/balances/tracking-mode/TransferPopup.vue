@@ -9,7 +9,7 @@ import { toVND } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
-import { useApiClient } from '../../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../../hooks/useApiClient';
 import BillItem from '../../bills/BillItem.vue';
 import { isMemberPaid } from '../../helpers/utils';
 import { useBillsContext } from '../../hooks/useBillsContext';
@@ -19,7 +19,7 @@ import BankQR from '../BankQR.vue';
 
 const memberId = defineModel<string>('memberId', { default: '' });
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const bills = useBillsContext();
 const toast = useToast();
 const { isPending: updating, mutateAsync } = useMutation({ mutationFn: client.markBillsAsPaid });

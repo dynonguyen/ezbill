@@ -7,6 +7,8 @@ import { defineConfig, PluginOption } from 'vite';
 import { ViteEjsPlugin } from 'vite-plugin-ejs';
 import vueDevTools from 'vite-plugin-vue-devtools';
 
+const HOST = process.env.HOST ? process.env.HOST : '0.0.0.0';
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8888;
 const BASE_URL = process.env.VITE_BASE_URL || '';
 
 const injectData = {
@@ -27,6 +29,6 @@ export default defineConfig({
 	base: BASE_URL,
 	resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
 	build: { chunkSizeWarningLimit: 1024 },
-	server: { open: true, port: 8888, host: '0.0.0.0' },
-	css: { postcss: { plugins: [tailwindcss()] } },
+	server: { open: true, port: PORT, host: HOST },
+	css: { postcss: { plugins: [tailwindcss() as any] } },
 });

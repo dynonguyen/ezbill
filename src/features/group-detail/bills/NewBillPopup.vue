@@ -6,13 +6,13 @@ import type { Bill } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import BillForm from './BillForm.vue';
 
 const open = defineModel<boolean>('open');
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { isPending, mutateAsync } = useMutation({ mutationFn: client.createBill });
 
 const toast = useToast();

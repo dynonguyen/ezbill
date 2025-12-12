@@ -8,14 +8,14 @@ import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const open = ref(false);
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { group } = useGroupContext();
 const toast = useToast();
 const { isPending, mutateAsync } = useMutation({ mutationFn: client.addMember });

@@ -19,7 +19,7 @@
 		"vnode",
 		"vueuse"
 	],
-	"todo-tree.tree.scanMode": "workspace only",
+	"todo-tree.tree.scanMode": "workspace",
 	"search.exclude": {
 		"bun.lock": true
 	}

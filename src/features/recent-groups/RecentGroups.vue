@@ -3,7 +3,7 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { LS_KEY, QUERY_KEY } from '@/constants/key';
-import { useApiClient } from '@/hooks/useApiClient';
+import { useLegacyApiClient } from '@/hooks/useApiClient';
 import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
@@ -13,7 +13,7 @@ import { computed, ref, toRaw, watch } from 'vue';
 import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const localStoreDB = useLocalDBStore();
 const showHidden = ref(Boolean(localStorage.getItem(LS_KEY.SHOW_HIDDEN_GROUPS)));
 

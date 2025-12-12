@@ -18,6 +18,9 @@ export const CONTEXT_KEY = {
 	BILLS: 'bills',
 	REALTIME_CLIENT: 'realtime-client',
 	BILL_FORM: 'bill-form',
+	// DEPRECATED: Remove this after migration
+	/** @deprecated Use API_CLIENT instead */
+	LEGACY_API_CLIENT: 'legacy-api-client',
 	API_CLIENT: 'api-client',
 };
 

@@ -3,7 +3,7 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import { PATH } from '@/constants/path';
-import { useApiClient } from '@/hooks/useApiClient';
+import { useLegacyApiClient } from '@/hooks/useApiClient';
 import { useToast } from '@/hooks/useToast';
 import { getEnv } from '@/utils/get-env';
 import { veeValidateFocusOnError } from '@/utils/helpers';
@@ -15,7 +15,7 @@ import { z } from 'zod';
 
 const emit = defineEmits<{ close: [] }>();
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const router = useRouter();
 const toast = useToast();
 const schema = z.object({

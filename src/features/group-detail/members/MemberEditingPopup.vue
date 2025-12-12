@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/useToast';
 import type { Member } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import type { MemberFormData } from './MemberForm.vue';
@@ -15,7 +15,7 @@ import MemberForm from './MemberForm.vue';
 const props = defineProps<{ member: Member }>();
 const open = defineModel('open', { default: false });
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { group } = useGroupContext();
 
 const { mutateAsync: updateMutateAsync, isPending: isUpdating } = useMutation({

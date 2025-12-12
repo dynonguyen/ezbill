@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import { omit } from 'es-toolkit';
 import type { Bill, BillId, CategoryId, Group, GroupId, Member, MemberId } from '../types/entities';
 import { getEnv } from '../utils/get-env';
-import type { IApiClient } from './api-client';
+import type { ILegacyApiClient } from './api-client';
 import type { IRealtimeClient, RealtimeChannel } from './realtime-client';
 
 const supabase = createClient(getEnv('VITE_SUPABASE_URL'), getEnv('VITE_SUPABASE_KEY'));
@@ -334,7 +334,7 @@ const createErrorLog = async (error: any) => {
 	});
 };
 
-export const supabaseApiClient: IApiClient = {
+export const supabaseApiClient: ILegacyApiClient = {
 	fetchGroups,
 	createGroup,
 	fetchGroup,

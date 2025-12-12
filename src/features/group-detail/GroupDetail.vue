@@ -12,7 +12,7 @@ import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { IRealtimeClient } from '../../apis/realtime-client';
 import { newRealtimeClient } from '../../apis/supabase';
-import { useApiClient } from '../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../hooks/useApiClient';
 import GroupBillDetail from './GroupBillDetail.vue';
 
 const route = useRoute();
@@ -21,7 +21,7 @@ const localDBStore = useLocalDBStore();
 const realtimeClient = ref<IRealtimeClient | null>(null);
 const queryClient = useQueryClient();
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const {
 	data: group,
 	isPending,

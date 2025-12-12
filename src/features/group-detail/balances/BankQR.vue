@@ -8,7 +8,7 @@ import { buildVietQRData, buildVietQRUrl } from '@/utils/vietqr';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref, watch } from 'vue';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import BankInfoDetail from '../BankInfoDetail.vue';
 import BankInfoPopup from '../BankInfoPopup.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
@@ -24,7 +24,7 @@ const props = defineProps<{
 const qrBase64 = ref('');
 const open = ref(false);
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { mutateAsync: updateMutateAsync } = useMutation({ mutationFn: client.updateMember });
 const toast = useToast();
 const { group } = useGroupContext();

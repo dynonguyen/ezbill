@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { getAssetUrl } from '@/utils/get-asset';
 import { onErrorCaptured, ref } from 'vue';
-import { useApiClient } from '../hooks/useApiClient';
+import { useLegacyApiClient } from '../hooks/useApiClient';
 import Button from './ui/Button.vue';
 import Flex from './ui/Flex.vue';
 import Typography from './ui/Typography.vue';
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const error = ref<Error | null>(null);
 
 onErrorCaptured((err) => {

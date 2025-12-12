@@ -6,12 +6,12 @@ import { useToast } from '@/hooks/useToast';
 import type { BillId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { useApiClient } from '../../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { group } = useGroupContext();
 const bills = useBillsContext();
 const toast = useToast();

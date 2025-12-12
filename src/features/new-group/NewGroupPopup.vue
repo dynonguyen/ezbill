@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { PATH } from '@/constants/path';
-import { useApiClient } from '@/hooks/useApiClient';
+import { useLegacyApiClient } from '@/hooks/useApiClient';
 import { useToast } from '@/hooks/useToast';
 import { useLocalDBStore } from '@/stores/local-db';
 import { PaymentTrackingMode, type Group } from '@/types/entities';
@@ -20,7 +20,7 @@ import ImportBackupFile, { type ImportedModel } from './ImportBackupFile.vue';
 const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const createGroupMutation = useMutation({ mutationFn: client.createGroup });
 const importGroupMutation = useMutation({ mutationFn: client.importGroup });
 

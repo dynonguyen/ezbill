@@ -13,13 +13,13 @@ import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
 import { ref, useId, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
-import { useApiClient } from '../../hooks/useApiClient';
+import { useLegacyApiClient } from '../../hooks/useApiClient';
 import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
 import { useGroupQueryControl } from './hooks/useGroupQueryControl';
 
-const client = useApiClient();
+const client = useLegacyApiClient();
 const { group } = useGroupContext();
 const bills = useBillsContext();
 const toast = useToast();
