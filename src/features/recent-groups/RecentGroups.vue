@@ -3,19 +3,37 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { LS_KEY, QUERY_KEY } from '@/constants/key';
-import { useLegacyApiClient } from '@/hooks/useApiClient';
+import { useApiClient, useLegacyApiClient } from '@/hooks/useApiClient';
 import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
 import { match } from 'ts-pattern';
-import { computed, ref, toRaw, watch } from 'vue';
+import { computed, ref, toRaw, watch, watchEffect } from 'vue';
+import { SortOrder, type ApiFetchGroupsReq } from '../../apis/api-client';
 import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
 
 const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const localStoreDB = useLocalDBStore();
 const showHidden = ref(Boolean(localStorage.getItem(LS_KEY.SHOW_HIDDEN_GROUPS)));
+
+const fetchOptions = ref<ApiFetchGroupsReq>({
+	offset: 0,
+	limit: 10,
+	order: SortOrder.Desc,
+	sortBy: 'created_at',
+});
+
+const { isPending: isFetchingGroups, data: groups } = useQuery({
+	queryKey: [QUERY_KEY.GROUPS, fetchOptions],
+	queryFn: () => apiClient.fetchGroups(fetchOptions.value),
+});
+
+watchEffect(() => {
+	console.log(isFetchingGroups, toRaw(groups.value));
+});
 
 const groupIds = computed(() => localStoreDB.joinedGroups.map((group) => group.groupId));
 const queryKey = computed(() => [QUERY_KEY.GROUP, groupIds]);
@@ -81,7 +99,7 @@ const toggleShowHidden = () => {
 		: localStorage.removeItem(LS_KEY.SHOW_HIDDEN_GROUPS);
 };
 
-const groups = computed<Group[]>(() => {
+const _groups = computed<Group[]>(() => {
 	const pinned: Group[] = [];
 	const unpinned: Group[] = [];
 	const filtered =
@@ -92,6 +110,8 @@ const groups = computed<Group[]>(() => {
 	filtered?.forEach((g) => {
 		localStoreDB.pinnedGroups.includes(g.id) ? pinned.push(g) : unpinned.push(g);
 	});
+
+	return groups.value?.data?.data || [];
 
 	return [
 		...(sortOpt.value ? sortGroups(pinned) : pinned),
@@ -129,11 +149,11 @@ const groups = computed<Group[]>(() => {
 			Đã có lỗi xảy ra, vui lòng thử lại sau
 		</Typography>
 		<img
-			v-else-if="!groups.length"
+			v-else-if="!_groups.length"
 			:src="getImgUrl('no-groups.svg')"
 			class="size-[300px] mx-auto" />
 		<Flex v-else stack class="gap-4 px-4 pb-4 overflow-auto">
-			<RecentGroupItem v-for="group in groups" :key="group.id" :group="group" />
+			<RecentGroupItem v-for="group in _groups" :key="group.id" :group="group" />
 		</Flex>
 	</Flex>
 </template>

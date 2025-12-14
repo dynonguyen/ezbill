@@ -19,7 +19,6 @@
 		"@vueuse/gesture": "^2.0.0",
 		"@vueuse/motion": "^3.0.3",
 		"await-to-js": "^3.0.0",
-		"axios": "^1.13.2",
 		"browser-image-compression": "^2.0.2",
 		"dayjs": "^1.11.13",
 		"es-toolkit": "^1.38.0",

@@ -25,6 +25,7 @@ export const CONTEXT_KEY = {
 };
 
 export const QUERY_KEY = {
+	CHECK_SESSION: 'check-session',
 	GROUPS: 'groups',
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',

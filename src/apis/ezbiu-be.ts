@@ -149,6 +149,10 @@ function parseEzbiuPaginatedReq(req: PaginatedReq): Record<string, Primitive> {
 	};
 }
 
+const checkSession = (): ResolvedApiResp<null> => {
+	return fetcher.get<null>('/sessions');
+};
+
 const createSession = (): ResolvedApiResp<ApiCreateSessionData> => {
 	return fetcher.post<ApiCreateSessionData>('/sessions');
 };
@@ -184,6 +188,7 @@ const updateGroup = (id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>
 };
 
 export const ezbiuApiClient: IApiClient = {
+	checkSession,
 	createSession,
 
 	createGroup,

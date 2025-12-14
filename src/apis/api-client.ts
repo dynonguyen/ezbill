@@ -81,6 +81,7 @@ export type ApiUpdateGroupReq = Partial<Pick<Group, 'name' | 'paymentTrackingMod
 
 export interface IApiClient {
 	// Sessions
+	checkSession(): ResolvedApiResp<null>;
 	createSession(): ResolvedApiResp<ApiCreateSessionData>;
 
 	// Groups

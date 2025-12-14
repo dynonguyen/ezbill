@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { PATH } from '@/constants/path';
-import { useLegacyApiClient } from '@/hooks/useApiClient';
+import { useApiClient, useLegacyApiClient } from '@/hooks/useApiClient';
 import { useToast } from '@/hooks/useToast';
 import { useLocalDBStore } from '@/stores/local-db';
 import { PaymentTrackingMode, type Group } from '@/types/entities';
@@ -21,7 +21,8 @@ const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
 
 const client = useLegacyApiClient();
-const createGroupMutation = useMutation({ mutationFn: client.createGroup });
+const apiClient = useApiClient();
+const createGroupMutation = useMutation({ mutationFn: apiClient.createGroup });
 const importGroupMutation = useMutation({ mutationFn: client.importGroup });
 
 const toast = useToast();
@@ -37,28 +38,34 @@ const handleClose = () => {
 
 const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>) => {
 	const { name, paymentTrackingMode } = form;
-	const groupId = generateUUID();
 
-	const mutationAction = importedFile.value
-		? importGroupMutation.mutateAsync({
+	if (importedFile.value) {
+		const groupId = generateUUID();
+
+		const [error] = await to(
+			importGroupMutation.mutateAsync({
 				imported: importedFile.value.data,
 				newGroupInfo: { name, id: groupId, paymentTrackingMode },
-			})
-		: createGroupMutation.mutateAsync({ name, id: groupId, paymentTrackingMode });
+			}),
+		);
 
-	const [error] = await to(mutationAction);
+		if (error) {
+			void client.createErrorLog({ error: error?.message });
+			return toast.errorWithRetry('Tạo nhóm thất bại', () => {
+				handleAddGroup(form);
+			});
+		}
 
-	if (error) {
-		void client.createErrorLog({ error: error?.message });
-		return toast.errorWithRetry('Tạo nhóm thất bại', () => {
-			handleAddGroup(form);
-		});
+		importedFile.value = null;
+
+		localDBStore.joinGroup(groupId);
+		inviteGroupId.value = groupId;
+	} else {
+		const resp = await createGroupMutation.mutateAsync({ name, paymentTrackingMode });
+		if (resp.success) {
+			console.log(`☕ DYNO DEBUG ~ NewGroupPopup.vue:66 🦫\n`, resp);
+		}
 	}
-
-	importedFile.value = null;
-
-	localDBStore.joinGroup(groupId);
-	inviteGroupId.value = groupId;
 };
 
 const handleViewGroup = () => {
