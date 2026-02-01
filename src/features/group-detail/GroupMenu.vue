@@ -13,13 +13,14 @@ import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
 import { ref, useId, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
-import { useLegacyApiClient } from '../../hooks/useApiClient';
+import { useApiClient, useLegacyApiClient } from '../../hooks/useApiClient';
 import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
 import { useGroupQueryControl } from './hooks/useGroupQueryControl';
 
 const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const { group } = useGroupContext();
 const bills = useBillsContext();
 const toast = useToast();
@@ -29,10 +30,10 @@ const localDBStore = useLocalDBStore();
 const outsideClickTarget = useTemplateRef('menu-target');
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
-	mutationFn: client.updateGroup,
+	mutationFn: (form: Partial<Group>) => apiClient.updateGroup(group.value.id, form),
 });
 const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
-	mutationFn: client.deleteGroup,
+	mutationFn: () => apiClient.leaveGroup(group.value.id),
 });
 const { refetchGroup } = useGroupQueryControl();
 
@@ -52,7 +53,7 @@ const exportGroup = () => {
 };
 
 const handleEditGroup = async (form: Partial<Group>) => {
-	const [error] = await to(updateMutateAsync({ updated: form, id: group.value.id }));
+	const [error] = await to(updateMutateAsync({ ...form, id: group.value.id }));
 
 	if (error) {
 		void client.createErrorLog({ error: error?.message });
@@ -65,7 +66,7 @@ const handleEditGroup = async (form: Partial<Group>) => {
 };
 
 const handleDeleteGroup = async () => {
-	const [error] = await to(deleteMutateAsync(group.value.id));
+	const [error] = await to(deleteMutateAsync());
 	localDBStore.unhideRecentGroup(group.value.id);
 
 	if (error) {

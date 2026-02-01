@@ -86,6 +86,10 @@ export type ApiFetchBillsData = {
 	data: Bill[];
 };
 
+export type ApiAddMemberReq = Omit<Member, 'id'>;
+
+export type ApiUpdateMemberReq = Partial<Omit<Member, 'id'>>;
+
 export interface IApiClient {
 	// Sessions
 	checkSession(): ResolvedApiResp<null>;
@@ -97,6 +101,17 @@ export interface IApiClient {
 	fetchGroup(id: GroupId): ResolvedApiResp<Group>;
 	updateGroup(id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>;
 
+	leaveGroup(id: GroupId): ResolvedApiResp<null>;
+
 	// Bills
 	fetchBills(groupId: GroupId, req: ApiFetchBillsReq): ResolvedApiResp<ApiFetchBillsData>;
+
+	// Members
+	addMember(groupId: GroupId, req: ApiAddMemberReq): ResolvedApiResp<null>;
+	updateMember(
+		groupId: GroupId,
+		memberId: MemberId,
+		req: ApiUpdateMemberReq,
+	): ResolvedApiResp<null>;
+	removeMember(groupId: GroupId, memberId: MemberId): ResolvedApiResp<null>;
 }

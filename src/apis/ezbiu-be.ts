@@ -1,12 +1,13 @@
-import { transformSnakeToCamel } from '@/utils/transformer';
+import { transformCamelToSnake, transformSnakeToCamel } from '@/utils/transformer';
 import to from 'await-to-js';
 import { merge } from 'es-toolkit';
 import type { Primitive } from 'zod';
 import { ERROR_CODES, HTTP_STATUS_CODES } from '../constants/code';
-import type { Group, GroupId } from '../types/entities';
+import type { Group, GroupId, MemberId } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 import { buildQueryString } from '../utils/querystring';
 import type {
+	ApiAddMemberReq,
 	ApiCreateGroupData,
 	ApiCreateGroupReq,
 	ApiCreateSessionData,
@@ -15,6 +16,7 @@ import type {
 	ApiFetchGroupsData,
 	ApiFetchGroupsReq,
 	ApiUpdateGroupReq,
+	ApiUpdateMemberReq,
 	BaseApiResp,
 	IApiClient,
 	PaginatedReq,
@@ -213,6 +215,10 @@ const updateGroup = (id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>
 	return fetcher.patch<null>(`/groups/${id}`, { payload });
 };
 
+const leaveGroup = (id: GroupId): ResolvedApiResp<null> => {
+	return fetcher.post<null>(`/groups/${id}/leave`);
+};
+
 const fetchBills = (
 	groupId: GroupId,
 	req: ApiFetchBillsReq,
@@ -220,6 +226,24 @@ const fetchBills = (
 	const queries = parseEzbiuPaginatedReq(req);
 
 	return fetcher.get<ApiFetchBillsData>(`/groups/${groupId}/bills`, { queries });
+};
+
+const addMember = (groupId: GroupId, req: ApiAddMemberReq): ResolvedApiResp<null> => {
+	return fetcher.post<null>(`/groups/${groupId}/members`, { payload: transformCamelToSnake(req) });
+};
+
+const updateMember = (
+	groupId: GroupId,
+	memberId: MemberId,
+	req: ApiUpdateMemberReq,
+): ResolvedApiResp<null> => {
+	return fetcher.patch<null>(`/groups/${groupId}/members/${memberId}`, {
+		payload: transformCamelToSnake(req),
+	});
+};
+
+const removeMember = (groupId: GroupId, memberId: MemberId): ResolvedApiResp<null> => {
+	return fetcher.delete<null>(`/groups/${groupId}/members/${memberId}`);
 };
 
 export const ezbiuApiClient: IApiClient = {
@@ -231,5 +255,11 @@ export const ezbiuApiClient: IApiClient = {
 	fetchGroup,
 	updateGroup,
 
+	leaveGroup,
+
 	fetchBills,
+
+	addMember,
+	updateMember,
+	removeMember,
 };

@@ -3,23 +3,23 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Member } from '@/types/entities';
+import type { Member, MemberId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
+import { useApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import AccountingIcon from './AccountingIcon.vue';
 import MemberEditingForm from './MemberEditingPopup.vue';
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const props = defineProps<{ member: Member; index: number }>();
 const { group, isAccountantMode } = useGroupContext();
 const bills = useBillsContext();
 const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
-	mutationFn: client.removeMember,
+	mutationFn: (memberId: MemberId) => apiClient.removeMember(group.value.id, memberId),
 });
 
 const toast = useToast();
@@ -36,9 +36,7 @@ const disabledDelete = computed(
 const handleDelete = async () => {
 	if (disabledDelete.value) return;
 
-	const [error] = await to(
-		removeMutateAsync({ groupId: group.value.id, memberId: props.member.id }),
-	);
+	const [error] = await to(removeMutateAsync(props.member.id));
 
 	if (error) {
 		return toast.errorWithRetry(error.message || 'Không thể Xoá thành viên', () => handleDelete());

@@ -21,7 +21,6 @@ const localDBStore = useLocalDBStore();
 const realtimeClient = ref<IRealtimeClient | null>(null);
 const queryClient = useQueryClient();
 
-// const client = useLegacyApiClient();
 const apiClient = useApiClient();
 
 const {
