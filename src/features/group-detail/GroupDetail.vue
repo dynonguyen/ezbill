@@ -12,7 +12,7 @@ import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { IRealtimeClient } from '../../apis/realtime-client';
 import { newRealtimeClient } from '../../apis/supabase';
-import { useLegacyApiClient } from '../../hooks/useApiClient';
+import { useApiClient } from '../../hooks/useApiClient';
 import GroupBillDetail from './GroupBillDetail.vue';
 
 const route = useRoute();
@@ -21,14 +21,16 @@ const localDBStore = useLocalDBStore();
 const realtimeClient = ref<IRealtimeClient | null>(null);
 const queryClient = useQueryClient();
 
-const client = useLegacyApiClient();
+// const client = useLegacyApiClient();
+const apiClient = useApiClient();
+
 const {
 	data: group,
 	isPending,
 	isError,
 } = useQuery({
 	queryKey: [QUERY_KEY.GROUP, groupId],
-	queryFn: () => client.fetchGroup(groupId.value),
+	queryFn: () => apiClient.fetchGroup(groupId.value).then((resp) => resp.data),
 });
 
 provide(CONTEXT_KEY.GROUP, group);

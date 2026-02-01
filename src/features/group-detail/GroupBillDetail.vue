@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SortOrder, type ApiFetchBillsReq } from '@/apis/api-client';
 import CurrencyText from '@/components/CurrencyText.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
@@ -12,7 +13,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { useLegacyApiClient } from '../../hooks/useApiClient';
+import { useApiClient } from '../../hooks/useApiClient';
 import PaymentTrackingHelper from '../new-group/PaymentTrackingHelper.vue';
 import BalanceList from './balances/BalanceList.vue';
 import BillList from './bills/BillList.vue';
@@ -26,16 +27,21 @@ type BillTabValue = 'bills' | 'balances';
 const { group } = useGroupContext();
 const router = useRouter();
 
-const client = useLegacyApiClient();
-const {
-	data: bills,
-	isPending,
-	error,
-} = useQuery({
-	queryKey: [QUERY_KEY.BILL_LIST, group.value.id],
-	queryFn: () => client.fetchBills(group.value.id),
+const apiClient = useApiClient();
+
+const fetchOptions = ref<ApiFetchBillsReq>({
+	offset: 0,
+	limit: 10,
+	order: SortOrder.Desc,
+	sortBy: 'created_at',
 });
 
+const { data, isPending, error } = useQuery({
+	queryKey: [QUERY_KEY.BILL_LIST, group.value.id, fetchOptions],
+	queryFn: () => apiClient.fetchBills(group.value.id, fetchOptions.value),
+});
+
+const bills = computed(() => data.value?.data?.data ?? []);
 const openNewBill = ref(false);
 const showPaymentModeTooltip = ref(false);
 

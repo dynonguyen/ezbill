@@ -1,3 +1,4 @@
+import { transformSnakeToCamel } from '@/utils/transformer';
 import to from 'await-to-js';
 import { merge } from 'es-toolkit';
 import type { Primitive } from 'zod';
@@ -9,6 +10,8 @@ import type {
 	ApiCreateGroupData,
 	ApiCreateGroupReq,
 	ApiCreateSessionData,
+	ApiFetchBillsData,
+	ApiFetchBillsReq,
 	ApiFetchGroupsData,
 	ApiFetchGroupsReq,
 	ApiUpdateGroupReq,
@@ -20,21 +23,33 @@ import type {
 
 // --- Error codes ---
 const fetcher = (function () {
+	type FetcherConfig = {
+		baseUrl: string;
+		transformer: <T>(data: unknown) => T;
+	};
+
 	type RequestOptions<D = unknown, P = unknown> = Partial<{
 		queries: Record<string, Primitive>;
 		payload: P;
+		transformer: (data: unknown) => D;
 		onError(err: Error, resp: BaseApiResp<D>): void;
 		onSuccess(resp: BaseApiResp<D>): void;
 	}>;
 
-	const baseUrl = getEnv('VITE_API_BASE_URL');
+	/**
+	 * Transform snake_case to camelCase by default
+	 */
+	const config: FetcherConfig = {
+		baseUrl: getEnv('VITE_API_BASE_URL'),
+		transformer: transformSnakeToCamel,
+	};
 
 	async function fetchFn<D, P = Primitive>(
 		endpoint: string,
 		init: RequestInit,
 		options?: RequestOptions<D, P>,
 	): ResolvedApiResp<D> {
-		let url = `${baseUrl}${endpoint}`;
+		let url = `${config.baseUrl}${endpoint}`;
 
 		// Build request options
 		const requestOptions: RequestInit = merge(
@@ -101,13 +116,16 @@ const fetcher = (function () {
 		}
 
 		const jsonResp = await safeGetJsonData();
+		const transformer =
+			options?.transformer ?? config.transformer<D> ?? ((data: unknown) => data as D);
+		const data: D | null = jsonResp?.data ? transformer(jsonResp.data) : null;
 		const response: BaseApiResp<D> = {
 			success: jsonResp?.success ?? false,
 			statusCode: jsonResp?.status_code ?? resp.status,
 			errorCode: jsonResp?.error_code ?? null,
 			errorDetails: jsonResp?.error_details ?? null,
 			message: jsonResp?.message ?? '',
-			data: jsonResp?.data ?? null,
+			data,
 		};
 
 		if (resp.ok) options?.onSuccess?.(response);
@@ -117,7 +135,15 @@ const fetcher = (function () {
 	}
 
 	return {
-		get<D = unknown>(endpoint: string, options?: Pick<RequestOptions<D, null>, 'queries'>) {
+		configure(newConfig: Partial<FetcherConfig>) {
+			if (newConfig.baseUrl !== undefined) config.baseUrl = newConfig.baseUrl;
+			if (newConfig.transformer !== undefined) config.transformer = newConfig.transformer;
+		},
+
+		get<D = unknown>(
+			endpoint: string,
+			options?: Pick<RequestOptions<D, null>, 'queries' | 'transformer'>,
+		) {
 			return fetchFn<D>(endpoint, { method: 'GET' }, options);
 		},
 
@@ -187,6 +213,15 @@ const updateGroup = (id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>
 	return fetcher.patch<null>(`/groups/${id}`, { payload });
 };
 
+const fetchBills = (
+	groupId: GroupId,
+	req: ApiFetchBillsReq,
+): ResolvedApiResp<ApiFetchBillsData> => {
+	const queries = parseEzbiuPaginatedReq(req);
+
+	return fetcher.get<ApiFetchBillsData>(`/groups/${groupId}/bills`, { queries });
+};
+
 export const ezbiuApiClient: IApiClient = {
 	checkSession,
 	createSession,
@@ -195,4 +230,6 @@ export const ezbiuApiClient: IApiClient = {
 	fetchGroups,
 	fetchGroup,
 	updateGroup,
+
+	fetchBills,
 };
