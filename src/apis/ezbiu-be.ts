@@ -1,9 +1,9 @@
-import { transformCamelToSnake, transformSnakeToCamel } from '@/utils/transformer';
+import { transformCamelToSnake, transformId, transformSnakeToCamel } from '@/utils/transformer';
 import to from 'await-to-js';
 import { merge } from 'es-toolkit';
 import type { Primitive } from 'zod';
 import { ERROR_CODES, HTTP_STATUS_CODES } from '../constants/code';
-import type { Group, GroupId, MemberId } from '../types/entities';
+import type { Group, GroupId, ImportBill, MemberId } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 import { buildQueryString } from '../utils/querystring';
 import type {
@@ -15,6 +15,8 @@ import type {
 	ApiFetchBillsReq,
 	ApiFetchGroupsData,
 	ApiFetchGroupsReq,
+	ApiImportGroupData,
+	ApiImportGroupReq,
 	ApiUpdateGroupReq,
 	ApiUpdateMemberReq,
 	BaseApiResp,
@@ -215,6 +217,24 @@ const updateGroup = (id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>
 	return fetcher.patch<null>(`/groups/${id}`, { payload });
 };
 
+const importGroup = (req: ApiImportGroupReq): ResolvedApiResp<ApiImportGroupData> => {
+	const payload = {
+		group: transformCamelToSnake(req.group),
+		bills: req.bills.map((bill) => {
+			const transformed = transformCamelToSnake<Omit<ImportBill, 'members'>>(transformId(bill));
+			return {
+				...transformed,
+				members: Object.entries(bill.members).map(([memberId, shareAmount]) => ({
+					member_id: memberId,
+					share_amount: shareAmount,
+				})),
+			};
+		}),
+	};
+
+	return fetcher.post<ApiImportGroupData>('/groups/import', { payload });
+};
+
 const leaveGroup = (id: GroupId): ResolvedApiResp<null> => {
 	return fetcher.post<null>(`/groups/${id}/leave`);
 };
@@ -254,6 +274,7 @@ export const ezbiuApiClient: IApiClient = {
 	fetchGroups,
 	fetchGroup,
 	updateGroup,
+	importGroup,
 
 	leaveGroup,
 

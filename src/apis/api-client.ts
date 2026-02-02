@@ -79,6 +79,11 @@ export type ApiFetchGroupsData = {
 
 export type ApiUpdateGroupReq = Partial<Pick<Group, 'name' | 'paymentTrackingMode'>>;
 
+export type ApiImportGroupReq = {
+	group: Group;
+	bills: Bill[];
+};
+export type ApiImportGroupData = Pick<Group, 'id'>;
 export type ApiFetchBillsReq = PaginatedReq;
 export type ApiFetchBillsData = {
 	total: number;
@@ -100,6 +105,7 @@ export interface IApiClient {
 	fetchGroups(req: ApiFetchGroupsReq): ResolvedApiResp<ApiFetchGroupsData>;
 	fetchGroup(id: GroupId): ResolvedApiResp<Group>;
 	updateGroup(id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>;
+	importGroup(req: ApiImportGroupReq): ResolvedApiResp<ApiImportGroupData>;
 
 	leaveGroup(id: GroupId): ResolvedApiResp<null>;
 

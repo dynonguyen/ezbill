@@ -56,6 +56,7 @@ export enum BillType {
 	Share = 'share',
 }
 export type BillMember = Record<MemberId, number>;
+
 export type Bill = {
 	id: number;
 	name: string;
@@ -70,3 +71,9 @@ export type Bill = {
 	categoryIds?: CategoryId[];
 };
 export type BillId = Bill['id'];
+
+export type ImportBillMember = {
+	memberId: MemberId;
+	shareAmount: number;
+};
+export type ImportBill = Omit<Bill, 'members'> & { members: ImportBillMember[] };
