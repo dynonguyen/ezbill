@@ -1,4 +1,4 @@
-const MAX_DEPTH = 4;
+const MAX_DEPTH = 10;
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
 	if (typeof value !== 'object' || value === null) return false;

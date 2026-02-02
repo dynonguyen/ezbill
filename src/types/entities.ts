@@ -55,25 +55,22 @@ export enum BillType {
 	Percentage = 'percentage',
 	Share = 'share',
 }
-export type BillMember = Record<MemberId, number>;
+export type BillMember = {
+	memberId: MemberId;
+	shareAmount: number;
+};
 
 export type Bill = {
-	id: number;
+	id: string;
 	name: string;
 	groupId: GroupId;
 	type: BillType;
 	amount: number;
 	note?: string | null;
 	createdAt: string;
-	members: BillMember;
+	members: BillMember[];
 	createdBy: MemberId;
 	paymentTracking: PaymentTracking[];
 	categoryIds?: CategoryId[];
 };
 export type BillId = Bill['id'];
-
-export type ImportBillMember = {
-	memberId: MemberId;
-	shareAmount: number;
-};
-export type ImportBill = Omit<Bill, 'members'> & { members: ImportBillMember[] };

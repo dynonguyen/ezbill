@@ -31,8 +31,8 @@ const balances = computed(() => {
 			result[bill.createdBy].paid += bill.amount;
 		}
 
-		Object.entries(bill.members).forEach(([id, amount]) => {
-			if (result[id]) result[id].spent += amount;
+		bill.members.forEach((m) => {
+			if (result[m.memberId]) result[m.memberId].spent += m.shareAmount;
 		});
 	});
 

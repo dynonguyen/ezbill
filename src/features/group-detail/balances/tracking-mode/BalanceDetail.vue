@@ -6,7 +6,7 @@ import { match, P } from 'ts-pattern';
 import { computed, ref } from 'vue';
 import BillDetailPopup from '../../bills/BillDetailPopup.vue';
 import BillItem from '../../bills/BillItem.vue';
-import { isAllPaid, isMemberPaid } from '../../helpers/utils';
+import { getMemberAmount, isAllPaid, isMemberPaid } from '../../helpers/utils';
 import { useBillsContext } from '../../hooks/useBillsContext';
 
 type Tab = 'to-pay' | 'received' | 'transferred';
@@ -22,24 +22,31 @@ const memberBills = computed(() => {
 			return match(activeTab.value)
 				.with(
 					'to-pay',
-					() => b.createdBy !== props.id && b.members[props.id] > 0 && !isMemberPaid(b, props.id),
+					() =>
+						b.createdBy !== props.id &&
+						getMemberAmount(b.members, props.id) > 0 &&
+						!isMemberPaid(b, props.id),
 				)
 				.with('received', () => b.createdBy === props.id && !isAllPaid(b))
 				.with(
 					'transferred',
-					() => b.createdBy !== props.id && b.members[props.id] > 0 && isMemberPaid(b, props.id),
+					() =>
+						b.createdBy !== props.id &&
+						getMemberAmount(b.members, props.id) > 0 &&
+						isMemberPaid(b, props.id),
 				)
 				.exhaustive();
 		})
 		.map((b) => {
 			const amount = match(activeTab.value)
-				.with(P.union('to-pay', 'transferred'), () => -b.members[props.id])
-				.with('received', () =>
-					Object.entries(b.members).reduce((sum, [id, amount]) => {
-						if (id === props.id || isMemberPaid(b, id)) return sum;
-						return sum + amount;
-					}, 0),
-				)
+				.with(P.union('to-pay', 'transferred'), () => -getMemberAmount(b.members, props.id))
+				.with('received', () => {
+					const paidMemberIds = new Set(b.paymentTracking.map((t) => t.memberId));
+					return b.members.reduce((sum, m) => {
+						if (m.memberId === props.id || paidMemberIds.has(m.memberId)) return sum;
+						return sum + m.shareAmount;
+					}, 0);
+				})
 				.exhaustive();
 			return { ...b, amount };
 		});

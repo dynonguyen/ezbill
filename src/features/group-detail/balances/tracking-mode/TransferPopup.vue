@@ -11,7 +11,7 @@ import to from 'await-to-js';
 import { computed, ref } from 'vue';
 import { useLegacyApiClient } from '../../../../hooks/useApiClient';
 import BillItem from '../../bills/BillItem.vue';
-import { isMemberPaid } from '../../helpers/utils';
+import { getMemberAmount, isMemberPaid } from '../../helpers/utils';
 import { useBillsContext } from '../../hooks/useBillsContext';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import { useGroupQueryControl } from '../../hooks/useGroupQueryControl';
@@ -35,10 +35,10 @@ const memberBills = computed(() => {
 		.filter(
 			(b) =>
 				b.createdBy !== memberId.value &&
-				b.members[memberId.value] > 0 &&
+				getMemberAmount(b.members, memberId.value) > 0 &&
 				!isMemberPaid(b, memberId.value),
 		)
-		.map((b) => ({ ...b, amount: -b.members[memberId.value] }))
+		.map((b) => ({ ...b, amount: -getMemberAmount(b.members, memberId.value) }))
 		.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 });
 

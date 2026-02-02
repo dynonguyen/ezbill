@@ -34,20 +34,24 @@ const balances = computed(() => {
 
 	bills.value.forEach((bill) => {
 		let totalPaid = 0;
+		let creatorAmount = 0;
+		const paidMemberIds = new Set(bill.paymentTracking.map((i) => i.memberId));
 
-		Object.entries(bill.members).forEach(([id, amount]) => {
-			const isPaid = bill.paymentTracking.some((i) => i.memberId === id);
-			if (bill.createdBy !== id && !isPaid) {
-				result[id].amountToPay += amount;
+		bill.members.forEach((m) => {
+			if (m.memberId === bill.createdBy) {
+				creatorAmount = m.shareAmount;
+				return;
 			}
 
-			if (isPaid) {
-				totalPaid += amount;
+			const isPaid = paidMemberIds.has(m.memberId);
+			if (!isPaid) {
+				result[m.memberId].amountToPay += m.shareAmount;
+			} else {
+				totalPaid += m.shareAmount;
 			}
 		});
 
-		result[bill.createdBy].amountReceived +=
-			bill.amount - totalPaid - (bill.members[bill.createdBy] || 0);
+		result[bill.createdBy].amountReceived += bill.amount - totalPaid - creatorAmount;
 	});
 
 	return Object.values(result).map((item) => {

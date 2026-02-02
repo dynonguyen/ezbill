@@ -5,35 +5,35 @@ import Typography from '@/components/ui/Typography.vue';
 import { type BillMember, type MemberId } from '@/types/entities';
 import { computed, ref, watch } from 'vue';
 import { z } from 'zod';
-import { focusOnToggleForDesktop } from '../../helpers/utils';
+import { focusOnToggleForDesktop, getMemberAmount } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
 import { useBillFormContext } from './useBillFormContext';
+
+type SharesRecord = Record<MemberId, number>;
 
 const { participants, memberAmounts, amount } = useBillFormContext();
 const { group } = useGroupContext();
 
 const MAX_SHARE_ITEM = 1000;
 
-const getDefaultShares = (memberAmounts: BillMember): BillMember => {
-	return Object.fromEntries(Object.keys(memberAmounts).map((id) => [id, 1]));
+const getDefaultShares = (memberAmounts: BillMember[]): SharesRecord => {
+	return Object.fromEntries(memberAmounts.map((m) => [m.memberId, 1]));
 };
 
-const calculateShares = (memberAmounts: BillMember): BillMember => {
-	const minAmount = Math.min(...Object.values(memberAmounts));
+const calculateShares = (memberAmounts: BillMember[]): SharesRecord => {
+	const amounts = memberAmounts.map((m) => m.shareAmount);
+	const minAmount = Math.min(...amounts);
 
 	if (minAmount === 0) return getDefaultShares(memberAmounts);
 
 	return Object.fromEntries(
-		Object.entries(memberAmounts).map(([id, amount]) => [
-			id,
-			Number((amount / minAmount).toFixed(2)),
-		]),
+		memberAmounts.map((m) => [m.memberId, Number((m.shareAmount / minAmount).toFixed(2))]),
 	);
 };
 
-const shares = ref<BillMember>(calculateShares(memberAmounts.value));
+const shares = ref<SharesRecord>(calculateShares(memberAmounts.value));
 
 const handleInputChange = (ev: Event, id: MemberId) => {
 	const target = ev.target as HTMLInputElement;
@@ -84,15 +84,13 @@ watch(
 	() => {
 		const totalAmount = amount.value ?? 0;
 
-		const newMemberAmounts: BillMember = {};
-
-		participants.value.forEach((id) => {
+		const newMemberAmounts: BillMember[] = participants.value.map((memberId) => {
+			let shareAmount = 0;
 			if (totalShares.value && totalAmount) {
-				const share = shares.value[id] ?? 0;
-				newMemberAmounts[id] = (share / totalShares.value) * totalAmount;
-			} else {
-				newMemberAmounts[id] = 0;
+				const share = shares.value[memberId] ?? 0;
+				shareAmount = (share / totalShares.value) * totalAmount;
 			}
+			return { memberId, shareAmount };
 		});
 
 		memberAmounts.value = newMemberAmounts;
@@ -116,7 +114,7 @@ watch(
 					<Typography variant="xsRegular">
 						({{ shares[m.id] }} / {{ totalShares }}) phần =
 					</Typography>
-					<CurrencyText :amount="memberAmounts[m.id] ?? 0" class="text-xs" :fixed="0" />
+					<CurrencyText :amount="getMemberAmount(memberAmounts, m.id)" class="text-xs" :fixed="0" />
 				</Flex>
 			</template>
 

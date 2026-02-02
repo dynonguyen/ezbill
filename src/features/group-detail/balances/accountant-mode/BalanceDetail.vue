@@ -6,6 +6,7 @@ import { match } from 'ts-pattern';
 import { computed, ref } from 'vue';
 import BillDetailPopup from '../../bills/BillDetailPopup.vue';
 import BillItem from '../../bills/BillItem.vue';
+import { getMemberAmount } from '../../helpers/utils';
 import { useBillsContext } from '../../hooks/useBillsContext';
 
 type Tab = 'all' | 'paid' | 'spent';
@@ -20,7 +21,7 @@ const memberBills = computed(() => {
 	return bills.value
 		.filter((b) => {
 			return (
-				(b.members[props.id] > 0 || b.createdBy === props.id) &&
+				(getMemberAmount(b.members, props.id) > 0 || b.createdBy === props.id) &&
 				match(activeTab.value)
 					.with('all', () => true)
 					.with('paid', () => b.createdBy === props.id)
@@ -30,7 +31,8 @@ const memberBills = computed(() => {
 		})
 		.map((b) => {
 			const isPayer = b.createdBy === props.id;
-			const spentAmount = b.members[props.id] || (isPayer ? 0 : b.amount);
+			const memberAmount = getMemberAmount(b.members, props.id);
+			const spentAmount = memberAmount || (isPayer ? 0 : b.amount);
 			return { ...b, amount: isPayer ? b.amount - spentAmount : -spentAmount, isPayer };
 		});
 });

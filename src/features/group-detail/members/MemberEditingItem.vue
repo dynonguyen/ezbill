@@ -30,7 +30,11 @@ const editing = ref(false);
 const disabledDelete = computed(
 	() =>
 		isRemoving.value ||
-		bills.value.some((bill) => bill.members[props.member.id] || bill.createdBy === props.member.id),
+		bills.value.some(
+			(bill) =>
+				bill.members.some((m) => m.memberId === props.member.id) ||
+				bill.createdBy === props.member.id,
+		),
 );
 
 const handleDelete = async () => {

@@ -5,7 +5,16 @@ import { createClient } from '@supabase/supabase-js';
 import to from 'await-to-js';
 import dayjs from 'dayjs';
 import { omit } from 'es-toolkit';
-import type { Bill, BillId, CategoryId, Group, GroupId, Member, MemberId } from '../types/entities';
+import type {
+	Bill,
+	BillId,
+	BillMember,
+	CategoryId,
+	Group,
+	GroupId,
+	Member,
+	MemberId,
+} from '../types/entities';
 import { getEnv } from '../utils/get-env';
 import type { ILegacyApiClient } from './api-client';
 import type { IRealtimeClient, RealtimeChannel } from './realtime-client';
@@ -14,6 +23,19 @@ const supabase = createClient(getEnv('VITE_SUPABASE_URL'), getEnv('VITE_SUPABASE
 
 const getGroupView = (groupId: GroupId) => `group_${groupId}`;
 const getBillView = (groupId: GroupId) => `bill_${groupId}`;
+
+const normalizeBillMembers = (members: BillMember[] | Record<MemberId, number>): BillMember[] => {
+	if (Array.isArray(members)) return members;
+	return Object.entries(members).map(([memberId, shareAmount]) => ({
+		memberId,
+		shareAmount,
+	}));
+};
+
+const normalizeBill = (bill: Bill): Bill => ({
+	...bill,
+	members: normalizeBillMembers(bill.members),
+});
 
 // Group
 const createGroup = async (
@@ -131,7 +153,11 @@ const removeMember = async (data: { groupId: GroupId; memberId: MemberId }) => {
 		throw new Error('Không thể Xoá thành viên');
 	}
 
-	if (bills.some((bill) => bill.createdBy === memberId || bill.members[memberId])) {
+	if (
+		bills.some(
+			(bill) => bill.createdBy === memberId || bill.members.some((m) => m.memberId === memberId),
+		)
+	) {
 		throw new Error(
 			'Thành viên đã tạo hoặc tham gia vào một số bill. Vui lòng Xoá bill trước khi Xoá thành viên',
 		);
@@ -180,7 +206,7 @@ const updateMember = async (data: { groupId: GroupId; newValue: Member }) => {
 const isAmountValid = (bill: Partial<Bill>) => {
 	if (
 		!bill.amount ||
-		Math.round(bill.amount) !== Math.round(getTotalMemberAmount(bill.members || {}))
+		Math.round(bill.amount) !== Math.round(getTotalMemberAmount(bill.members || []))
 	) {
 		throw Error('Tổng số tiền không khớp với số tiền của các thành viên');
 	}
@@ -193,7 +219,7 @@ const fetchBills = async (groupId: GroupId): Promise<Bill[]> => {
 
 	if (error) throw error;
 
-	return data as Bill[];
+	return (data as Bill[]).map(normalizeBill);
 };
 
 const createBill = async (bill: Omit<Bill, 'id' | 'createdAt'>) => {

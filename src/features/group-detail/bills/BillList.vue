@@ -109,7 +109,7 @@ const displayedBills = computed<Bill[]>(() => {
 				}
 
 				if (participant) {
-					result.push(Boolean(bill.members[participant]));
+					result.push(bill.members.some((m) => m.memberId === participant));
 				}
 
 				if (paymentStatus) {

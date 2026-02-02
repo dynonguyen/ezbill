@@ -3,7 +3,7 @@ import to from 'await-to-js';
 import { merge } from 'es-toolkit';
 import type { Primitive } from 'zod';
 import { ERROR_CODES, HTTP_STATUS_CODES } from '../constants/code';
-import type { Group, GroupId, ImportBill, MemberId } from '../types/entities';
+import type { Bill, Group, GroupId, MemberId } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 import { buildQueryString } from '../utils/querystring';
 import type {
@@ -170,6 +170,13 @@ const fetcher = (function () {
 })();
 
 // --- Implementations for IApiClient ---
+
+const normalizeBill = (bill: Bill): Bill => ({
+	...bill,
+	members: bill.members ?? [],
+	paymentTracking: bill.paymentTracking ?? [],
+});
+
 function parseEzbiuPaginatedReq(req: PaginatedReq): Record<string, Primitive> {
 	return {
 		limit: req.limit,
@@ -220,16 +227,7 @@ const updateGroup = (id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>
 const importGroup = (req: ApiImportGroupReq): ResolvedApiResp<ApiImportGroupData> => {
 	const payload = {
 		group: transformCamelToSnake(req.group),
-		bills: req.bills.map((bill) => {
-			const transformed = transformCamelToSnake<Omit<ImportBill, 'members'>>(transformId(bill));
-			return {
-				...transformed,
-				members: Object.entries(bill.members).map(([memberId, shareAmount]) => ({
-					member_id: memberId,
-					share_amount: shareAmount,
-				})),
-			};
-		}),
+		bills: req.bills.map((bill) => transformCamelToSnake(transformId(bill))),
 	};
 
 	return fetcher.post<ApiImportGroupData>('/groups/import', { payload });
@@ -245,7 +243,13 @@ const fetchBills = (
 ): ResolvedApiResp<ApiFetchBillsData> => {
 	const queries = parseEzbiuPaginatedReq(req);
 
-	return fetcher.get<ApiFetchBillsData>(`/groups/${groupId}/bills`, { queries });
+	return fetcher.get<ApiFetchBillsData>(`/groups/${groupId}/bills`, {
+		queries,
+		transformer: (raw) => {
+			const data = transformSnakeToCamel<ApiFetchBillsData>(raw);
+			return { ...data, data: data.data.map(normalizeBill) };
+		},
+	});
 };
 
 const addMember = (groupId: GroupId, req: ApiAddMemberReq): ResolvedApiResp<null> => {

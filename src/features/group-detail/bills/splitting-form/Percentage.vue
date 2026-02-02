@@ -5,30 +5,33 @@ import Typography from '@/components/ui/Typography.vue';
 import type { BillMember, MemberId } from '@/types/entities';
 import { computed, ref, watch } from 'vue';
 import { z } from 'zod';
-import { focusOnToggleForDesktop, getTotalMemberAmount } from '../../helpers/utils';
+import {
+	focusOnToggleForDesktop,
+	getMemberAmount,
+	getTotalMemberAmount,
+} from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
 import { useBillFormContext } from './useBillFormContext';
+
+type PercentageRecord = Record<MemberId, number>;
 
 const { participants, memberAmounts, amount } = useBillFormContext();
 const { group } = useGroupContext();
 
 const MAX_PERCENTAGE_ITEM = 100;
 
-const getInitialPercentage = () => {
+const getInitialPercentage = (): PercentageRecord => {
 	const totalAmount = getTotalMemberAmount(memberAmounts.value);
-	if (!totalAmount || !Object.keys(memberAmounts.value).length) return {};
+	if (!totalAmount || !memberAmounts.value.length) return {};
 
 	return Object.fromEntries(
-		Object.keys(memberAmounts.value).map((id) => [
-			id,
-			(memberAmounts.value[id] / totalAmount) * 100,
-		]),
-	) as BillMember;
+		memberAmounts.value.map((m) => [m.memberId, (m.shareAmount / totalAmount) * 100]),
+	);
 };
 
-const memberPercentage = ref<BillMember>(getInitialPercentage());
+const memberPercentage = ref<PercentageRecord>(getInitialPercentage());
 
 const remainingMembers = computed(() => {
 	return participants.value.filter((id) => !isPercentageValid(memberPercentage.value[id])).length;
@@ -61,15 +64,13 @@ watch(
 	() => {
 		const totalAmount = amount.value ?? 0;
 
-		const newMemberAmounts: BillMember = {};
-		participants.value.forEach((id) => {
-			const mPercent = isPercentageValid(memberPercentage.value[id])
-				? memberPercentage.value[id]
+		const newMemberAmounts: BillMember[] = participants.value.map((memberId) => {
+			const mPercent = isPercentageValid(memberPercentage.value[memberId])
+				? memberPercentage.value[memberId]
 				: remainingPercentagePerMember.value;
 
-			if (mPercent) {
-				newMemberAmounts[id] = totalAmount * (mPercent / totalPercentage.value[1]);
-			}
+			const shareAmount = mPercent ? totalAmount * (mPercent / totalPercentage.value[1]) : 0;
+			return { memberId, shareAmount };
 		});
 
 		memberAmounts.value = newMemberAmounts;
@@ -132,7 +133,7 @@ const getShortPercentage = (value: number) => {
 						({{ getShortPercentage(m.percentage) }} / {{ getShortPercentage(totalPercentage[1]) }})%
 						=
 					</Typography>
-					<CurrencyText :amount="memberAmounts[m.id] ?? 0" class="text-xs" :fixed="0" />
+					<CurrencyText :amount="getMemberAmount(memberAmounts, m.id)" class="text-xs" :fixed="0" />
 				</Flex>
 			</template>
 
