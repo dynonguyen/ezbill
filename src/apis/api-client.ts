@@ -91,10 +91,25 @@ export type ApiFetchBillsData = {
 	data: Bill[];
 };
 
+export type ApiCreateBillReq = Omit<Bill, 'id' | 'createdAt'>;
+export type ApiCreateBillData = Pick<Bill, 'id'>;
+
 export type ApiAddMemberReq = Omit<Member, 'id'>;
 
 export type ApiUpdateMemberReq = Partial<Omit<Member, 'id'>>;
 
+export type ApiUpdateBillReq = Partial<Omit<Bill, 'id' | 'createdAt'>>;
+
+export type ApiMarkBillAsPaidReq = {
+	groupId: GroupId;
+	billId: BillId;
+	memberId: MemberId;
+};
+export type ApiMarkBillsAsPaidReq = {
+	groupId: GroupId;
+	memberId: MemberId;
+	billIds: BillId[];
+};
 export interface IApiClient {
 	// Sessions
 	checkSession(): ResolvedApiResp<null>;
@@ -111,6 +126,10 @@ export interface IApiClient {
 
 	// Bills
 	fetchBills(groupId: GroupId, req: ApiFetchBillsReq): ResolvedApiResp<ApiFetchBillsData>;
+	createBill(groupId: GroupId, req: ApiCreateBillReq): ResolvedApiResp<ApiCreateBillData>;
+	updateBill(groupId: GroupId, id: BillId, req: ApiUpdateBillReq): ResolvedApiResp<null>;
+	deleteBill(groupId: GroupId, id: BillId): ResolvedApiResp<null>;
+	markBillsAsPaid(req: ApiMarkBillsAsPaidReq): ResolvedApiResp<null>;
 
 	// Members
 	addMember(groupId: GroupId, req: ApiAddMemberReq): ResolvedApiResp<null>;
@@ -120,4 +139,6 @@ export interface IApiClient {
 		req: ApiUpdateMemberReq,
 	): ResolvedApiResp<null>;
 	removeMember(groupId: GroupId, memberId: MemberId): ResolvedApiResp<null>;
+
+	createErrorLog(error: any): ResolvedApiResp<null>;
 }

@@ -31,7 +31,7 @@ const apiClient = useApiClient();
 
 const fetchOptions = ref<ApiFetchBillsReq>({
 	offset: 0,
-	limit: 10,
+	limit: 100,
 	order: SortOrder.Desc,
 	sortBy: 'created_at',
 });

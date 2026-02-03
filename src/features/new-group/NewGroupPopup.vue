@@ -6,7 +6,7 @@ import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
-import { useApiClient, useLegacyApiClient } from '@/hooks/useApiClient';
+import { useApiClient } from '@/hooks/useApiClient';
 import { useToast } from '@/hooks/useToast';
 import { useLocalDBStore } from '@/stores/local-db';
 import { PaymentTrackingMode, type Group } from '@/types/entities';
@@ -19,7 +19,6 @@ import ImportBackupFile, { type ImportedModel } from './ImportBackupFile.vue';
 const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
 
-const client = useLegacyApiClient();
 const apiClient = useApiClient();
 const queryClient = useQueryClient();
 const createGroupMutation = useMutation({ mutationFn: apiClient.createGroup });
@@ -48,7 +47,7 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 		});
 
 		if (!resp.success) {
-			void client.createErrorLog({ error: resp.message });
+			void apiClient.createErrorLog({ error: resp.message });
 			return toast.errorWithRetry('Tạo nhóm thất bại', () => {
 				handleAddGroup(form);
 			});

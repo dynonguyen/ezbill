@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { getAssetUrl } from '@/utils/get-asset';
 import { onErrorCaptured, ref } from 'vue';
-import { useLegacyApiClient } from '../hooks/useApiClient';
+import { useApiClient } from '../hooks/useApiClient';
 import Button from './ui/Button.vue';
 import Flex from './ui/Flex.vue';
 import Typography from './ui/Typography.vue';
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const error = ref<Error | null>(null);
 
 onErrorCaptured((err) => {
 	error.value = err;
 	console.error('ErrorBoundary:', error);
-	void client.createErrorLog({ error: err.message });
+	void apiClient.createErrorLog({ error: err.message });
 	return false;
 });
 

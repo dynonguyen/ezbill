@@ -1,29 +1,35 @@
 <script setup lang="ts">
+import type { ApiCreateBillReq } from '@/apis/api-client';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Bill } from '@/types/entities';
+import type { Bill, GroupId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
+import { useApiClient } from '../../../hooks/useApiClient';
+import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import BillForm from './BillForm.vue';
 
 const open = defineModel<boolean>('open');
 
-const client = useLegacyApiClient();
-const { isPending, mutateAsync } = useMutation({ mutationFn: client.createBill });
+const { group } = useGroupContext();
+const apiClient = useApiClient();
+const { isPending, mutateAsync } = useMutation({
+	mutationFn: ({ groupId, req }: { groupId: GroupId; req: ApiCreateBillReq }) =>
+		apiClient.createBill(groupId, req),
+});
 
 const toast = useToast();
 const { refetchBills } = useGroupQueryControl();
 const isDirty = ref(false);
 
 const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
-	const [error] = await to(mutateAsync(form));
+	const [error] = await to(mutateAsync({ groupId: group.value.id, req: form }));
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
+		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Tạo bill thất bại', () => handleAddBill(form));
 	}
 

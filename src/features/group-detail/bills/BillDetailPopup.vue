@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import type { ApiUpdateBillReq } from '@/apis/api-client';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Bill, BillId } from '@/types/entities';
+import type { Bill, BillId, GroupId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
+import { useApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
@@ -15,11 +16,12 @@ import ReadonlyBillDetail from './ReadonlyBillDetail.vue';
 
 const bills = useBillsContext();
 const toast = useToast();
-const { isAccountantMode } = useGroupContext();
+const { isAccountantMode, group } = useGroupContext();
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
-	mutationFn: client.updateBill,
+	mutationFn: ({ groupId, id, req }: { groupId: GroupId; id: BillId; req: ApiUpdateBillReq }) =>
+		apiClient.updateBill(groupId, id, req),
 });
 const { refetchBills } = useGroupQueryControl();
 
@@ -33,10 +35,12 @@ const handleCloseDetail = () => {
 const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	if (!detailId.value) return;
 
-	const [error] = await to(updateMutateAsync({ id: detailId.value, ...form }));
+	const [error] = await to(
+		updateMutateAsync({ groupId: group.value.id, id: detailId.value, req: form }),
+	);
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
+		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Chỉnh sửa bill thất bại', () => handleUpdateBill(form));
 	}
 

@@ -13,13 +13,12 @@ import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
 import { ref, useId, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
-import { useApiClient, useLegacyApiClient } from '../../hooks/useApiClient';
+import { useApiClient } from '../../hooks/useApiClient';
 import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
 import { useGroupQueryControl } from './hooks/useGroupQueryControl';
 
-const client = useLegacyApiClient();
 const apiClient = useApiClient();
 const { group } = useGroupContext();
 const bills = useBillsContext();
@@ -56,7 +55,7 @@ const handleEditGroup = async (form: Partial<Group>) => {
 	const [error] = await to(updateMutateAsync({ ...form, id: group.value.id }));
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
+		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Chỉnh sửa thất bại', () => handleEditGroup(form));
 	}
 
@@ -70,7 +69,7 @@ const handleDeleteGroup = async () => {
 	localDBStore.unhideRecentGroup(group.value.id);
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
+		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Xoá nhóm thất bại', () => handleDeleteGroup());
 	}
 

@@ -8,11 +8,13 @@ import to from 'await-to-js';
 import { merge } from 'es-toolkit';
 import type { Primitive } from 'zod';
 import { ERROR_CODES, HTTP_STATUS_CODES } from '../constants/code';
-import type { Bill, Group, GroupId, MemberId } from '../types/entities';
+import type { Bill, BillId, Group, GroupId, MemberId } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 import { buildQueryString } from '../utils/querystring';
 import type {
 	ApiAddMemberReq,
+	ApiCreateBillData,
+	ApiCreateBillReq,
 	ApiCreateGroupData,
 	ApiCreateGroupReq,
 	ApiCreateSessionData,
@@ -22,6 +24,8 @@ import type {
 	ApiFetchGroupsReq,
 	ApiImportGroupData,
 	ApiImportGroupReq,
+	ApiMarkBillsAsPaidReq,
+	ApiUpdateBillReq,
 	ApiUpdateGroupReq,
 	ApiUpdateMemberReq,
 	BaseApiResp,
@@ -254,6 +258,32 @@ const fetchBills = (
 	});
 };
 
+const createBill = (
+	groupId: GroupId,
+	req: ApiCreateBillReq,
+): ResolvedApiResp<ApiCreateBillData> => {
+	return fetcher.post<ApiCreateBillData>(`/groups/${groupId}/bills`, {
+		payload: transformCamelToSnake(req),
+	});
+};
+
+const updateBill = (groupId: GroupId, id: BillId, req: ApiUpdateBillReq): ResolvedApiResp<null> => {
+	return fetcher.patch<null>(`/groups/${groupId}/bills/${id}`, {
+		payload: transformCamelToSnake(req),
+	});
+};
+
+const deleteBill = (groupId: GroupId, id: BillId): ResolvedApiResp<null> => {
+	return fetcher.delete<null>(`/groups/${groupId}/bills/${id}`);
+};
+
+const markBillsAsPaid = (req: ApiMarkBillsAsPaidReq): ResolvedApiResp<null> => {
+	const { groupId, memberId, billIds } = req;
+	return fetcher.post<null>(`/groups/${groupId}/bills/members/${memberId}/paid`, {
+		payload: transformCamelToSnake({ billIds }),
+	});
+};
+
 const addMember = (groupId: GroupId, req: ApiAddMemberReq): ResolvedApiResp<null> => {
 	return fetcher.post<null>(`/groups/${groupId}/members`, { payload: transformCamelToSnake(req) });
 };
@@ -272,6 +302,10 @@ const removeMember = (groupId: GroupId, memberId: MemberId): ResolvedApiResp<nul
 	return fetcher.delete<null>(`/groups/${groupId}/members/${memberId}`);
 };
 
+const createErrorLog = (error: any): ResolvedApiResp<null> => {
+	return fetcher.post<null>('/error-logs', { payload: transformCamelToSnake(error) });
+};
+
 export const ezbiuApiClient: IApiClient = {
 	checkSession,
 	createSession,
@@ -285,8 +319,14 @@ export const ezbiuApiClient: IApiClient = {
 	leaveGroup,
 
 	fetchBills,
+	createBill,
+	updateBill,
+	deleteBill,
+	markBillsAsPaid,
 
 	addMember,
 	updateMember,
 	removeMember,
+
+	createErrorLog,
 };
