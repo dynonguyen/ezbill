@@ -5,12 +5,15 @@ import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { LS_KEY, QUERY_KEY } from '@/constants/key';
 import { useApiClient } from '@/hooks/useApiClient';
+import { useExpandLimit } from '@/hooks/useExpandLimit';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, ref, watch } from 'vue';
 import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
+
+const FIRST_PAGE_LIMIT = 10;
 
 const apiClient = useApiClient();
 const localStoreDB = useLocalDBStore();
@@ -24,30 +27,30 @@ const sortOpt = ref(
 	})(),
 );
 
-const fetchOptions = ref<ApiFetchGroupsReq>({
+const limitRef = ref(FIRST_PAGE_LIMIT);
+const fetchOptions = computed<ApiFetchGroupsReq>(() => ({
 	offset: 0,
-	limit: 10,
+	limit: limitRef.value,
 	order: sortOpt.value?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
 	sortBy: sortOpt.value?.by as string,
+}));
+
+watch(sortOpt, () => {
+	limitRef.value = FIRST_PAGE_LIMIT;
 });
 
-watch(sortOpt, (opt) => {
-	fetchOptions.value = {
-		...fetchOptions.value,
-		offset: 0,
-		order: opt?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
-		sortBy: opt?.by as string,
-	};
-});
+const queryKey = computed(() => [QUERY_KEY.GROUPS, sortOpt.value]);
 
-const queryKey = computed(() => [QUERY_KEY.GROUPS, fetchOptions.value]);
-
-const { isPending, data, isError } = useQuery({
+const { isPending, data, isError, refetch } = useQuery({
 	queryKey,
 	queryFn: () => apiClient.fetchGroups(fetchOptions.value),
 });
 
+useExpandLimit(limitRef, () => data.value?.data ?? null, refetch);
+
 const groups = computed(() => data.value?.data?.data ?? []);
+const responseTotal = computed(() => data.value?.data?.total ?? 0);
+const skeletonCount = computed(() => Math.max(0, responseTotal.value - groups.value.length));
 
 const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
 
@@ -93,6 +96,10 @@ const toggleShowHidden = () => {
 			class="size-[300px] mx-auto" />
 		<Flex v-else stack class="gap-4 px-4 pb-4 overflow-auto">
 			<RecentGroupItem v-for="group in groups" :key="group.id" :group="group" />
+			<div
+				v-for="i in skeletonCount"
+				:key="`skeleton-${i}`"
+				class="skeleton h-24 w-full rounded-2xl" />
 		</Flex>
 	</Flex>
 </template>

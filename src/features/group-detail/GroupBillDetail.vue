@@ -9,6 +9,7 @@ import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
+import { useExpandLimit } from '@/hooks/useExpandLimit';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
@@ -27,19 +28,33 @@ type BillTabValue = 'bills' | 'balances';
 const { group } = useGroupContext();
 const router = useRouter();
 
+const FIRST_PAGE_LIMIT = 10;
+
 const apiClient = useApiClient();
 
-const fetchOptions = ref<ApiFetchBillsReq>({
+const limitRef = ref(FIRST_PAGE_LIMIT);
+const fetchOptions = computed<ApiFetchBillsReq>(() => ({
 	offset: 0,
-	limit: 100,
+	limit: limitRef.value,
 	order: SortOrder.Desc,
 	sortBy: 'created_at',
-});
+}));
 
-const { data, isPending, error } = useQuery({
-	queryKey: [QUERY_KEY.BILL_LIST, group.value.id, fetchOptions],
+watch(
+	() => group.value.id,
+	() => {
+		limitRef.value = FIRST_PAGE_LIMIT;
+	},
+);
+
+const billListQueryKey = computed(() => [QUERY_KEY.BILL_LIST, group.value.id]);
+
+const { data, isPending, error, refetch } = useQuery({
+	queryKey: billListQueryKey,
 	queryFn: () => apiClient.fetchBills(group.value.id, fetchOptions.value),
 });
+
+useExpandLimit(limitRef, () => data.value?.data ?? null, refetch);
 
 const bills = computed(() => data.value?.data?.data ?? []);
 const openNewBill = ref(false);
