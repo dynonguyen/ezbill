@@ -8,29 +8,13 @@ import { useApiClient } from '@/hooks/useApiClient';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
 
 const apiClient = useApiClient();
 const localStoreDB = useLocalDBStore();
 const showHidden = ref(Boolean(localStorage.getItem(LS_KEY.SHOW_HIDDEN_GROUPS)));
-// TODO: scroll pagination and hide groups
-const fetchOptions = ref<ApiFetchGroupsReq>({
-	offset: 0,
-	limit: 10,
-	order: SortOrder.Desc,
-	sortBy: 'created_at',
-});
-
-const { isPending, data, isError } = useQuery({
-	queryKey: [QUERY_KEY.GROUPS, fetchOptions],
-	queryFn: () => apiClient.fetchGroups(fetchOptions.value),
-});
-
-const groups = computed(() => data.value?.data?.data ?? []);
-
-const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
 
 const sortOpt = ref(
 	(() => {
@@ -40,29 +24,39 @@ const sortOpt = ref(
 	})(),
 );
 
+const fetchOptions = ref<ApiFetchGroupsReq>({
+	offset: 0,
+	limit: 10,
+	order: sortOpt.value?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
+	sortBy: sortOpt.value?.by as string,
+});
+
+watch(sortOpt, (opt) => {
+	fetchOptions.value = {
+		...fetchOptions.value,
+		offset: 0,
+		order: opt?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
+		sortBy: opt?.by as string,
+	};
+});
+
+const queryKey = computed(() => [QUERY_KEY.GROUPS, fetchOptions.value]);
+
+const { isPending, data, isError } = useQuery({
+	queryKey,
+	queryFn: () => apiClient.fetchGroups(fetchOptions.value),
+});
+
+const groups = computed(() => data.value?.data?.data ?? []);
+
+const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
+
 const toggleShowHidden = () => {
 	showHidden.value = !showHidden.value;
 	showHidden.value
 		? localStorage.setItem(LS_KEY.SHOW_HIDDEN_GROUPS, '1')
 		: localStorage.removeItem(LS_KEY.SHOW_HIDDEN_GROUPS);
 };
-
-// 	const pinned: Group[] = [];
-// 	const unpinned: Group[] = [];
-// 	const filtered =
-// 		(hasHiddenGroups.value && showHidden.value) || !hasHiddenGroups.value
-// 			? (groups.value ?? [])
-// 			: (groups.value ?? []).filter((g) => !localStoreDB.hiddenGroups.includes(g.id));
-
-// 	filtered?.forEach((g) => {
-// 		localStoreDB.pinnedGroups.includes(g.id) ? pinned.push(g) : unpinned.push(g);
-// 	});
-
-// 	return [
-// 		...(sortOpt.value ? sortGroups(pinned) : pinned),
-// 		...(sortOpt.value ? sortGroups(unpinned) : unpinned),
-// 	];
-// });
 </script>
 
 <template>

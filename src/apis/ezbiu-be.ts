@@ -1,4 +1,9 @@
-import { transformCamelToSnake, transformId, transformSnakeToCamel } from '@/utils/transformer';
+import {
+	camelToSnake,
+	transformCamelToSnake,
+	transformId,
+	transformSnakeToCamel,
+} from '@/utils/transformer';
 import to from 'await-to-js';
 import { merge } from 'es-toolkit';
 import type { Primitive } from 'zod';
@@ -180,7 +185,7 @@ const normalizeBill = (bill: Bill): Bill => ({
 function parseEzbiuPaginatedReq(req: PaginatedReq): Record<string, Primitive> {
 	return {
 		limit: req.limit,
-		sort_by: req.sortBy,
+		sort_by: camelToSnake(req.sortBy),
 		order: req.order,
 		offset: req.offset,
 	};
@@ -218,9 +223,6 @@ const updateGroup = (id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>
 		name: req.name,
 		payment_tracking_mode: req.paymentTrackingMode,
 	};
-
-	console.log(`☕ DYNO DEBUG ~ ezbiu-be.ts:181 🦫\n`, payload);
-
 	return fetcher.patch<null>(`/groups/${id}`, { payload });
 };
 

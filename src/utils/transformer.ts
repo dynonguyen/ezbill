@@ -41,7 +41,7 @@ export const transformSnakeToCamel = <T = unknown>(
 	return data as T;
 };
 
-const camelToSnake = (str: string): string => {
+export const camelToSnake = (str: string): string => {
 	return str.replace(/([A-Z])/g, '_$1').toLowerCase();
 };
 
