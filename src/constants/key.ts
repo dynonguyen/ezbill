@@ -29,6 +29,7 @@ export const QUERY_KEY = {
 	GROUPS: 'groups',
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',
+	INVITE_KEY: 'invite-key',
 };
 
 export const REALTIME_EVENT = {

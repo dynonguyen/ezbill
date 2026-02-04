@@ -2,15 +2,24 @@
 import Loading from '@/components/Loading.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { APP_NAME } from '@/constants/common';
+import { QUERY_KEY } from '@/constants/key';
+import { useApiClient } from '@/hooks/useApiClient';
 import type { GroupId } from '@/types/entities';
 import { copyToClipboard, getGroupLink, saveFileAs } from '@/utils/helpers';
+import { useQuery } from '@tanstack/vue-query';
 import { computed, onWatcherCleanup, ref, watch } from 'vue';
 import Button from './ui/Button.vue';
 import FormControl from './ui/FormControl.vue';
 
 const props = defineProps<{ id: GroupId }>();
+const apiClient = useApiClient();
 
-const inviteLink = computed(() => getGroupLink(props.id));
+const { data: inviteKey } = useQuery({
+	queryKey: [QUERY_KEY.INVITE_KEY, props.id],
+	queryFn: () => apiClient.createInviteKey(props.id).then((resp) => resp.data),
+});
+
+const inviteLink = computed(() => getGroupLink(props.id, inviteKey.value?.value));
 const qrBase64 = ref('');
 const copied = ref(false);
 

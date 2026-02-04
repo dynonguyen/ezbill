@@ -91,6 +91,15 @@ export type ApiFetchBillsData = {
 	data: Bill[];
 };
 
+export type ApiCreateInviteKeyReq = {
+	expiresIn?: number;
+};
+
+export type ApiCreateInviteKeyData = {
+	value: string;
+	expiresAt?: Date;
+};
+
 export type ApiCreateBillReq = Omit<Bill, 'id' | 'createdAt'>;
 export type ApiCreateBillData = Pick<Bill, 'id'>;
 
@@ -110,6 +119,7 @@ export type ApiMarkBillsAsPaidReq = {
 	memberId: MemberId;
 	billIds: BillId[];
 };
+
 export interface IApiClient {
 	// Sessions
 	checkSession(): ResolvedApiResp<null>;
@@ -122,6 +132,12 @@ export interface IApiClient {
 	updateGroup(id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>;
 	importGroup(req: ApiImportGroupReq): ResolvedApiResp<ApiImportGroupData>;
 
+	createInviteKey(
+		id: GroupId,
+		req?: ApiCreateInviteKeyReq,
+	): ResolvedApiResp<ApiCreateInviteKeyData>;
+
+	joinGroup(id: GroupId, inviteKey: string): ResolvedApiResp<null>;
 	leaveGroup(id: GroupId): ResolvedApiResp<null>;
 
 	// Bills

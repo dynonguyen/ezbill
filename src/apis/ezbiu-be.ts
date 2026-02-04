@@ -17,6 +17,8 @@ import type {
 	ApiCreateBillReq,
 	ApiCreateGroupData,
 	ApiCreateGroupReq,
+	ApiCreateInviteKeyData,
+	ApiCreateInviteKeyReq,
 	ApiCreateSessionData,
 	ApiFetchBillsData,
 	ApiFetchBillsReq,
@@ -239,6 +241,23 @@ const importGroup = (req: ApiImportGroupReq): ResolvedApiResp<ApiImportGroupData
 	return fetcher.post<ApiImportGroupData>('/groups/import', { payload });
 };
 
+const createInviteKey = (
+	id: GroupId,
+	req?: ApiCreateInviteKeyReq,
+): ResolvedApiResp<ApiCreateInviteKeyData> => {
+	return fetcher.post<ApiCreateInviteKeyData>(`/groups/${id}/invite`, {
+		payload: transformCamelToSnake(req),
+	});
+};
+
+const joinGroup = (id: GroupId, inviteKey: string): ResolvedApiResp<null> => {
+	const queries = {
+		invite_key: inviteKey,
+	};
+
+	return fetcher.post<null>(`/groups/${id}/join`, { queries });
+};
+
 const leaveGroup = (id: GroupId): ResolvedApiResp<null> => {
 	return fetcher.post<null>(`/groups/${id}/leave`);
 };
@@ -315,7 +334,8 @@ export const ezbiuApiClient: IApiClient = {
 	fetchGroup,
 	updateGroup,
 	importGroup,
-
+	createInviteKey,
+	joinGroup,
 	leaveGroup,
 
 	fetchBills,

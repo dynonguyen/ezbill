@@ -33,8 +33,8 @@ export function saveFileAs(data: Blob | string, filename: string) {
 	a.remove();
 }
 
-export function getGroupLink(groupId: string): string {
-	return `${getEnv('VITE_BASE_URL')}${PATH.GROUP.replace(':id', groupId)}`;
+export function getGroupLink(groupId: string, inviteKey?: string): string {
+	return `${getEnv('VITE_BASE_URL')}${PATH.GROUP.replace(':id', groupId)}${inviteKey ? `?invite_key=${inviteKey}` : ''}`;
 }
 
 export function hasEventPassed(evName: string): boolean {
