@@ -32,6 +32,6 @@ export const QUERY_KEY = {
 };
 
 export const REALTIME_EVENT = {
-	GROUP_UPDATED: 'GROUP_UPDATED',
-	BILL_UPDATED: 'BILL_UPDATED',
+	GROUP_UPDATED: 'group_updated',
+	BILL_UPDATED: 'bill_updated',
 };

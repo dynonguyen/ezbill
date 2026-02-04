@@ -3,23 +3,20 @@ import Feedback from '@/components/Feedback.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
-import { CONTEXT_KEY, QUERY_KEY, REALTIME_EVENT } from '@/constants/key';
+import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { useQuery } from '@tanstack/vue-query';
+import { computed, onMounted, onUnmounted, provide, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import type { IRealtimeClient } from '../../apis/realtime-client';
-import { newRealtimeClient } from '../../apis/supabase';
 import { useApiClient } from '../../hooks/useApiClient';
+import { useEzbiuGroupEvents } from '../../hooks/useEzbiuGroupEvents';
 import GroupBillDetail from './GroupBillDetail.vue';
 
 const route = useRoute();
 const groupId = computed(() => route.params.id as string);
 const localDBStore = useLocalDBStore();
-const realtimeClient = ref<IRealtimeClient | null>(null);
-const queryClient = useQueryClient();
 
 const apiClient = useApiClient();
 
@@ -33,7 +30,6 @@ const {
 });
 
 provide(CONTEXT_KEY.GROUP, group);
-provide(CONTEXT_KEY.REALTIME_CLIENT, realtimeClient);
 
 watch(group, () => {
 	if (group.value) {
@@ -42,27 +38,16 @@ watch(group, () => {
 	}
 });
 
-const realtimeEventListener = () => {
-	realtimeClient.value?.channel
-		?.on('broadcast', { event: REALTIME_EVENT.GROUP_UPDATED }, () => {
-			queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, groupId.value] });
-		})
-		.on('broadcast', { event: REALTIME_EVENT.BILL_UPDATED }, () => {
-			queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, groupId.value] });
-		})
-		.subscribe();
-};
+const { connect, disconnect } = useEzbiuGroupEvents(groupId);
 
 onMounted(() => {
 	document.getElementById('app-layout')?.classList.remove('h-dvh');
-
-	realtimeClient.value = newRealtimeClient(groupId.value);
-	realtimeEventListener();
+	connect();
 });
 
 onUnmounted(() => {
 	document.getElementById('app-layout')?.classList.add('h-dvh');
-	realtimeClient.value?.channel?.unsubscribe();
+	disconnect();
 });
 </script>
 
