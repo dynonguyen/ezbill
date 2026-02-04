@@ -64,14 +64,14 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 <template>
 	<Flex stack class="gap-4" as="form" @submit="handleJoinGroup">
 		<FormControl
-			label="ID nhóm hoặc link mời"
+			label="Link mời"
 			html-for="inviteLink"
 			:error="Boolean(errors.inviteLink)"
 			:helper-text="errors.inviteLink">
 			<input
 				type="text"
 				class="input input-bordered w-full"
-				placeholder="Nhập ID nhóm hoặc link mời tham gia."
+				placeholder="Nhập link mời tham gia."
 				v-model="inviteLink"
 				v-bind="inviteLinkProps"
 				name="inviteLink"

@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
+import router from '@/routes/router';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
@@ -24,10 +25,20 @@ const {
 	data: group,
 	isPending,
 	isError,
+	refetch,
 } = useQuery({
 	queryKey: [QUERY_KEY.GROUP, groupId],
 	queryFn: () => apiClient.fetchGroup(groupId.value).then((resp) => resp.data),
 });
+
+const handleJoinGroup = async (refetchGroup: () => void) => {
+	const inviteKey = route.query.invite_key as string | undefined;
+	if (inviteKey) {
+		await apiClient.joinGroup(groupId.value, inviteKey);
+		router.replace({ query: { invite_key: undefined } });
+		refetchGroup();
+	}
+};
 
 provide(CONTEXT_KEY.GROUP, group);
 
@@ -40,8 +51,10 @@ watch(group, () => {
 
 const { connect, disconnect } = useEzbiuGroupEvents(groupId);
 
-onMounted(() => {
+onMounted(async () => {
 	document.getElementById('app-layout')?.classList.remove('h-dvh');
+	await handleJoinGroup(refetch);
+
 	connect();
 });
 
