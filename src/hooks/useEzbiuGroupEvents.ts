@@ -11,7 +11,7 @@ type EzbiuEventPayload = {
 	bill_ids?: string[];
 };
 
-const MAX_RETRY_ATTEMPTS = 10;
+const MAX_RETRY_ATTEMPTS = 5;
 
 export function useEzbiuGroupEvents(groupId: Ref<string>) {
 	const queryClient = useQueryClient();

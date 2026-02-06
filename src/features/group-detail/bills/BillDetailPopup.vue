@@ -35,8 +35,13 @@ const handleCloseDetail = () => {
 const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 	if (!detailId.value) return;
 
+	const unsetNote = Boolean(bill.value?.note && form.note === '');
+	if (unsetNote) {
+		delete form.note;
+	}
+
 	const [error] = await to(
-		updateMutateAsync({ groupId: group.value.id, id: detailId.value, req: form }),
+		updateMutateAsync({ groupId: group.value.id, id: detailId.value, req: { ...form, unsetNote } }),
 	);
 
 	if (error) {

@@ -51,12 +51,14 @@ const billListQueryKey = computed(() => [QUERY_KEY.BILL_LIST, group.value.id]);
 
 const { data, isPending, error, refetch } = useQuery({
 	queryKey: billListQueryKey,
-	queryFn: () => apiClient.fetchBills(group.value.id, fetchOptions.value),
+	queryFn: () => apiClient.fetchBills(group.value.id, fetchOptions.value).then((res) => res.data),
 });
 
-useExpandLimit(limitRef, () => data.value?.data ?? null, refetch);
+useExpandLimit(limitRef, () => data.value ?? null, refetch);
 
-const bills = computed(() => data.value?.data?.data ?? []);
+const bills = computed(() => data.value?.data ?? []);
+const billCount = computed(() => data.value?.total ?? 0);
+const memberCount = computed(() => group.value.members?.length ?? 0);
 const openNewBill = ref(false);
 const showPaymentModeTooltip = ref(false);
 
@@ -67,7 +69,7 @@ watch(error, () => {
 const billTab = computed(() => (router.currentRoute.value.query.tab as BillTabValue) ?? 'bills');
 const total = computed(() => bills.value?.reduce((acc, bill) => acc + bill.amount, 0) || 0);
 const billTabs = computed<Array<[BillTabValue, string]>>(() => [
-	['bills', `Hoá đơn (${bills.value?.length || 0})`],
+	['bills', `Hoá đơn (${billCount.value || 0})`],
 	['balances', 'Số dư'],
 ]);
 const loading = computed(() => isPending.value || error.value);
@@ -120,8 +122,8 @@ provide(CONTEXT_KEY.BILLS, bills);
 const summary = computed<Array<[string, string | number, action?: () => void]>>(() => {
 	const ptm = PAYMENT_TRACKING_LABEL_MAPPING[group.value.paymentTrackingMode];
 	return [
-		['icon msi-group-rounded', group.value.members?.length || 0],
-		['icon msi-receipt-long-rounded', bills.value?.length || 0],
+		['icon msi-group-rounded', memberCount.value || 0],
+		['icon msi-receipt-long-rounded', billCount.value || 0],
 		[ptm.icon, '', () => (showPaymentModeTooltip.value = true)],
 	];
 });
