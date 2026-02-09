@@ -4,64 +4,36 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Member, MemberId } from '@/types/entities';
+import { PaymentTrackingMode, type Member, type MemberBalanceTracking } from '@/types/entities';
 import { computed, ref } from 'vue';
-import { useBillsContext } from '../../hooks/useBillsContext';
 import { useGroupContext } from '../../hooks/useGroupContext';
+import { useGroupStatsContext } from '../../hooks/useGroupStatsContext';
 import BalanceDetail from './BalanceDetail.vue';
 import TransferPopup from './TransferPopup.vue';
 
-type MemberBalance = {
-	member: Member;
-	amountToPay: number;
-	amountReceived: number;
-	balance: number;
-};
-
-const bills = useBillsContext();
 const { group } = useGroupContext();
-const detailId = ref<MemberId | null>(null);
-const transferId = ref<MemberId | null>(null);
+const groupStats = useGroupStatsContext();
+const detailId = ref<string | null>(null);
+const transferId = ref<string | null>(null);
 
 const balances = computed(() => {
-	const result = group.value.members.reduce(
-		(acc, member) => {
-			acc[member.id] = { member, amountReceived: 0, amountToPay: 0, balance: 0 };
-			return acc;
-		},
-		{} as Record<MemberId, MemberBalance>,
-	);
+	if (!groupStats.value || groupStats.value.paymentTrackingMode !== PaymentTrackingMode.Tracking) {
+		return [];
+	}
 
-	bills.value.forEach((bill) => {
-		let totalPaid = 0;
-		let creatorAmount = 0;
-		const paidMemberIds = new Set(bill.paymentTracking.map((i) => i.memberId));
+	return groupStats.value.members.map((memberStats) => {
+		const member = group.value.members.find((m) => m.id === memberStats.memberId) as Member;
+		const stats = memberStats as MemberBalanceTracking;
+		const balance = stats.toReceive - stats.toPay;
 
-		bill.members.forEach((m) => {
-			if (m.memberId === bill.createdBy) {
-				creatorAmount = m.shareAmount;
-				return;
-			}
-
-			const isPaid = paidMemberIds.has(m.memberId);
-			if (!isPaid) {
-				result[m.memberId].amountToPay += m.shareAmount;
-			} else {
-				totalPaid += m.shareAmount;
-			}
-		});
-
-		result[bill.createdBy].amountReceived += bill.amount - totalPaid - creatorAmount;
-	});
-
-	return Object.values(result).map((item) => {
-		const balance = item.amountReceived - item.amountToPay;
 		return {
-			...item,
+			member,
+			amountToPay: stats.toPay,
+			amountReceived: stats.toReceive,
 			balance,
 			displayItems: [
-				{ label: 'Cần trả', value: -item.amountToPay },
-				{ label: 'Nhận lại', value: item.amountReceived },
+				{ label: 'Cần trả', value: -stats.toPay },
+				{ label: 'Nhận lại', value: stats.toReceive },
 			],
 		};
 	});

@@ -16,6 +16,7 @@ export const CONTEXT_KEY = {
 	GROUP: 'group',
 	GROUP_USER: 'group-user',
 	BILLS: 'bills',
+	GROUP_STATS: 'group-stats',
 	REALTIME_CLIENT: 'realtime-client',
 	BILL_FORM: 'bill-form',
 	// DEPRECATED: Remove this after migration

@@ -48,10 +48,16 @@ watch(
 );
 
 const billListQueryKey = computed(() => [QUERY_KEY.BILL_LIST, group.value.id]);
+const groupStatsQueryKey = computed(() => [QUERY_KEY.GROUP_STATS, group.value.id]);
 
 const { data, isPending, error, refetch } = useQuery({
 	queryKey: billListQueryKey,
 	queryFn: () => apiClient.fetchBills(group.value.id, fetchOptions.value).then((res) => res.data),
+});
+
+const { data: groupStats } = useQuery({
+	queryKey: groupStatsQueryKey,
+	queryFn: () => apiClient.fetchGroupStats({ groupId: group.value.id }).then((res) => res.data),
 });
 
 useExpandLimit(limitRef, () => data.value ?? null, refetch);
@@ -117,6 +123,7 @@ onUnmounted(() => observer?.disconnect());
 usePageTitle(group.value.name);
 
 provide(CONTEXT_KEY.BILLS, bills);
+provide(CONTEXT_KEY.GROUP_STATS, groupStats);
 
 const summary = computed<Array<[string, string | number, action?: () => void]>>(() => {
 	const ptm = PAYMENT_TRACKING_LABEL_MAPPING[group.value.paymentTrackingMode];

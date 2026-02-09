@@ -14,5 +14,13 @@ export function useGroupQueryControl() {
 		queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, group.value.id] });
 	};
 
-	return { refetchGroup, refetchBills };
+	const refetchGroupStats = () => {
+		queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP_STATS, group.value.id] });
+	};
+
+	const refetchBillsByMember = () => {
+		queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILLS_BY_MEMBER, group.value.id] });
+	};
+
+	return { refetchGroup, refetchBills, refetchGroupStats, refetchBillsByMember };
 }

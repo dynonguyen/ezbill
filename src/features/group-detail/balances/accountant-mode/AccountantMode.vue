@@ -4,43 +4,45 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import type { Member, MemberId } from '@/types/entities';
+import {
+	PaymentTrackingMode,
+	type Member,
+	type MemberBalanceAccounting,
+	type MemberId,
+} from '@/types/entities';
 import { computed, ref } from 'vue';
 import { useBillsContext } from '../../hooks/useBillsContext';
 import { useGroupContext } from '../../hooks/useGroupContext';
+import { useGroupStatsContext } from '../../hooks/useGroupStatsContext';
 import AccountingMaker from '../../members/AccountingMaker.vue';
 import BankQR from '../BankQR.vue';
 import BalanceDetail from './BalanceDetail.vue';
 
 const { group } = useGroupContext();
 const bills = useBillsContext();
+const groupStats = useGroupStatsContext();
 
 type MemberBalance = { member: Member; paid: number; spent: number; balance: number };
 
 const balances = computed(() => {
-	const result = group.value.members.reduce(
-		(acc, member) => {
-			acc[member.id] = { member, paid: 0, spent: 0, balance: 0 };
-			return acc;
-		},
-		{} as Record<MemberId, MemberBalance>,
-	);
+	if (
+		!groupStats.value ||
+		groupStats.value.paymentTrackingMode !== PaymentTrackingMode.Accountant
+	) {
+		return [];
+	}
 
-	bills.value.forEach((bill) => {
-		if (result[bill.createdBy]) {
-			result[bill.createdBy].paid += bill.amount;
-		}
+	return groupStats.value.members.map((memberStats) => {
+		const member = group.value.members.find((m) => m.id === memberStats.memberId) as Member;
+		const stats = memberStats as MemberBalanceAccounting;
 
-		bill.members.forEach((m) => {
-			if (result[m.memberId]) result[m.memberId].spent += m.shareAmount;
-		});
+		return {
+			member,
+			paid: stats.totalPaid,
+			spent: stats.totalOwed,
+			balance: stats.balance,
+		};
 	});
-
-	Object.values(result).forEach((item) => {
-		item.balance = item.paid - item.spent;
-	});
-
-	return Object.values(result);
 });
 
 const detailId = ref<MemberId | null>(null);
