@@ -24,8 +24,12 @@ import type {
 	ApiFetchBillsReq,
 	ApiFetchGroupsData,
 	ApiFetchGroupsReq,
+	ApiFetchGroupStatsData,
+	ApiFetchGroupStatsReq,
 	ApiImportGroupData,
 	ApiImportGroupReq,
+	ApiListBillsByMemberData,
+	ApiListBillsByMemberReq,
 	ApiMarkBillsAsPaidReq,
 	ApiUpdateBillReq,
 	ApiUpdateGroupReq,
@@ -197,6 +201,14 @@ function parseEzbiuPaginatedReq(req: PaginatedReq): Record<string, Primitive> {
 	};
 }
 
+function parseEzbiuBillsByMemberReq(req: ApiListBillsByMemberReq): Record<string, Primitive> {
+	const queries = parseEzbiuPaginatedReq(req);
+	return {
+		...queries,
+		status: req.status ? camelToSnake(req.status) : undefined,
+	};
+}
+
 const checkSession = (): ResolvedApiResp<null> => {
 	return fetcher.get<null>('/sessions');
 };
@@ -239,6 +251,10 @@ const importGroup = (req: ApiImportGroupReq): ResolvedApiResp<ApiImportGroupData
 	};
 
 	return fetcher.post<ApiImportGroupData>('/groups/import', { payload });
+};
+
+const fetchGroupStats = (req: ApiFetchGroupStatsReq): ResolvedApiResp<ApiFetchGroupStatsData> => {
+	return fetcher.get<ApiFetchGroupStatsData>(`/groups/${req.groupId}/stats`);
 };
 
 const createInviteKey = (
@@ -303,6 +319,26 @@ const markBillsAsPaid = (req: ApiMarkBillsAsPaidReq): ResolvedApiResp<null> => {
 	});
 };
 
+const listBillsByMember = (
+	groupId: GroupId,
+	memberId: MemberId,
+	req: ApiListBillsByMemberReq,
+): ResolvedApiResp<ApiListBillsByMemberData> => {
+	const queries = parseEzbiuBillsByMemberReq(req);
+	const transformer = (raw: unknown) => {
+		const data = transformSnakeToCamel<ApiListBillsByMemberData>(raw);
+		return { ...data, data: data.data.map(normalizeBill) };
+	};
+
+	return fetcher.get<ApiListBillsByMemberData>(
+		`/groups/${groupId}/bills/members/${memberId}/stats`,
+		{
+			queries,
+			transformer,
+		},
+	);
+};
+
 const addMember = (groupId: GroupId, req: ApiAddMemberReq): ResolvedApiResp<null> => {
 	return fetcher.post<null>(`/groups/${groupId}/members`, { payload: transformCamelToSnake(req) });
 };
@@ -334,6 +370,7 @@ export const ezbiuApiClient: IApiClient = {
 	fetchGroup,
 	updateGroup,
 	importGroup,
+	fetchGroupStats,
 	createInviteKey,
 	joinGroup,
 	leaveGroup,
@@ -343,6 +380,7 @@ export const ezbiuApiClient: IApiClient = {
 	updateBill,
 	deleteBill,
 	markBillsAsPaid,
+	listBillsByMember,
 
 	addMember,
 	updateMember,

@@ -1,5 +1,14 @@
 import type { ImportedBackup } from '../features/group-detail/helpers/group-backup';
-import type { Bill, BillId, CategoryId, Group, GroupId, Member, MemberId } from '../types/entities';
+import type {
+	Bill,
+	BillId,
+	CategoryId,
+	Group,
+	GroupId,
+	GroupStats,
+	Member,
+	MemberId,
+} from '../types/entities';
 
 // DEPRECATED: Remove this after migration
 /** @deprecated Use IApiClient instead */
@@ -120,6 +129,19 @@ export type ApiMarkBillsAsPaidReq = {
 	billIds: BillId[];
 };
 
+export type ApiFetchGroupStatsReq = {
+	groupId: GroupId;
+};
+export type ApiFetchGroupStatsData = GroupStats;
+
+export type BillByMemberStatus = 'paid' | 'owed' | 'to_pay' | 'to_receive';
+export type ApiListBillsByMemberReq = PaginatedReq & { status?: BillByMemberStatus };
+export type ApiListBillsByMemberData = {
+	total: number;
+	limit: number;
+	data: Bill[];
+};
+
 export interface IApiClient {
 	// Sessions
 	checkSession(): ResolvedApiResp<null>;
@@ -131,6 +153,7 @@ export interface IApiClient {
 	fetchGroup(id: GroupId): ResolvedApiResp<Group>;
 	updateGroup(id: GroupId, req: ApiUpdateGroupReq): ResolvedApiResp<null>;
 	importGroup(req: ApiImportGroupReq): ResolvedApiResp<ApiImportGroupData>;
+	fetchGroupStats(req: ApiFetchGroupStatsReq): ResolvedApiResp<ApiFetchGroupStatsData>;
 
 	createInviteKey(
 		id: GroupId,
@@ -146,6 +169,11 @@ export interface IApiClient {
 	updateBill(groupId: GroupId, id: BillId, req: ApiUpdateBillReq): ResolvedApiResp<null>;
 	deleteBill(groupId: GroupId, id: BillId): ResolvedApiResp<null>;
 	markBillsAsPaid(req: ApiMarkBillsAsPaidReq): ResolvedApiResp<null>;
+	listBillsByMember(
+		groupId: GroupId,
+		memberId: MemberId,
+		req: ApiListBillsByMemberReq,
+	): ResolvedApiResp<ApiListBillsByMemberData>;
 
 	// Members
 	addMember(groupId: GroupId, req: ApiAddMemberReq): ResolvedApiResp<null>;

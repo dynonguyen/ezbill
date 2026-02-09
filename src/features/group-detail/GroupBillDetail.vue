@@ -67,7 +67,6 @@ watch(error, () => {
 });
 
 const billTab = computed(() => (router.currentRoute.value.query.tab as BillTabValue) ?? 'bills');
-const total = computed(() => bills.value?.reduce((acc, bill) => acc + bill.amount, 0) || 0);
 const billTabs = computed<Array<[BillTabValue, string]>>(() => [
 	['bills', `Hoá đơn (${billCount.value || 0})`],
 	['balances', 'Số dư'],
@@ -177,7 +176,7 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 				<Typography variant="smRegular" class="text-white">Tổng chi tiêu nhóm:</Typography>
 				<Flex class="gap-1 text-white !items-end">
 					<CurrencyText
-						:amount="total"
+						:amount="group.totalSpent ?? 0"
 						amount-class="font-black text-[40px] leading-[43px]"
 						:fixed="0"
 						unit-class="text-2xl" />
@@ -203,7 +202,7 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 			class="hidden gap-2 justify-between fixed top-0 left-1/2 -translate-x-1/2 p-4 bg-gray-800 rounded-b-2xl w-full z-10 first-render max-w-screen-sm"
 			center>
 			<CurrencyText
-				:amount="total"
+				:amount="group.totalSpent ?? 0"
 				amount-class="text-2xl font-semibold text-white"
 				unit-class="text-2xl text-white"
 				:fixed="0" />

@@ -29,6 +29,8 @@ export const QUERY_KEY = {
 	GROUPS: 'groups',
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',
+	GROUP_STATS: 'group-stats',
+	BILLS_BY_MEMBER: 'bills-by-member',
 	INVITE_KEY: 'invite-key',
 };
 

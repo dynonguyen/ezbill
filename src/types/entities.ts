@@ -46,6 +46,7 @@ export type Group = {
 	createdAt: string;
 	updatedAt: string;
 	categories?: Category[];
+	totalSpent?: number;
 };
 export type GroupId = Group['id'];
 
@@ -74,3 +75,27 @@ export type Bill = {
 	categoryIds?: CategoryId[];
 };
 export type BillId = Bill['id'];
+
+export type MemberBalanceAccounting = {
+	balance: number;
+	totalOwed: number;
+	totalPaid: number;
+};
+
+export type MemberBalanceTracking = {
+	toPay: number;
+	toReceive: number;
+};
+
+export type MemberBalance = MemberBalanceAccounting | MemberBalanceTracking;
+
+export type GroupMemberStats = {
+	memberId: MemberId;
+	name: string;
+} & MemberBalance;
+
+export type GroupStats = {
+	groupId: GroupId;
+	paymentTrackingMode: PaymentTrackingMode;
+	members: GroupMemberStats[];
+};
