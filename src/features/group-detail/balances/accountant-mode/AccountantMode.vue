@@ -11,7 +11,6 @@ import {
 	type MemberId,
 } from '@/types/entities';
 import { computed, ref } from 'vue';
-import { useBillsContext } from '../../hooks/useBillsContext';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import { useGroupStatsContext } from '../../hooks/useGroupStatsContext';
 import AccountingMaker from '../../members/AccountingMaker.vue';
@@ -19,10 +18,7 @@ import BankQR from '../BankQR.vue';
 import BalanceDetail from './BalanceDetail.vue';
 
 const { group } = useGroupContext();
-const bills = useBillsContext();
 const groupStats = useGroupStatsContext();
-
-type MemberBalance = { member: Member; paid: number; spent: number; balance: number };
 
 const balances = computed(() => {
 	if (

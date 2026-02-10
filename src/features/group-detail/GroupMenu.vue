@@ -34,7 +34,7 @@ const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
 	mutationFn: () => apiClient.leaveGroup(group.value.id),
 });
-const { refetchGroup } = useGroupQueryControl();
+const { refetchGroup, refetchGroupStats } = useGroupQueryControl();
 
 const open = ref(false);
 const openShareGroup = ref(false);
@@ -62,6 +62,7 @@ const handleEditGroup = async (form: Partial<Group>) => {
 	openEditGroupName.value = false;
 
 	refetchGroup();
+	refetchGroupStats();
 };
 
 const handleDeleteGroup = async () => {

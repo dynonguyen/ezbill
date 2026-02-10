@@ -1,46 +1,79 @@
 <script setup lang="ts">
+import {
+	SortOrder,
+	type ApiListBillsByMemberReq,
+	type BillByMemberStatus,
+} from '@/apis/api-client';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
+import { QUERY_KEY } from '@/constants/key';
 import type { BillId, MemberId } from '@/types/entities';
-import { match } from 'ts-pattern';
+import { useQuery } from '@tanstack/vue-query';
 import { computed, ref } from 'vue';
+import { useApiClient } from '../../../../hooks/useApiClient';
 import BillDetailPopup from '../../bills/BillDetailPopup.vue';
 import BillItem from '../../bills/BillItem.vue';
 import { getMemberAmount } from '../../helpers/utils';
-import { useBillsContext } from '../../hooks/useBillsContext';
+import { useGroupContext } from '../../hooks/useGroupContext';
 
-type Tab = 'all' | 'paid' | 'spent';
+type Tab = 'all' | BillByMemberStatus;
+
 const props = defineProps<{ id: MemberId }>();
-
-const bills = useBillsContext();
 
 const detailId = ref<BillId | null>(null);
 const activeTab = ref<Tab>('all');
 
+const apiClient = useApiClient();
+const { group } = useGroupContext();
+
+const fetchOptions = computed<ApiListBillsByMemberReq>(() => {
+	const status: BillByMemberStatus | undefined =
+		activeTab.value === 'all' ? undefined : activeTab.value;
+
+	return {
+		offset: 0,
+		limit: 100,
+		sortBy: 'created_at',
+		order: SortOrder.Desc,
+		...(status ? { status } : {}),
+	};
+});
+
+const billsByMemberQueryKey = computed(() => [
+	QUERY_KEY.BILLS_BY_MEMBER,
+	group.value.id,
+	props.id,
+	activeTab.value,
+]);
+
+const { data: billsByMember } = useQuery({
+	queryKey: billsByMemberQueryKey,
+	queryFn: () =>
+		apiClient
+			.listBillsByMember(group.value.id, props.id, fetchOptions.value)
+			.then((res) => res.data),
+});
+
 const memberBills = computed(() => {
-	return bills.value
-		.filter((b) => {
-			return (
-				(getMemberAmount(b.members, props.id) > 0 || b.createdBy === props.id) &&
-				match(activeTab.value)
-					.with('all', () => true)
-					.with('paid', () => b.createdBy === props.id)
-					.with('spent', () => b.createdBy !== props.id)
-					.exhaustive()
-			);
-		})
-		.map((b) => {
-			const isPayer = b.createdBy === props.id;
-			const memberAmount = getMemberAmount(b.members, props.id);
-			const spentAmount = memberAmount || (isPayer ? 0 : b.amount);
-			return { ...b, amount: isPayer ? b.amount - spentAmount : -spentAmount, isPayer };
-		});
+	const bills = billsByMember.value?.data ?? [];
+
+	return bills.map((b) => {
+		const isPayer = b.createdBy === props.id;
+		const memberAmount = getMemberAmount(b.members, props.id);
+		const spentAmount = memberAmount || (isPayer ? 0 : b.amount);
+
+		return {
+			...b,
+			amount: isPayer ? b.amount - spentAmount : -spentAmount,
+			isPayer,
+		};
+	});
 });
 
 const tabs: Array<{ value: Tab; label: string }> = [
 	{ value: 'all', label: 'Tất cả' },
 	{ value: 'paid', label: 'Nhận lại' },
-	{ value: 'spent', label: 'Cần trả' },
+	{ value: 'owed', label: 'Cần trả' },
 ];
 </script>
 
