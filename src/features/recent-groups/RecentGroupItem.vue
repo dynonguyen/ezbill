@@ -147,7 +147,7 @@ const handleLinkClick = () => {
 							@click.prevent.stop="localDBStore.unpinRecentGroup(group.id)"></span>
 					</Flex>
 				</Flex>
-				<Flex class="justify-between" wrap>
+				<Flex class="justify-between items-center" wrap>
 					<Flex class="gap-1">
 						<div :class="$style.tag">
 							<span class="icon msi-calendar-clock-rounded"></span>
@@ -166,7 +166,7 @@ const handleLinkClick = () => {
 						</div>
 					</Flex>
 
-					<div class="avatar-group -space-x-4">
+					<div class="avatar-group -space-x-4 min-h-9 shrink-0 flex items-center">
 						<MemberAvatar
 							v-for="member in group.members.slice(0, MAX_AVATAR)"
 							:key="member.id"

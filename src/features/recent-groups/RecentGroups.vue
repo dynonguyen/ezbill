@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { SortOrder, type ApiFetchGroupsReq } from '@/apis/api-client';
+import Pagination from '@/components/Pagination.vue';
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { LS_KEY, QUERY_KEY } from '@/constants/key';
 import { useApiClient } from '@/hooks/useApiClient';
-import { useExpandLimit } from '@/hooks/useExpandLimit';
+import { usePagination } from '@/hooks/usePagination';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
@@ -19,6 +20,12 @@ const apiClient = useApiClient();
 const localStoreDB = useLocalDBStore();
 const showHidden = ref(Boolean(localStorage.getItem(LS_KEY.SHOW_HIDDEN_GROUPS)));
 
+const totalRef = ref(0);
+const { page, totalPages, offset, limit } = usePagination({
+	limit: FIRST_PAGE_LIMIT,
+	total: totalRef,
+});
+
 const sortOpt = ref(
 	(() => {
 		const savedSortKey = localStorage.getItem(LS_KEY.RECENT_GROUP_SORT_KEY);
@@ -27,30 +34,26 @@ const sortOpt = ref(
 	})(),
 );
 
-const limitRef = ref(FIRST_PAGE_LIMIT);
-const fetchOptions = computed<ApiFetchGroupsReq>(() => ({
-	offset: 0,
-	limit: limitRef.value,
+const fetchOpts = computed<ApiFetchGroupsReq>(() => ({
+	offset: offset.value,
+	limit,
 	order: sortOpt.value?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
 	sortBy: sortOpt.value?.by as string,
 }));
 
-watch(sortOpt, () => {
-	limitRef.value = FIRST_PAGE_LIMIT;
-});
+const queryKey = computed(() => [QUERY_KEY.GROUPS, sortOpt.value, page.value]);
 
-const queryKey = computed(() => [QUERY_KEY.GROUPS, sortOpt.value]);
-
-const { isPending, data, isError, refetch } = useQuery({
+const { isPending, data, isError } = useQuery({
 	queryKey,
-	queryFn: () => apiClient.fetchGroups(fetchOptions.value),
+	queryFn: () => apiClient.fetchGroups(fetchOpts.value).then((res) => res.data),
 });
 
-useExpandLimit(limitRef, () => data.value?.data ?? null, refetch);
+const groups = computed(() => data.value?.data ?? []);
+const total = computed(() => data.value?.total ?? 0);
 
-const groups = computed(() => data.value?.data?.data ?? []);
-const responseTotal = computed(() => data.value?.data?.total ?? 0);
-const skeletonCount = computed(() => Math.max(0, responseTotal.value - groups.value.length));
+watch(data, (v) => {
+	if (v != null) totalRef.value = v.total ?? 0;
+}, { immediate: true });
 
 const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
 
@@ -86,6 +89,9 @@ const toggleShowHidden = () => {
 
 		<Flex v-if="isPending" stack class="gap-4 px-4">
 			<div v-for="i in 4" :key="i" class="skeleton h-24 w-full rounded-2xl"></div>
+			<Flex class="gap-2 justify-center min-h-10 items-center">
+				<div v-for="i in 5" :key="i" class="skeleton size-9 shrink-0 rounded-full"></div>
+			</Flex>
 		</Flex>
 		<Typography v-else-if="isError" variant="smMedium" class="text-red-400 text-center">
 			Đã có lỗi xảy ra, vui lòng thử lại sau
@@ -96,10 +102,7 @@ const toggleShowHidden = () => {
 			class="size-[300px] mx-auto" />
 		<Flex v-else stack class="gap-4 px-4 pb-4 overflow-auto">
 			<RecentGroupItem v-for="group in groups" :key="group.id" :group="group" />
-			<div
-				v-for="i in skeletonCount"
-				:key="`skeleton-${i}`"
-				class="skeleton h-24 w-full rounded-2xl" />
+			<Pagination v-if="totalPages > 1" v-model:page="page" :total="total" :limit="limit" />
 		</Flex>
 	</Flex>
 </template>

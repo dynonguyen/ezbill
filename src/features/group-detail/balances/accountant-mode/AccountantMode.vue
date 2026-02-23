@@ -4,12 +4,7 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import {
-	PaymentTrackingMode,
-	type Member,
-	type MemberBalanceAccounting,
-	type MemberId,
-} from '@/types/entities';
+import { type Member, type MemberBalanceAccounting, type MemberId } from '@/types/entities';
 import { computed, ref } from 'vue';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import { useGroupStatsContext } from '../../hooks/useGroupStatsContext';
@@ -21,10 +16,7 @@ const { group } = useGroupContext();
 const groupStats = useGroupStatsContext();
 
 const balances = computed(() => {
-	if (
-		!groupStats.value ||
-		groupStats.value.paymentTrackingMode !== PaymentTrackingMode.Accountant
-	) {
+	if (!groupStats.value) {
 		return [];
 	}
 
