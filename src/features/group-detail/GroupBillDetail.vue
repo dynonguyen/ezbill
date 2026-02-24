@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { SortOrder, type ApiFetchBillsReq } from '@/apis/api-client';
+import {
+	SortOrder,
+	type ApiFetchBillsReq,
+	type BillListPaymentStatus,
+} from '@/apis/api-client';
+import type { CategoryId, MemberId } from '@/types/entities';
 import CurrencyText from '@/components/CurrencyText.vue';
 import Loading from '@/components/Loading.vue';
+import Pagination from '@/components/Pagination.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
@@ -9,8 +15,8 @@ import Typography from '@/components/ui/Typography.vue';
 import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
-import { useExpandLimit } from '@/hooks/useExpandLimit';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { usePagination } from '@/hooks/usePagination';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
@@ -32,27 +38,81 @@ const FIRST_PAGE_LIMIT = 10;
 
 const apiClient = useApiClient();
 
-const limitRef = ref(FIRST_PAGE_LIMIT);
+const totalRef = ref(0);
+const { page, totalPages, offset, limit } = usePagination({
+	limit: FIRST_PAGE_LIMIT,
+	total: totalRef,
+});
+
+type BillSortBy = 'createdAt' | 'name' | 'amount';
+const sortRef = ref<{ by: BillSortBy; order: 'asc' | 'desc' }>({
+	by: 'createdAt',
+	order: 'desc',
+});
+const filterRef = ref<{
+	keyword?: string;
+	createdBy?: MemberId;
+	participant?: MemberId;
+	paymentStatus?: BillListPaymentStatus;
+	categoryIds?: CategoryId[];
+}>({});
+
 const fetchOptions = computed<ApiFetchBillsReq>(() => ({
-	offset: 0,
-	limit: limitRef.value,
-	order: SortOrder.Desc,
-	sortBy: 'created_at',
+	offset: offset.value,
+	limit,
+	sortBy: sortRef.value.by === 'createdAt' ? 'created_at' : sortRef.value.by,
+	sortOrder: sortRef.value.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
+	...(filterRef.value.keyword && { keyword: filterRef.value.keyword }),
+	...(filterRef.value.createdBy && { createdBy: filterRef.value.createdBy }),
+	...(filterRef.value.participant && { participant: filterRef.value.participant }),
+	...(filterRef.value.paymentStatus && { paymentStatus: filterRef.value.paymentStatus }),
+	...(filterRef.value.categoryIds?.length && {
+		categoryIds: [...filterRef.value.categoryIds],
+	}),
 }));
 
 watch(
 	() => group.value.id,
 	() => {
-		limitRef.value = FIRST_PAGE_LIMIT;
+		totalRef.value = 0;
+		filterRef.value = {};
 	},
 );
 
-const billListQueryKey = computed(() => [QUERY_KEY.BILL_LIST, group.value.id]);
+watch([sortRef, filterRef], () => {
+	page.value = 1;
+}, { deep: true });
+
+const billListParams = {
+	sort: sortRef,
+	filter: filterRef,
+	setSort(by: BillSortBy, order: 'asc' | 'desc') {
+		sortRef.value = { by, order };
+	},
+	setFilter(updates: Partial<typeof filterRef.value>) {
+		const next = { ...filterRef.value };
+		for (const [k, v] of Object.entries(updates)) {
+			if (v === undefined || (Array.isArray(v) && v.length === 0)) delete next[k as keyof typeof next];
+			else (next as Record<string, unknown>)[k] = v;
+		}
+		filterRef.value = next;
+	},
+};
+provide(CONTEXT_KEY.BILL_LIST_PARAMS, billListParams);
+
+const billListQueryKey = computed(() => [
+	QUERY_KEY.BILL_LIST,
+	group.value.id,
+	page.value,
+	sortRef.value,
+	filterRef.value,
+]);
 const groupStatsQueryKey = computed(() => [QUERY_KEY.GROUP_STATS, group.value.id]);
 
-const { data, isPending, error, refetch } = useQuery({
+const { data, isPending, error } = useQuery({
 	queryKey: billListQueryKey,
 	queryFn: () => apiClient.fetchBills(group.value.id, fetchOptions.value).then((res) => res.data),
+	placeholderData: (previousData) => previousData,
 });
 
 const { data: groupStats } = useQuery({
@@ -60,10 +120,17 @@ const { data: groupStats } = useQuery({
 	queryFn: () => apiClient.fetchGroupStats({ groupId: group.value.id }).then((res) => res.data),
 });
 
-useExpandLimit(limitRef, () => data.value ?? null, refetch);
-
 const bills = computed(() => data.value?.data ?? []);
 const billCount = computed(() => data.value?.total ?? 0);
+
+watch(
+	data,
+	(v) => {
+		if (v != null) totalRef.value = v.total ?? 0;
+	},
+	{ immediate: true },
+);
+
 const memberCount = computed(() => group.value.members?.length ?? 0);
 const openNewBill = ref(false);
 const showPaymentModeTooltip = ref(false);
@@ -77,7 +144,7 @@ const billTabs = computed<Array<[BillTabValue, string]>>(() => [
 	['bills', `Hoá đơn (${billCount.value || 0})`],
 	['balances', 'Số dư'],
 ]);
-const loading = computed(() => isPending.value || error.value);
+const loading = computed(() => (isPending.value && !data.value) || error.value);
 let observer: IntersectionObserver | null = null;
 
 const handleToggleStatistic = () => {
@@ -139,9 +206,9 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 	<Flex v-if="loading" center class="h-dvh">
 		<Loading />
 	</Flex>
-	<Flex v-else stack class="bg-indigo-50 min-h-dvh overflow-auto" id="group-detail">
+	<Flex v-else stack class="gap-4 py-4 bg-indigo-50 min-h-dvh overflow-auto" id="group-detail">
 		<!-- Header -->
-		<Flex class="px-4 py-2 gap-2 justify-between">
+		<Flex class="px-4 gap-2 justify-between">
 			<RouterLink :to="PATH.HOME">
 				<Button
 					variant="soft"
@@ -222,7 +289,7 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 		<MemberList />
 
 		<!-- Bills & Balances -->
-		<Flex stack class="p-4 gap-3.5 bg-white rounded-t-2xl grow h-full">
+		<Flex stack class="gap-4 px-4 pb-4 pt-4 bg-white rounded-t-2xl grow h-full">
 			<div role="tablist" class="tabs tabs-boxed grid-cols-2">
 				<a
 					v-for="[value, label] in billTabs"
@@ -237,6 +304,11 @@ const summary = computed<Array<[string, string | number, action?: () => void]>>(
 
 			<div class="grow">
 				<BillList v-if="billTab === 'bills'" />
+				<Pagination
+					v-if="billTab === 'bills' && totalPages > 1"
+					v-model:page="page"
+					:total="billCount"
+					:limit="limit" />
 				<BalanceList v-if="billTab === 'balances'" />
 			</div>
 		</Flex>

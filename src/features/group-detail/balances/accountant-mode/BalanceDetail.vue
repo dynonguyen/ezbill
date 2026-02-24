@@ -34,7 +34,7 @@ const fetchOptions = computed<ApiListBillsByMemberReq>(() => {
 		offset: 0,
 		limit: 100,
 		sortBy: 'created_at',
-		order: SortOrder.Desc,
+		sortOrder: SortOrder.Desc,
 		...(status ? { status } : {}),
 	};
 });

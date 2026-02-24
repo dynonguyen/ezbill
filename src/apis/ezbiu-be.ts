@@ -8,13 +8,15 @@ import to from 'await-to-js';
 import { merge } from 'es-toolkit';
 import type { Primitive } from 'zod';
 import { ERROR_CODES, HTTP_STATUS_CODES } from '../constants/code';
-import type { Bill, BillId, Group, GroupId, MemberId } from '../types/entities';
+import type { Bill, BillId, CategoryId, Group, GroupId, MemberId } from '../types/entities';
 import { getEnv } from '../utils/get-env';
 import { buildQueryString } from '../utils/querystring';
 import type {
 	ApiAddMemberReq,
 	ApiCreateBillData,
 	ApiCreateBillReq,
+	ApiCreateCategoryData,
+	ApiCreateCategoryReq,
 	ApiCreateGroupData,
 	ApiCreateGroupReq,
 	ApiCreateInviteKeyData,
@@ -32,6 +34,7 @@ import type {
 	ApiListBillsByMemberReq,
 	ApiMarkBillsAsPaidReq,
 	ApiUpdateBillReq,
+	ApiUpdateCategoryReq,
 	ApiUpdateGroupReq,
 	ApiUpdateMemberReq,
 	BaseApiResp,
@@ -196,9 +199,19 @@ function parseEzbiuPaginatedReq(req: PaginatedReq): Record<string, Primitive> {
 	return {
 		limit: req.limit,
 		sort_by: camelToSnake(req.sortBy),
-		order: req.order,
+		sort_order: req.sortOrder,
 		offset: req.offset,
 	};
+}
+
+function parseEzbiuFetchBillsReq(req: ApiFetchBillsReq): Record<string, Primitive> {
+	const queries: Record<string, Primitive> = parseEzbiuPaginatedReq(req);
+	if (req.keyword != null && req.keyword !== '') queries.keyword = req.keyword;
+	if (req.createdBy != null) queries.created_by = req.createdBy;
+	if (req.participant != null) queries.participant = req.participant;
+	if (req.paymentStatus != null) queries.payment_status = camelToSnake(req.paymentStatus);
+	if (req.categoryIds?.length) queries.category_ids = req.categoryIds.join(',');
+	return queries;
 }
 
 function parseEzbiuBillsByMemberReq(req: ApiListBillsByMemberReq): Record<string, Primitive> {
@@ -282,7 +295,7 @@ const fetchBills = (
 	groupId: GroupId,
 	req: ApiFetchBillsReq,
 ): ResolvedApiResp<ApiFetchBillsData> => {
-	const queries = parseEzbiuPaginatedReq(req);
+	const queries = parseEzbiuFetchBillsReq(req);
 
 	return fetcher.get<ApiFetchBillsData>(`/groups/${groupId}/bills`, {
 		queries,
@@ -357,6 +370,29 @@ const removeMember = (groupId: GroupId, memberId: MemberId): ResolvedApiResp<nul
 	return fetcher.delete<null>(`/groups/${groupId}/members/${memberId}`);
 };
 
+const createCategory = (
+	groupId: GroupId,
+	req: ApiCreateCategoryReq,
+): ResolvedApiResp<ApiCreateCategoryData> => {
+	return fetcher.post<ApiCreateCategoryData>(`/groups/${groupId}/categories`, {
+		payload: transformCamelToSnake(req),
+	});
+};
+
+const updateCategory = (
+	groupId: GroupId,
+	categoryId: CategoryId,
+	req: ApiUpdateCategoryReq,
+): ResolvedApiResp<null> => {
+	return fetcher.patch<null>(`/groups/${groupId}/categories/${categoryId}`, {
+		payload: transformCamelToSnake(req),
+	});
+};
+
+const deleteCategory = (groupId: GroupId, categoryId: CategoryId): ResolvedApiResp<null> => {
+	return fetcher.delete<null>(`/groups/${groupId}/categories/${categoryId}`);
+};
+
 const createErrorLog = (error: any): ResolvedApiResp<null> => {
 	return fetcher.post<null>('/error-logs', { payload: transformCamelToSnake(error) });
 };
@@ -385,6 +421,10 @@ export const ezbiuApiClient: IApiClient = {
 	addMember,
 	updateMember,
 	removeMember,
+
+	createCategory,
+	updateCategory,
+	deleteCategory,
 
 	createErrorLog,
 };

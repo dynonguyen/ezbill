@@ -37,7 +37,7 @@ const sortOpt = ref(
 const fetchOpts = computed<ApiFetchGroupsReq>(() => ({
 	offset: offset.value,
 	limit,
-	order: sortOpt.value?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
+	sortOrder: sortOpt.value?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
 	sortBy: sortOpt.value?.by as string,
 }));
 
@@ -51,9 +51,13 @@ const { isPending, data, isError } = useQuery({
 const groups = computed(() => data.value?.data ?? []);
 const total = computed(() => data.value?.total ?? 0);
 
-watch(data, (v) => {
-	if (v != null) totalRef.value = v.total ?? 0;
-}, { immediate: true });
+watch(
+	data,
+	(v) => {
+		if (v != null) totalRef.value = v.total ?? 0;
+	},
+	{ immediate: true },
+);
 
 const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
 

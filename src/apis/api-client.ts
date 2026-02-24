@@ -2,6 +2,7 @@ import type { ImportedBackup } from '../features/group-detail/helpers/group-back
 import type {
 	Bill,
 	BillId,
+	Category,
 	CategoryId,
 	Group,
 	GroupId,
@@ -65,7 +66,7 @@ export type PaginatedReq = {
 	offset: number;
 	limit: number;
 	sortBy: string;
-	order: SortOrder;
+	sortOrder: SortOrder;
 };
 
 type MustResolvedPromise<T> = Promise<T>;
@@ -93,7 +94,14 @@ export type ApiImportGroupReq = {
 	bills: Bill[];
 };
 export type ApiImportGroupData = Pick<Group, 'id'>;
-export type ApiFetchBillsReq = PaginatedReq;
+export type BillListPaymentStatus = 'paid' | 'unpaid' | 'partiallyPaid';
+export type ApiFetchBillsReq = PaginatedReq & {
+	keyword?: string;
+	createdBy?: MemberId;
+	participant?: MemberId;
+	paymentStatus?: BillListPaymentStatus;
+	categoryIds?: CategoryId[];
+};
 export type ApiFetchBillsData = {
 	total: number;
 	limit: number;
@@ -142,6 +150,11 @@ export type ApiListBillsByMemberData = {
 	data: Bill[];
 };
 
+export type ApiCreateCategoryReq = Omit<Category, 'id' | 'createdAt'>;
+export type ApiCreateCategoryData = Pick<Category, 'id'>;
+
+export type ApiUpdateCategoryReq = Partial<Omit<Category, 'id' | 'createdAt'>>;
+
 export interface IApiClient {
 	// Sessions
 	checkSession(): ResolvedApiResp<null>;
@@ -183,6 +196,18 @@ export interface IApiClient {
 		req: ApiUpdateMemberReq,
 	): ResolvedApiResp<null>;
 	removeMember(groupId: GroupId, memberId: MemberId): ResolvedApiResp<null>;
+
+	// Categories
+	createCategory(
+		groupId: GroupId,
+		req: ApiCreateCategoryReq,
+	): ResolvedApiResp<ApiCreateCategoryData>;
+	updateCategory(
+		groupId: GroupId,
+		categoryId: CategoryId,
+		req: ApiUpdateCategoryReq & { unsetLabel?: boolean },
+	): ResolvedApiResp<null>;
+	deleteCategory(groupId: GroupId, categoryId: CategoryId): ResolvedApiResp<null>;
 
 	createErrorLog(error: any): ResolvedApiResp<null>;
 }
