@@ -124,7 +124,10 @@ export type ApiAddMemberReq = Omit<Member, 'id'>;
 
 export type ApiUpdateMemberReq = Partial<Omit<Member, 'id'>>;
 
-export type ApiUpdateBillReq = Partial<Omit<Bill, 'id' | 'createdAt'>> & { unsetNote?: boolean };
+export type ApiUpdateBillReq = Partial<Omit<Bill, 'id' | 'createdAt'>> & {
+	unsetNote?: boolean;
+	unsetMembers?: MemberId[];
+};
 
 export type ApiMarkBillAsPaidReq = {
 	groupId: GroupId;

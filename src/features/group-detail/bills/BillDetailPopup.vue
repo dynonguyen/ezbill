@@ -40,8 +40,25 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 		delete form.note;
 	}
 
+	const previousMemberIds =
+		bill.value?.members?.map((member) => member.memberId) ?? [];
+	const nextMemberIds = form.members.map((member) => member.memberId);
+	const unsetMembers = previousMemberIds.filter(
+		(id) => !nextMemberIds.includes(id),
+	);
+
+	const req: ApiUpdateBillReq = {
+		...form,
+		unsetNote,
+		...(unsetMembers.length ? { unsetMembers } : {}),
+	};
+
 	const [error] = await to(
-		updateMutateAsync({ groupId: group.value.id, id: detailId.value, req: { ...form, unsetNote } }),
+		updateMutateAsync({
+			groupId: group.value.id,
+			id: detailId.value,
+			req,
+		}),
 	);
 
 	if (error) {
