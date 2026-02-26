@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { useApiClient, useLegacyApiClient } from '@/hooks/useApiClient';
+import type { ApiCreateCategoryReq } from '@/apis/api-client';
+import { useApiClient } from '@/hooks/useApiClient';
 import { useToast } from '@/hooks/useToast';
-import type { Category } from '@/types/entities';
-import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
@@ -11,32 +10,20 @@ import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import CategoryForm, { type CategoryFormData, type ExposedCategoryForm } from './CategoryForm.vue';
 
 const apiClient = useApiClient();
-const client = useLegacyApiClient();
 const { group } = useGroupContext();
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
-	mutationFn: client.updateGroup,
+	mutationFn: (req: ApiCreateCategoryReq) => apiClient.createCategory(group.value.id, req),
 });
 const { refetchGroup } = useGroupQueryControl();
 const toast = useToast();
 const formRef = ref<ExposedCategoryForm>();
 
 const handleAddNewCategory = async (form: CategoryFormData) => {
-	const now = new Date();
-	const newCategories: Category[] = [
-		{ ...form, id: generateUUID(), createdAt: now.toISOString() },
-		...(group.value.categories ?? []),
-	];
-
-	const [error] = await to(
-		updateMutateAsync({
-			updated: { categories: newCategories },
-			id: group.value.id,
-		}),
-	);
+	const [error] = await to(updateMutateAsync({ label: form.label, color: form.color }));
 
 	if (error) {
 		void apiClient.createErrorLog({ error: error?.message });
-		return toast.errorWithRetry('Chỉnh sửa thất bại', () => handleAddNewCategory(form));
+		return toast.errorWithRetry('Thêm danh mục thất bại', () => handleAddNewCategory(form));
 	}
 
 	formRef.value?.resetForm({ values: { label: '', color: form.color } }); // reset but keep color

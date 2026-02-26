@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-	SortOrder,
-	type ApiFetchBillsReq,
-	type BillListPaymentStatus,
-} from '@/apis/api-client';
-import type { CategoryId, MemberId } from '@/types/entities';
+import { SortOrder, type ApiFetchBillsReq, type BillListPaymentStatus } from '@/apis/api-client';
 import CurrencyText from '@/components/CurrencyText.vue';
 import Loading from '@/components/Loading.vue';
 import Pagination from '@/components/Pagination.vue';
@@ -17,6 +12,7 @@ import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { usePagination } from '@/hooks/usePagination';
+import type { CategoryId, MemberId } from '@/types/entities';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
@@ -79,9 +75,7 @@ watch(
 	},
 );
 
-watch([sortRef, filterRef], () => {
-	page.value = 1;
-}, { deep: true });
+watch([sortRef, filterRef], () => (page.value = 1), { deep: true });
 
 const billListParams = {
 	sort: sortRef,
@@ -90,9 +84,14 @@ const billListParams = {
 		sortRef.value = { by, order };
 	},
 	setFilter(updates: Partial<typeof filterRef.value>) {
+		if (Object.keys(updates).length === 0) {
+			filterRef.value = {};
+			return;
+		}
 		const next = { ...filterRef.value };
 		for (const [k, v] of Object.entries(updates)) {
-			if (v === undefined || (Array.isArray(v) && v.length === 0)) delete next[k as keyof typeof next];
+			if (v === undefined || (Array.isArray(v) && v.length === 0))
+				delete next[k as keyof typeof next];
 			else (next as Record<string, unknown>)[k] = v;
 		}
 		filterRef.value = next;

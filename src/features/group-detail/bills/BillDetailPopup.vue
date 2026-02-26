@@ -47,10 +47,17 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 		(id) => !nextMemberIds.includes(id),
 	);
 
+	const previousCategoryIds = bill.value?.categoryIds ?? [];
+	const nextCategoryIds = form.categoryIds ?? [];
+	const unsetCategories = previousCategoryIds.filter(
+		(id) => !nextCategoryIds.includes(id),
+	);
+
 	const req: ApiUpdateBillReq = {
 		...form,
 		unsetNote,
 		...(unsetMembers.length ? { unsetMembers } : {}),
+		...(unsetCategories.length ? { unsetCategories } : {}),
 	};
 
 	const [error] = await to(

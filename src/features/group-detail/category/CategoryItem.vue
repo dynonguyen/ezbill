@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ApiUpdateCategoryReq } from '@/apis/api-client';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
@@ -8,13 +9,13 @@ import type { Category } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
+import { useApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
 import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
 import type { CategoryFormData } from './CategoryForm.vue';
 import CategoryForm from './CategoryForm.vue';
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const props = withDefaults(
 	defineProps<{ category: Category; billCount?: number; editable?: boolean }>(),
 	{ editable: false },
@@ -23,10 +24,11 @@ const emit = defineEmits<{ click: [] }>();
 
 const { group } = useGroupContext();
 const { isPending: isUpdating, mutateAsync: updateGroupAsync } = useMutation({
-	mutationFn: client.updateGroup,
+	mutationFn: (req: ApiUpdateCategoryReq) =>
+		apiClient.updateCategory(group.value.id, props.category.id, req),
 });
 const { isPending: isDeleting, mutateAsync: deleteCategoryAsync } = useMutation({
-	mutationFn: client.deleteCategory,
+	mutationFn: () => apiClient.deleteCategory(group.value.id, props.category.id),
 });
 const { refetchGroup, refetchBills } = useGroupQueryControl();
 const toast = useToast();
@@ -36,9 +38,7 @@ const openEdit = ref(false);
 const handleDeleteCategory = async () => {
 	if (isDeleting.value) return;
 
-	const [err] = await to(
-		deleteCategoryAsync({ groupId: group.value.id, categoryId: props.category.id }),
-	);
+	const [err] = await to(deleteCategoryAsync());
 
 	if (err) {
 		toast.errorWithRetry('Xoá danh mục thất bại', handleDeleteCategory);
@@ -51,21 +51,14 @@ const handleDeleteCategory = async () => {
 };
 
 const handleCategoryChange = async (form: CategoryFormData) => {
-	const category = props.category;
-	const newCategories =
-		group.value.categories?.map((c) => (c.id === category.id ? { ...c, ...form } : c)) || [];
-
-	const [err] = await to(
-		updateGroupAsync({ id: group.value.id, updated: { categories: newCategories } }),
-	);
+	const [err] = await to(updateGroupAsync({ label: form.label, color: form.color }));
 
 	if (err) {
-		toast.errorWithRetry('Cập nhật danh mục thất bại', () => handleCategoryChange(form));
-		return;
+		void apiClient.createErrorLog({ error: err?.message });
+		return toast.errorWithRetry('Cập nhật danh mục thất bại', () => handleCategoryChange(form));
 	}
 
 	openEdit.value = false;
-	refetchGroup();
 };
 
 const handleClick = () => {
