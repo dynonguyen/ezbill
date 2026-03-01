@@ -71,7 +71,7 @@ const handleDeleteGroup = async () => {
 
 	if (error) {
 		void apiClient.createErrorLog({ error: error?.message });
-		return toast.errorWithRetry('Xoá nhóm thất bại', () => handleDeleteGroup());
+		return toast.errorWithRetry('Rời nhóm thất bại', () => handleDeleteGroup());
 	}
 
 	localDBStore.removeFromGroup(group.value.id);
@@ -103,7 +103,7 @@ const items = ref<
 		action: exportGroup,
 	},
 	{
-		label: 'Xoá nhóm',
+		label: 'Rời nhóm',
 		icon: 'icon msi-delete size-5',
 		itemClass: '[&>*]:!text-red-500',
 		action: () => (confirmDelete.value = true),
@@ -167,9 +167,9 @@ const items = ref<
 		<InviteLink v-if="openShareGroup" :id="group.id" />
 	</Dialog>
 
-	<Dialog v-model:open="confirmDelete" header="Xoá nhóm">
+	<Dialog v-model:open="confirmDelete" header="Rời nhóm">
 		<Typography variant="smRegular" class="text-center">
-			Bạn có chắc chắn muốn xoá nhóm không? Thao tác không thể hoàn tác.
+			Bạn có chắc chắn muốn rời nhóm không? Thao tác không thể hoàn tác.
 		</Typography>
 
 		<template #action>
