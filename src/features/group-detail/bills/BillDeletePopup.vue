@@ -9,13 +9,13 @@ import to from 'await-to-js';
 import { useApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 
 const apiClient = useApiClient();
 const { group } = useGroupContext();
 const bills = useBillsContext();
 const toast = useToast();
-const { refetchBills } = useGroupQueryControl();
+const { refetchBills } = useGroupDetailQueryControl();
 
 const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
 	mutationFn: ({ groupId, billId }: { groupId: GroupId; billId: BillId }) =>

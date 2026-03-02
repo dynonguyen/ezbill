@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import type { ApiGroupPreference } from '@/apis/api-client';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
 import { useApiClient } from '@/hooks/useApiClient';
+import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import type { Group } from '@/types/entities';
-import { useQueryClient } from '@tanstack/vue-query';
 import { useDrag } from '@vueuse/gesture';
 import { useMotionProperties, useSpring, type PermissiveMotionProperties } from '@vueuse/motion';
 import dayjs from 'dayjs';
@@ -25,7 +23,7 @@ const DEFAULT_ACTION_WIDTH = 300;
 const props = defineProps<{ group: Group }>();
 const router = useRouter();
 const apiClient = useApiClient();
-const queryClient = useQueryClient();
+const { handleGroupPreferenceUpdated } = useGroupsQueryControl();
 
 const dragRef = ref();
 const { motionProperties } = useMotionProperties(dragRef, { cursor: 'grab', x: 0, y: 0 });
@@ -42,14 +40,11 @@ const actionWidth = ref(DEFAULT_ACTION_WIDTH);
 const pinned = computed(() => props.group.isPinned ?? false);
 const hidden = computed(() => props.group.isHidden ?? false);
 
-const handleUpdatePreference = async (updates: ApiGroupPreference) => {
+const handleUpdatePreference = async (updates: Parameters<typeof handleGroupPreferenceUpdated>[0]) => {
 	const res = await apiClient.updateGroupPreference(props.group.id, updates);
 	if (!res.success) return;
 
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
-	if (updates.hidden !== undefined) {
-		queryClient.invalidateQueries({ queryKey: [QUERY_KEY.SESSION_STATS] });
-	}
+	handleGroupPreferenceUpdated(updates);
 };
 
 useDrag(

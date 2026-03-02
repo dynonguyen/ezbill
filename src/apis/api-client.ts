@@ -89,7 +89,7 @@ export type ApiCreateBillData = Pick<Bill, 'id'>;
 
 export type ApiAddMemberReq = Omit<Member, 'id'>;
 
-export type ApiUpdateMemberReq = Partial<Omit<Member, 'id'>>;
+export type ApiUpdateMemberReq = Partial<Omit<Member, 'id'>> & { unsetBankInfo?: boolean };
 
 export type ApiUpdateBillReq = Partial<Omit<Bill, 'id' | 'createdAt'>> & {
 	unsetNote?: boolean;

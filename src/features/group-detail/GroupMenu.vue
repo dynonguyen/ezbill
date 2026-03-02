@@ -4,11 +4,11 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
+import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { useToast } from '@/hooks/useToast';
 import type { Group } from '@/types/entities';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
 import { ref, useId, useTemplateRef } from 'vue';
@@ -17,7 +17,7 @@ import { useApiClient } from '../../hooks/useApiClient';
 import GroupForm from '../new-group/GroupForm.vue';
 import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
-import { useGroupQueryControl } from './hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from './hooks/useGroupDetailQueryControl';
 
 const apiClient = useApiClient();
 const { group } = useGroupContext();
@@ -25,7 +25,7 @@ const bills = useBillsContext();
 const toast = useToast();
 const actionId = useId();
 const router = useRouter();
-const queryClient = useQueryClient();
+const { handleGroupLeft } = useGroupsQueryControl();
 const outsideClickTarget = useTemplateRef('menu-target');
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
@@ -34,7 +34,7 @@ const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 const { isPending: isLeaving, mutateAsync: leaveGroupMutateAsync } = useMutation({
 	mutationFn: () => apiClient.leaveGroup(group.value.id),
 });
-const { refetchGroup, refetchGroupStats } = useGroupQueryControl();
+const { refetchGroup, refetchGroupStats } = useGroupDetailQueryControl();
 
 const open = ref(false);
 const openShareGroup = ref(false);
@@ -73,7 +73,7 @@ const handleLeaveGroup = async () => {
 		return toast.errorWithRetry('Rời nhóm thất bại', () => handleLeaveGroup());
 	}
 
-	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
+	handleGroupLeft();
 	confirmDelete.value = false;
 
 	router.push(PATH.HOME);

@@ -10,7 +10,7 @@ import { computed, ref } from 'vue';
 import { useApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 import BillForm from './BillForm.vue';
 import ReadonlyBillDetail from './ReadonlyBillDetail.vue';
 
@@ -23,7 +23,7 @@ const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: ({ groupId, id, req }: { groupId: GroupId; id: BillId; req: ApiUpdateBillReq }) =>
 		apiClient.updateBill(groupId, id, req),
 });
-const { refetchBills, refetchGroupStats } = useGroupQueryControl();
+const { refetchBills, refetchGroupStats } = useGroupDetailQueryControl();
 
 const detailId = defineModel<BillId | null>({ default: null });
 const isDirty = ref(false);

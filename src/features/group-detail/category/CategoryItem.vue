@@ -11,7 +11,7 @@ import to from 'await-to-js';
 import { ref } from 'vue';
 import { useApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 import type { CategoryFormData } from './CategoryForm.vue';
 import CategoryForm from './CategoryForm.vue';
 
@@ -30,7 +30,7 @@ const { isPending: isUpdating, mutateAsync: updateGroupAsync } = useMutation({
 const { isPending: isDeleting, mutateAsync: deleteCategoryAsync } = useMutation({
 	mutationFn: () => apiClient.deleteCategory(group.value.id, props.category.id),
 });
-const { refetchGroup, refetchBills } = useGroupQueryControl();
+const { refetchGroup, refetchBills } = useGroupDetailQueryControl();
 const toast = useToast();
 
 const openEdit = ref(false);

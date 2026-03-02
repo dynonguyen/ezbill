@@ -374,9 +374,9 @@ const updateMember = (
 	memberId: MemberId,
 	req: ApiUpdateMemberReq,
 ): ResolvedApiResp<null> => {
-	return fetcher.patch<null>(`/groups/${groupId}/members/${memberId}`, {
-		payload: transformCamelToSnake(req),
-	});
+	const { unsetBankInfo, ...rest } = req;
+	const payload = transformCamelToSnake({ ...rest, unset_bank_info: unsetBankInfo });
+	return fetcher.patch<null>(`/groups/${groupId}/members/${memberId}`, { payload });
 };
 
 const removeMember = (groupId: GroupId, memberId: MemberId): ResolvedApiResp<null> => {

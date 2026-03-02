@@ -9,7 +9,7 @@ import to from 'await-to-js';
 import { ref } from 'vue';
 import { useApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 import BillForm from './BillForm.vue';
 
 const open = defineModel<boolean>('open');
@@ -22,7 +22,7 @@ const { isPending, mutateAsync } = useMutation({
 });
 
 const toast = useToast();
-const { refetchBills, refetchGroupStats } = useGroupQueryControl();
+const { refetchBills, refetchGroupStats } = useGroupDetailQueryControl();
 const isDirty = ref(false);
 
 const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {

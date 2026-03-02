@@ -1,4 +1,5 @@
 import { QUERY_KEY, REALTIME_EVENT } from '@/constants/key';
+import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { getEnv } from '@/utils/get-env';
 import { useQueryClient } from '@tanstack/vue-query';
 import type { Ref } from 'vue';
@@ -15,6 +16,7 @@ const MAX_RETRY_ATTEMPTS = 5;
 
 export function useEzbiuGroupEvents(groupId: Ref<string>) {
 	const queryClient = useQueryClient();
+	const { refetchGroups } = useGroupsQueryControl();
 	const baseUrl = getEnv('VITE_API_BASE_URL');
 
 	let source: EventSource | null = null;
@@ -68,7 +70,7 @@ export function useEzbiuGroupEvents(groupId: Ref<string>) {
 
 			if (payload.type === REALTIME_EVENT.GROUP_UPDATED) {
 				queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, id] });
-				queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
+				refetchGroups();
 			}
 
 			if (payload.type === REALTIME_EVENT.BILL_UPDATED) {

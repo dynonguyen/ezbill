@@ -19,7 +19,7 @@ import { useApiClient } from '../../../../hooks/useApiClient';
 import BillItem from '../../bills/BillItem.vue';
 import { getMemberAmount } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
-import { useGroupQueryControl } from '../../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../../hooks/useGroupDetailQueryControl';
 import BankQR from '../BankQR.vue';
 
 const memberId = defineModel<string>('memberId', { default: '' });
@@ -29,7 +29,7 @@ const toast = useToast();
 const { isPending: updating, mutateAsync } = useMutation({
 	mutationFn: (req: ApiMarkBillsAsPaidReq) => apiClient.markBillsAsPaid(req),
 });
-const { refetchBills } = useGroupQueryControl();
+const { refetchBills } = useGroupDetailQueryControl();
 const { group } = useGroupContext();
 
 const selected = ref<Set<BillId>>(new Set());

@@ -4,13 +4,13 @@ import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
-import { QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
 import { useApiClient } from '@/hooks/useApiClient';
+import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { useToast } from '@/hooks/useToast';
 import { useLocalDBStore } from '@/stores/local-db';
 import { PaymentTrackingMode, type Group } from '@/types/entities';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useMutation } from '@tanstack/vue-query';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GroupForm, { type GroupFormModel } from './GroupForm.vue';
@@ -20,7 +20,7 @@ const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
 
 const apiClient = useApiClient();
-const queryClient = useQueryClient();
+const { refetchGroups, refetchSessionStats, handleGroupCreated } = useGroupsQueryControl();
 const createGroupMutation = useMutation({ mutationFn: apiClient.createGroup });
 const importGroupMutation = useMutation({ mutationFn: apiClient.importGroup });
 
@@ -57,13 +57,14 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 
 		if (resp.data?.id) {
 			localDBStore.joinGroup(resp.data.id);
-			await queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
+			handleGroupCreated();
+			await refetchSessionStats();
 			inviteGroupId.value = resp.data.id;
 		}
 	} else {
 		const resp = await createGroupMutation.mutateAsync({ name, paymentTrackingMode });
 		if (resp.success) {
-			await queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
+			refetchGroups();
 			handleClose();
 			return;
 		}

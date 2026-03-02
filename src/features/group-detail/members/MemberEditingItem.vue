@@ -10,7 +10,7 @@ import { computed, ref } from 'vue';
 import { useApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 import AccountingIcon from './AccountingIcon.vue';
 import MemberEditingForm from './MemberEditingPopup.vue';
 
@@ -23,7 +23,7 @@ const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
 });
 
 const toast = useToast();
-const { refetchGroup } = useGroupQueryControl();
+const { refetchGroup } = useGroupDetailQueryControl();
 
 const editing = ref(false);
 

@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { QUERY_KEY } from '../../../constants/key';
 import { useGroupContext } from './useGroupContext';
 
-export function useGroupQueryControl() {
+export function useGroupDetailQueryControl() {
 	const queryClient = useQueryClient();
 	const { group } = useGroupContext();
 

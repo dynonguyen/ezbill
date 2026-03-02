@@ -6,7 +6,7 @@ import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 import CategoryForm, { type CategoryFormData, type ExposedCategoryForm } from './CategoryForm.vue';
 
 const apiClient = useApiClient();
@@ -14,7 +14,7 @@ const { group } = useGroupContext();
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: (req: ApiCreateCategoryReq) => apiClient.createCategory(group.value.id, req),
 });
-const { refetchGroup } = useGroupQueryControl();
+const { refetchGroup } = useGroupDetailQueryControl();
 const toast = useToast();
 const formRef = ref<ExposedCategoryForm>();
 

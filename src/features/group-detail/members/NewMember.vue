@@ -8,7 +8,7 @@ import to from 'await-to-js';
 import { ref } from 'vue';
 import { useApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const open = ref(false);
@@ -19,7 +19,7 @@ const toast = useToast();
 const { isPending, mutateAsync } = useMutation({
 	mutationFn: (form: MemberFormData) => apiClient.addMember(group.value.id, form),
 });
-const { refetchGroup } = useGroupQueryControl();
+const { refetchGroup } = useGroupDetailQueryControl();
 
 const handleAddMember = async (form: MemberFormData) => {
 	const [error] = await to(mutateAsync(form));
