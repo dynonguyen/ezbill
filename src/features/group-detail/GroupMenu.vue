@@ -4,8 +4,8 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { PATH } from '@/constants/path';
 import { QUERY_KEY } from '@/constants/key';
+import { PATH } from '@/constants/path';
 import { useToast } from '@/hooks/useToast';
 import type { Group } from '@/types/entities';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
@@ -31,7 +31,7 @@ const outsideClickTarget = useTemplateRef('menu-target');
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: (form: Partial<Group>) => apiClient.updateGroup(group.value.id, form),
 });
-const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
+const { isPending: isLeaving, mutateAsync: leaveGroupMutateAsync } = useMutation({
 	mutationFn: () => apiClient.leaveGroup(group.value.id),
 });
 const { refetchGroup, refetchGroupStats } = useGroupQueryControl();
@@ -65,12 +65,12 @@ const handleEditGroup = async (form: Partial<Group>) => {
 	refetchGroupStats();
 };
 
-const handleDeleteGroup = async () => {
-	const [error] = await to(deleteMutateAsync());
+const handleLeaveGroup = async () => {
+	const [error] = await to(leaveGroupMutateAsync());
 
 	if (error) {
 		void apiClient.createErrorLog({ error: error?.message });
-		return toast.errorWithRetry('Rời nhóm thất bại', () => handleDeleteGroup());
+		return toast.errorWithRetry('Rời nhóm thất bại', () => handleLeaveGroup());
 	}
 
 	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
@@ -171,7 +171,7 @@ const items = ref<
 		</Typography>
 
 		<template #action>
-			<Button color="danger" @click="handleDeleteGroup" :loading="isDeleting">Xoá</Button>
+			<Button color="danger" @click="handleLeaveGroup" :loading="isLeaving">Rời nhóm</Button>
 		</template>
 	</Dialog>
 </template>
