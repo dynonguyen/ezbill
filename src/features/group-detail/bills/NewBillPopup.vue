@@ -22,7 +22,7 @@ const { isPending, mutateAsync } = useMutation({
 });
 
 const toast = useToast();
-const { refetchBills } = useGroupQueryControl();
+const { refetchBills, refetchGroupStats } = useGroupQueryControl();
 const isDirty = ref(false);
 
 const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
@@ -35,6 +35,7 @@ const handleAddBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 
 	open.value = false;
 	refetchBills();
+	refetchGroupStats();
 };
 </script>
 

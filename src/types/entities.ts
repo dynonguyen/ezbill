@@ -48,7 +48,6 @@ export type Group = {
 	createdAt: string;
 	updatedAt: string;
 	categories?: Category[];
-	totalSpent?: number;
 } & GroupPreference;
 export type GroupId = Group['id'];
 
@@ -99,5 +98,6 @@ export type GroupMemberStats = {
 export type GroupStats = {
 	groupId: GroupId;
 	paymentTrackingMode: PaymentTrackingMode;
+	totalSpent: number;
 	members: GroupMemberStats[];
 };

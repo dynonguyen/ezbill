@@ -23,7 +23,7 @@ const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
 	mutationFn: ({ groupId, id, req }: { groupId: GroupId; id: BillId; req: ApiUpdateBillReq }) =>
 		apiClient.updateBill(groupId, id, req),
 });
-const { refetchBills } = useGroupQueryControl();
+const { refetchBills, refetchGroupStats } = useGroupQueryControl();
 
 const detailId = defineModel<BillId | null>({ default: null });
 const isDirty = ref(false);
@@ -40,18 +40,13 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 		delete form.note;
 	}
 
-	const previousMemberIds =
-		bill.value?.members?.map((member) => member.memberId) ?? [];
+	const previousMemberIds = bill.value?.members?.map((member) => member.memberId) ?? [];
 	const nextMemberIds = form.members.map((member) => member.memberId);
-	const unsetMembers = previousMemberIds.filter(
-		(id) => !nextMemberIds.includes(id),
-	);
+	const unsetMembers = previousMemberIds.filter((id) => !nextMemberIds.includes(id));
 
 	const previousCategoryIds = bill.value?.categoryIds ?? [];
 	const nextCategoryIds = form.categoryIds ?? [];
-	const unsetCategories = previousCategoryIds.filter(
-		(id) => !nextCategoryIds.includes(id),
-	);
+	const unsetCategories = previousCategoryIds.filter((id) => !nextCategoryIds.includes(id));
 
 	const req: ApiUpdateBillReq = {
 		...form,
@@ -75,6 +70,7 @@ const handleUpdateBill = async (form: Omit<Bill, 'id' | 'createdAt'>) => {
 
 	detailId.value = null;
 	refetchBills();
+	refetchGroupStats();
 };
 
 const bill = computed(() => {
