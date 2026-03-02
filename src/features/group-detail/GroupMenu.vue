@@ -5,10 +5,10 @@ import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { PATH } from '@/constants/path';
+import { QUERY_KEY } from '@/constants/key';
 import { useToast } from '@/hooks/useToast';
-import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
-import { useMutation } from '@tanstack/vue-query';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
 import { ref, useId, useTemplateRef } from 'vue';
@@ -25,7 +25,7 @@ const bills = useBillsContext();
 const toast = useToast();
 const actionId = useId();
 const router = useRouter();
-const localDBStore = useLocalDBStore();
+const queryClient = useQueryClient();
 const outsideClickTarget = useTemplateRef('menu-target');
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
@@ -67,16 +67,14 @@ const handleEditGroup = async (form: Partial<Group>) => {
 
 const handleDeleteGroup = async () => {
 	const [error] = await to(deleteMutateAsync());
-	localDBStore.unhideRecentGroup(group.value.id);
 
 	if (error) {
 		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Rời nhóm thất bại', () => handleDeleteGroup());
 	}
 
-	localDBStore.removeFromGroup(group.value.id);
+	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
 	confirmDelete.value = false;
-	refetchGroup();
 
 	router.push(PATH.HOME);
 };

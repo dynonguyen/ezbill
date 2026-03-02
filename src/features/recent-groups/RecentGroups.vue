@@ -7,7 +7,6 @@ import Typography from '@/components/ui/Typography.vue';
 import { LS_KEY, QUERY_KEY } from '@/constants/key';
 import { useApiClient } from '@/hooks/useApiClient';
 import { usePagination } from '@/hooks/usePagination';
-import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, ref, watch } from 'vue';
@@ -17,7 +16,6 @@ import Sorting, { sortOptions } from './Sorting.vue';
 const FIRST_PAGE_LIMIT = 10;
 
 const apiClient = useApiClient();
-const localStoreDB = useLocalDBStore();
 const showHidden = ref(Boolean(localStorage.getItem(LS_KEY.SHOW_HIDDEN_GROUPS)));
 
 const totalRef = ref(0);
@@ -34,14 +32,16 @@ const sortOpt = ref(
 	})(),
 );
 
+const hiddenRef = computed(() => (showHidden.value ? true : undefined));
 const fetchOpts = computed<ApiFetchGroupsReq>(() => ({
 	offset: offset.value,
 	limit,
 	sortOrder: sortOpt.value?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
 	sortBy: sortOpt.value?.by as string,
+	includeHidden: hiddenRef.value,
 }));
 
-const queryKey = computed(() => [QUERY_KEY.GROUPS, sortOpt.value, page.value]);
+const queryKey = computed(() => [QUERY_KEY.GROUPS, sortOpt.value, page.value, hiddenRef.value]);
 
 const { isPending, data, isError } = useQuery({
 	queryKey,
@@ -59,7 +59,12 @@ watch(
 	{ immediate: true },
 );
 
-const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
+const { data: sessionStats } = useQuery({
+	queryKey: [QUERY_KEY.SESSION_STATS],
+	queryFn: () => apiClient.fetchSessionStats().then((res) => res.data),
+});
+
+const totalHiddenGroups = computed(() => sessionStats.value?.totalHiddenGroups ?? 0);
 
 const toggleShowHidden = () => {
 	showHidden.value = !showHidden.value;
@@ -75,7 +80,7 @@ const toggleShowHidden = () => {
 			<Typography variant="lgSemiBold" class="text-black">Nhóm của bạn</Typography>
 			<Flex class="gap-2 shrink-0">
 				<Button
-					v-if="hasHiddenGroups"
+					v-if="totalHiddenGroups > 0"
 					variant="outlined"
 					shape="rounded"
 					color="neutral"
@@ -85,7 +90,7 @@ const toggleShowHidden = () => {
 					<span
 						class="icon"
 						:class="showHidden ? 'msi-visibility-off-rounded' : 'msi-visibility-rounded'"></span>
-					({{ localStoreDB.hiddenGroups.length }})
+					({{ totalHiddenGroups }})
 				</Button>
 				<Sorting v-model="sortOpt" />
 			</Flex>

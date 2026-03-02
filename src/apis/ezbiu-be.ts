@@ -28,6 +28,8 @@ import type {
 	ApiFetchGroupsReq,
 	ApiFetchGroupStatsData,
 	ApiFetchGroupStatsReq,
+	ApiFetchSessionStatsData,
+	ApiGroupPreference,
 	ApiImportGroupData,
 	ApiImportGroupReq,
 	ApiListBillsByMemberData,
@@ -195,12 +197,15 @@ const normalizeBill = (bill: Bill): Bill => ({
 	paymentTracking: bill.paymentTracking ?? [],
 });
 
-function parseEzbiuPaginatedReq(req: PaginatedReq): Record<string, Primitive> {
+function parseEzbiuPaginatedReq(
+	req: PaginatedReq & { includeHidden?: boolean },
+): Record<string, Primitive> {
 	return {
 		limit: req.limit,
 		sort_by: camelToSnake(req.sortBy),
 		sort_order: req.sortOrder,
 		offset: req.offset,
+		include_hidden: req.includeHidden,
 	};
 }
 
@@ -228,6 +233,10 @@ const checkSession = (): ResolvedApiResp<null> => {
 
 const createSession = (): ResolvedApiResp<ApiCreateSessionData> => {
 	return fetcher.post<ApiCreateSessionData>('/sessions');
+};
+
+const fetchSessionStats = (): ResolvedApiResp<ApiFetchSessionStatsData> => {
+	return fetcher.get<ApiFetchSessionStatsData>('/sessions/stats');
 };
 
 const createGroup = (req: ApiCreateGroupReq): ResolvedApiResp<ApiCreateGroupData> => {
@@ -289,6 +298,10 @@ const joinGroup = (id: GroupId, inviteKey: string): ResolvedApiResp<null> => {
 
 const leaveGroup = (id: GroupId): ResolvedApiResp<null> => {
 	return fetcher.post<null>(`/groups/${id}/leave`);
+};
+
+const updateGroupPreference = (id: GroupId, req: ApiGroupPreference): ResolvedApiResp<null> => {
+	return fetcher.patch<null>(`/groups/${id}/preferences`, { payload: transformCamelToSnake(req) });
 };
 
 const fetchBills = (
@@ -400,6 +413,7 @@ const createErrorLog = (error: any): ResolvedApiResp<null> => {
 export const ezbiuApiClient: IApiClient = {
 	checkSession,
 	createSession,
+	fetchSessionStats,
 
 	createGroup,
 	fetchGroups,
@@ -410,6 +424,7 @@ export const ezbiuApiClient: IApiClient = {
 	createInviteKey,
 	joinGroup,
 	leaveGroup,
+	updateGroupPreference,
 
 	fetchBills,
 	createBill,

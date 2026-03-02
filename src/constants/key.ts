@@ -28,6 +28,7 @@ export const CONTEXT_KEY = {
 
 export const QUERY_KEY = {
 	CHECK_SESSION: 'check-session',
+	SESSION_STATS: 'session-stats',
 	GROUPS: 'groups',
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',

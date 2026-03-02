@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
-import { useLocalDBStore } from '@/stores/local-db';
 import type { GroupId } from '@/types/entities';
 import { copyToClipboard, getGroupLink } from '@/utils/helpers';
 import { match } from 'ts-pattern';
@@ -9,11 +8,17 @@ import { computed, onMounted, ref } from 'vue';
 
 type ActionKey = 'hide' | 'unhide' | 'pin' | 'unpin' | 'copy-link';
 
-const props = defineProps<{ groupId: GroupId }>();
+const props = defineProps<{
+	groupId: GroupId;
+	isPinned?: boolean;
+	isHidden?: boolean;
+}>();
+const emit = defineEmits<{
+	'update-preference': [updates: { hidden?: boolean; pinned?: boolean }];
+}>();
 const actionWidthModel = defineModel<number>('actionWidth');
 const el = ref<HTMLDivElement | null>();
 const copied = ref(false);
-const localDBStore = useLocalDBStore();
 
 onMounted(() => {
 	actionWidthModel.value = el.value?.offsetWidth ?? 0;
@@ -30,10 +35,10 @@ const handleActionClick = (action: ActionKey) => {
 				}, 3000);
 			});
 		})
-		.with('pin', () => localDBStore.pinRecentGroup(props.groupId))
-		.with('unpin', () => localDBStore.unpinRecentGroup(props.groupId))
-		.with('hide', () => localDBStore.hideRecentGroup(props.groupId))
-		.with('unhide', () => localDBStore.unhideRecentGroup(props.groupId))
+		.with('pin', () => emit('update-preference', { pinned: true }))
+		.with('unpin', () => emit('update-preference', { pinned: false }))
+		.with('hide', () => emit('update-preference', { hidden: true }))
+		.with('unhide', () => emit('update-preference', { hidden: false }))
 		.exhaustive();
 };
 
@@ -45,7 +50,7 @@ const actions = computed<Array<{ key: ActionKey; icon: string; label: string; bg
 			label: 'Sao chép link',
 			bgcolor: copied.value ? 'bg-success' : 'bg-zinc-400',
 		},
-		localDBStore.pinnedGroups.includes(props.groupId)
+		props.isPinned
 			? {
 					key: 'unpin',
 					icon: 'msi-keep-off-rounded',
@@ -53,7 +58,7 @@ const actions = computed<Array<{ key: ActionKey; icon: string; label: string; bg
 					bgcolor: 'bg-yellow-500',
 				}
 			: { key: 'pin', icon: 'msi-keep-rounded', label: 'Ghim', bgcolor: 'bg-yellow-500' },
-		localDBStore.hiddenGroups.includes(props.groupId)
+		props.isHidden
 			? {
 					key: 'unhide',
 					icon: 'msi-visibility-rounded',

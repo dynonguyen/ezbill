@@ -37,6 +37,8 @@ export type PaymentTracking = {
 	memberId: MemberId;
 };
 
+export type GroupPreference = Partial<{ isHidden: boolean; isPinned: boolean }>;
+
 export type Group = {
 	id: string;
 	name: string;
@@ -47,7 +49,7 @@ export type Group = {
 	updatedAt: string;
 	categories?: Category[];
 	totalSpent?: number;
-};
+} & GroupPreference;
 export type GroupId = Group['id'];
 
 export enum BillType {

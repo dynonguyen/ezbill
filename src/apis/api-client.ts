@@ -76,11 +76,16 @@ export type ResolvedApiResp<Data> = MustResolvedPromise<BaseApiResp<Data>>;
 // --- Sessions ---
 export type ApiCreateSessionData = { value: string };
 
+export type ApiFetchSessionStatsData = {
+	totalHiddenGroups: number;
+};
+
 // --- Groups ---
 export type ApiCreateGroupReq = Pick<Group, 'name' | 'paymentTrackingMode'>;
 export type ApiCreateGroupData = Pick<Group, 'id'>;
+export type ApiGroupPreference = Partial<{ hidden: boolean; pinned: boolean }>;
 
-export type ApiFetchGroupsReq = PaginatedReq;
+export type ApiFetchGroupsReq = PaginatedReq & { includeHidden?: boolean };
 export type ApiFetchGroupsData = {
 	total: number;
 	limit: number;
@@ -163,6 +168,7 @@ export interface IApiClient {
 	// Sessions
 	checkSession(): ResolvedApiResp<null>;
 	createSession(): ResolvedApiResp<ApiCreateSessionData>;
+	fetchSessionStats(): ResolvedApiResp<ApiFetchSessionStatsData>;
 
 	// Groups
 	createGroup(req: ApiCreateGroupReq): ResolvedApiResp<ApiCreateGroupData>;
@@ -179,6 +185,7 @@ export interface IApiClient {
 
 	joinGroup(id: GroupId, inviteKey: string): ResolvedApiResp<null>;
 	leaveGroup(id: GroupId): ResolvedApiResp<null>;
+	updateGroupPreference(id: GroupId, req: ApiGroupPreference): ResolvedApiResp<null>;
 
 	// Bills
 	fetchBills(groupId: GroupId, req: ApiFetchBillsReq): ResolvedApiResp<ApiFetchBillsData>;

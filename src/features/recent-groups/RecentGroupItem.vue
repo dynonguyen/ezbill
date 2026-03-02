@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import type { ApiGroupPreference } from '@/apis/api-client';
 import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
+import { QUERY_KEY } from '@/constants/key';
 import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
-import { useLocalDBStore } from '@/stores/local-db';
+import { useApiClient } from '@/hooks/useApiClient';
 import type { Group } from '@/types/entities';
+import { useQueryClient } from '@tanstack/vue-query';
 import { useDrag } from '@vueuse/gesture';
 import { useMotionProperties, useSpring, type PermissiveMotionProperties } from '@vueuse/motion';
 import dayjs from 'dayjs';
@@ -21,7 +24,8 @@ const DEFAULT_ACTION_WIDTH = 300;
 
 const props = defineProps<{ group: Group }>();
 const router = useRouter();
-const localDBStore = useLocalDBStore();
+const apiClient = useApiClient();
+const queryClient = useQueryClient();
 
 const dragRef = ref();
 const { motionProperties } = useMotionProperties(dragRef, { cursor: 'grab', x: 0, y: 0 });
@@ -35,8 +39,18 @@ const hasSwipedLeft = ref(false);
 const hasMoved = ref(false);
 const actionWidth = ref(DEFAULT_ACTION_WIDTH);
 
-const pinned = computed(() => localDBStore.pinnedGroups.includes(props.group.id));
-const hidden = computed(() => localDBStore.hiddenGroups.includes(props.group.id));
+const pinned = computed(() => props.group.isPinned ?? false);
+const hidden = computed(() => props.group.isHidden ?? false);
+
+const handleUpdatePreference = async (updates: ApiGroupPreference) => {
+	const res = await apiClient.updateGroupPreference(props.group.id, updates);
+	if (!res.success) return;
+
+	queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUPS] });
+	if (updates.hidden !== undefined) {
+		queryClient.invalidateQueries({ queryKey: [QUERY_KEY.SESSION_STATS] });
+	}
+};
 
 useDrag(
 	({ movement: [x, _], dragging }) => {
@@ -140,11 +154,11 @@ const handleLinkClick = () => {
 						<span
 							v-if="hidden"
 							class="icon msi-visibility-rounded text-zinc-500 size-5"
-							@click.prevent.stop="localDBStore.unhideRecentGroup(group.id)"></span>
+							@click.prevent.stop="handleUpdatePreference({ hidden: false })"></span>
 						<span
 							v-if="pinned"
 							class="icon msi-keep-off-rounded text-zinc-500 size-5"
-							@click.prevent.stop="localDBStore.unpinRecentGroup(group.id)"></span>
+							@click.prevent.stop="handleUpdatePreference({ pinned: false })"></span>
 					</Flex>
 				</Flex>
 				<Flex class="justify-between items-center" wrap>
@@ -183,7 +197,12 @@ const handleLinkClick = () => {
 				</Flex>
 			</Flex>
 		</a>
-		<RecentGroupActions v-model:action-width="actionWidth" :group-id="group.id" />
+		<RecentGroupActions
+			v-model:action-width="actionWidth"
+			:group-id="group.id"
+			:is-pinned="pinned"
+			:is-hidden="hidden"
+			@update-preference="handleUpdatePreference" />
 	</Flex>
 </template>
 
