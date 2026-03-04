@@ -8,6 +8,7 @@ import { PATH } from '@/constants/path';
 import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { useToast } from '@/hooks/useToast';
 import type { Group } from '@/types/entities';
+import { SortOrder } from '@/apis/api-client';
 import { useMutation } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
@@ -15,13 +16,11 @@ import { ref, useId, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useApiClient } from '../../hooks/useApiClient';
 import GroupForm from '../new-group/GroupForm.vue';
-import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
 import { useGroupDetailQueryControl } from './hooks/useGroupDetailQueryControl';
 
 const apiClient = useApiClient();
 const { group } = useGroupContext();
-const bills = useBillsContext();
 const toast = useToast();
 const actionId = useId();
 const router = useRouter();
@@ -47,7 +46,16 @@ const handleClose = () => {
 
 const exportGroup = () => {
 	import('./helpers/group-backup').then(({ exportGroupToExcel }) => {
-		exportGroupToExcel(group.value, bills.value);
+		exportGroupToExcel(group.value, (offset, limit) =>
+			apiClient
+				.fetchBills(group.value.id, {
+					offset,
+					limit,
+					sortBy: 'created_at',
+					sortOrder: SortOrder.Desc,
+				})
+				.then((res) => res.data ?? { total: 0, limit, data: [] }),
+		);
 	});
 };
 

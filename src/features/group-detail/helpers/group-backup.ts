@@ -260,13 +260,38 @@ const generateBackupSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 	ws.getCell('A2').value = JSON.stringify(bills || []);
 };
 
-export const exportGroupToExcel = async (group: Group, bills: Bill[]) => {
+type FetchBillsPage = (
+	offset: number,
+	limit: number,
+) => Promise<{
+	total: number;
+	limit: number;
+	data: Bill[];
+}>;
+
+export const exportGroupToExcel = async (group: Group, fetchBillsPage: FetchBillsPage) => {
 	const wb = new Workbook();
 
-	generateOverviewSheet(wb, group, bills);
-	generateDetailSheet(wb, group, bills);
+	const PAGE_SIZE = 500;
+	let offset = 0;
+	const allBills: Bill[] = [];
+
+	const first = await fetchBillsPage(offset, PAGE_SIZE);
+	allBills.push(...first.data);
+
+	const total = first.total ?? allBills.length;
+
+	while (allBills.length < total && first.data.length === PAGE_SIZE) {
+		offset += PAGE_SIZE;
+		const page = await fetchBillsPage(offset, PAGE_SIZE);
+		allBills.push(...page.data);
+		if (page.data.length < PAGE_SIZE) break;
+	}
+
+	generateOverviewSheet(wb, group, allBills);
+	generateDetailSheet(wb, group, allBills);
 	generateInformationSheet(wb, group);
-	generateBackupSheet(wb, group, bills);
+	generateBackupSheet(wb, group, allBills);
 
 	const buffer = await wb.xlsx.writeBuffer();
 	saveFileAs(new Blob([buffer]), `${group.name}.xlsx`);
