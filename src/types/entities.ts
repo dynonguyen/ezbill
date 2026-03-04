@@ -100,4 +100,7 @@ export type GroupStats = {
 	paymentTrackingMode: PaymentTrackingMode;
 	totalSpent: number;
 	members: GroupMemberStats[];
+	totalBills: number;
+	memberBillCounts: Record<MemberId, number>;
+	categoryBillCounts: Record<CategoryId, number>;
 };
