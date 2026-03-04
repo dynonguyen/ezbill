@@ -16,7 +16,7 @@ const MAX_RETRY_ATTEMPTS = 5;
 
 export function useEzbiuGroupEvents(groupId: Ref<string>) {
 	const queryClient = useQueryClient();
-	const { refetchGroups } = useGroupsQueryControl();
+	const { refetchGroups, refetchGroupStats } = useGroupsQueryControl();
 	const baseUrl = getEnv('VITE_API_BASE_URL');
 
 	let source: EventSource | null = null;
@@ -69,8 +69,8 @@ export function useEzbiuGroupEvents(groupId: Ref<string>) {
 			if (!payload || payload.group_id !== id) return;
 
 			if (payload.type === REALTIME_EVENT.GROUP_UPDATED) {
-				queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, id] });
 				refetchGroups();
+				refetchGroupStats();
 			}
 
 			if (payload.type === REALTIME_EVENT.BILL_UPDATED) {

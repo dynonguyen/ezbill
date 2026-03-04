@@ -20,7 +20,7 @@ const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
 
 const apiClient = useApiClient();
-const { refetchGroups, refetchSessionStats, handleGroupCreated } = useGroupsQueryControl();
+const { refetchGroups, refetchSessionStats } = useGroupsQueryControl();
 const createGroupMutation = useMutation({ mutationFn: apiClient.createGroup });
 const importGroupMutation = useMutation({ mutationFn: apiClient.importGroup });
 
@@ -57,8 +57,8 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 
 		if (resp.data?.id) {
 			localDBStore.joinGroup(resp.data.id);
-			handleGroupCreated();
-			await refetchSessionStats();
+			refetchSessionStats();
+			refetchGroups();
 			inviteGroupId.value = resp.data.id;
 		}
 	} else {

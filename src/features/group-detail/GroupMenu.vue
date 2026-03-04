@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SortOrder } from '@/apis/api-client';
 import InviteLink from '@/components/InviteLink.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
@@ -8,7 +9,6 @@ import { PATH } from '@/constants/path';
 import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { useToast } from '@/hooks/useToast';
 import type { Group } from '@/types/entities';
-import { SortOrder } from '@/apis/api-client';
 import { useMutation } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
@@ -24,7 +24,7 @@ const { group } = useGroupContext();
 const toast = useToast();
 const actionId = useId();
 const router = useRouter();
-const { handleGroupLeft } = useGroupsQueryControl();
+const { refetchGroups } = useGroupsQueryControl();
 const outsideClickTarget = useTemplateRef('menu-target');
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
@@ -81,7 +81,7 @@ const handleLeaveGroup = async () => {
 		return toast.errorWithRetry('Rời nhóm thất bại', () => handleLeaveGroup());
 	}
 
-	handleGroupLeft();
+	refetchGroups();
 	confirmDelete.value = false;
 
 	router.push(PATH.HOME);
