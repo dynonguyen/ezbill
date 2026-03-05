@@ -1,5 +1,5 @@
+import { computed, ref, toValue, watch, type MaybeRefOrGetter } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { computed, ref, type MaybeRefOrGetter, toValue, watch } from 'vue';
 
 export type UsePaginationOptions = {
 	limit: number;
@@ -8,17 +8,19 @@ export type UsePaginationOptions = {
 	queryKey?: string;
 };
 
+const DEFAULT_PAGE = 1;
+
 export function usePagination(options: UsePaginationOptions) {
 	const { limit, total, syncWithRoute = true, queryKey = 'page' } = options;
 	const route = useRoute();
 	const router = useRouter();
 
-	const pageRef = ref(1);
+	const pageRef = ref(DEFAULT_PAGE);
 	const page = syncWithRoute
 		? computed({
-				get: () => Number(route.query[queryKey] ?? 1) || 1,
+				get: () => Number(route.query[queryKey] ?? DEFAULT_PAGE) || DEFAULT_PAGE,
 				set: (value: number) => {
-					const current = Number(route.query[queryKey] ?? 1) || 1;
+					const current = Number(route.query[queryKey] ?? DEFAULT_PAGE) || DEFAULT_PAGE;
 					if (value === current) return;
 					router.replace({ query: { ...route.query, [queryKey]: value } });
 				},
@@ -32,16 +34,16 @@ export function usePagination(options: UsePaginationOptions) {
 
 	const totalPages = computed(() => {
 		const t = toValue(total);
-		if (!limit) return 1;
+		if (!limit) return DEFAULT_PAGE;
 		const p = Math.ceil(t / limit);
-		return p > 0 ? p : 1;
+		return p > 0 ? p : DEFAULT_PAGE;
 	});
 
 	watch(
 		[page, totalPages],
 		([p, max]) => {
 			const current = Number(p);
-			const safe = Math.max(1, Math.min(current, Number(max)));
+			const safe = Math.max(DEFAULT_PAGE, Math.min(current, Number(max)));
 			if (safe !== current) page.value = safe;
 		},
 		{ immediate: true },

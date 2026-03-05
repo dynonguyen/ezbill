@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { BillListPaymentStatus } from '@/apis/api-client';
 import Autocomplete, { type AutocompleteOption } from '@/components/ui/Autocomplete.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
@@ -21,31 +22,25 @@ import BillDetailPopup from './BillDetailPopup.vue';
 import BillItem from './BillItem.vue';
 import FilterItemReset from './FilterItemReset.vue';
 
+export type BillListFilter = {
+	keyword?: string;
+	createdBy?: MemberId;
+	participant?: MemberId;
+	paymentStatus?: BillListPaymentStatus;
+	categoryIds?: CategoryId[];
+};
+
 const bills = useBillsContext();
 const { group, isAccountantMode } = useGroupContext();
 const searchRef = useTemplateRef<HTMLInputElement>('searchRef');
 
 const billListParams = inject<{
-	sort: { value: { by: 'createdAt' | 'name' | 'amount'; order: 'asc' | 'desc' } };
+	sort: { value: { by: SortOption['by']; order: SortOption['order'] } };
 	filter: {
-		value: Partial<{
-			keyword: string;
-			createdBy: MemberId;
-			participant: MemberId;
-			paymentStatus: string;
-			categoryIds: CategoryId[];
-		}>;
+		value: Partial<BillListFilter>;
 	};
-	setSort(by: 'createdAt' | 'name' | 'amount', order: 'asc' | 'desc'): void;
-	setFilter(
-		updates: Partial<{
-			keyword?: string;
-			createdBy?: MemberId;
-			participant?: MemberId;
-			paymentStatus?: string;
-			categoryIds?: CategoryId[];
-		}>,
-	): void;
+	setSort(by: SortOption['by'], order: SortOption['order']): void;
+	setFilter(updates: Partial<BillListFilter>): void;
 }>(CONTEXT_KEY.BILL_LIST_PARAMS)!;
 
 type SortOption = {
@@ -244,7 +239,10 @@ const handleResetFilter = (
 				<MemberSelect
 					placeholder="Chọn người trả"
 					:value="billListParams.filter.value.createdBy"
-					@update:value="(v: string | null | undefined) => billListParams.setFilter({ createdBy: v ?? undefined })" />
+					@update:value="
+						(v: MemberId | null | undefined) =>
+							billListParams.setFilter({ createdBy: v ?? undefined })
+					" />
 			</FormControl>
 
 			<FormControl label="Theo người tham gia">
@@ -254,7 +252,10 @@ const handleResetFilter = (
 				<MemberSelect
 					placeholder="Chọn thành viên"
 					:value="billListParams.filter.value.participant"
-					@update:value="(v: string | null | undefined) => billListParams.setFilter({ participant: v ?? undefined })" />
+					@update:value="
+						(v: MemberId | null | undefined) =>
+							billListParams.setFilter({ participant: v ?? undefined })
+					" />
 			</FormControl>
 
 			<FormControl v-if="!isAccountantMode" label="Theo trạng thái thanh toán">
@@ -266,7 +267,12 @@ const handleResetFilter = (
 				<Autocomplete
 					:options="paymentStatusOptions"
 					:value="billListParams.filter.value.paymentStatus"
-					@update:value="(v: string | number | null | undefined) => billListParams.setFilter({ paymentStatus: v != null ? String(v) : undefined })"
+					@update:value="
+						(v: AutocompleteOption['value'] | null | undefined) =>
+							billListParams.setFilter({
+								paymentStatus: v != null ? (v as BillListPaymentStatus) : undefined,
+							})
+					"
 					placeholder="Chọn trạng thái" />
 			</FormControl>
 

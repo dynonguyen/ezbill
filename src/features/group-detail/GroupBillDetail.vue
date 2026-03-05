@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SortOrder, type ApiFetchBillsReq, type BillListPaymentStatus } from '@/apis/api-client';
+import { SortOrder, type ApiFetchBillsReq } from '@/apis/api-client';
 import CurrencyText from '@/components/CurrencyText.vue';
 import Loading from '@/components/Loading.vue';
 import Pagination from '@/components/Pagination.vue';
@@ -12,13 +12,13 @@ import { PAYMENT_TRACKING_LABEL_MAPPING } from '@/constants/mapping';
 import { PATH } from '@/constants/path';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { usePagination } from '@/hooks/usePagination';
-import type { CategoryId, MemberId } from '@/types/entities';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, nextTick, onUnmounted, provide, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useApiClient } from '../../hooks/useApiClient';
 import PaymentTrackingHelper from '../new-group/PaymentTrackingHelper.vue';
 import BalanceList from './balances/BalanceList.vue';
+import type { BillListFilter } from './bills/BillList.vue';
 import BillList from './bills/BillList.vue';
 import NewBillPopup from './bills/NewBillPopup.vue';
 import GroupMenu from './GroupMenu.vue';
@@ -45,13 +45,7 @@ const sortRef = ref<{ by: BillSortBy; order: 'asc' | 'desc' }>({
 	by: 'createdAt',
 	order: 'desc',
 });
-const filterRef = ref<{
-	keyword?: string;
-	createdBy?: MemberId;
-	participant?: MemberId;
-	paymentStatus?: BillListPaymentStatus;
-	categoryIds?: CategoryId[];
-}>({});
+const filterRef = ref<BillListFilter>({});
 
 const fetchOptions = computed<ApiFetchBillsReq>(() => ({
 	offset: offset.value,
@@ -83,7 +77,7 @@ const billListParams = {
 	setSort(by: BillSortBy, order: 'asc' | 'desc') {
 		sortRef.value = { by, order };
 	},
-	setFilter(updates: Partial<typeof filterRef.value>) {
+	setFilter(updates: Partial<BillListFilter>) {
 		if (Object.keys(updates).length === 0) {
 			filterRef.value = {};
 			return;
