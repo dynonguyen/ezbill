@@ -34,7 +34,9 @@ export function saveFileAs(data: Blob | string, filename: string) {
 }
 
 export function getGroupLink(groupId: string, inviteKey?: string): string {
-	return `${getEnv('VITE_BASE_URL')}${PATH.GROUP.replace(':id', groupId)}${inviteKey ? `?invite_key=${inviteKey}` : ''}`;
+	const url = new URL(PATH.GROUP.replace(':id', groupId), getEnv('VITE_BASE_URL'));
+	if (inviteKey) url.searchParams.set('invite_key', inviteKey);
+	return url.toString();
 }
 
 export function hasEventPassed(evName: string): boolean {
