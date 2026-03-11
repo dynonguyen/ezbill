@@ -35,6 +35,7 @@ import type {
 	ApiListBillsByMemberData,
 	ApiListBillsByMemberReq,
 	ApiMarkBillsAsPaidReq,
+	ApiSessionBackfillData,
 	ApiUpdateBillReq,
 	ApiUpdateCategoryReq,
 	ApiUpdateGroupReq,
@@ -239,6 +240,10 @@ const fetchSessionStats = (): ResolvedApiResp<ApiFetchSessionStatsData> => {
 	return fetcher.get<ApiFetchSessionStatsData>('/sessions/stats');
 };
 
+const sessionBackfill = (req: ApiSessionBackfillData): ResolvedApiResp<null> => {
+	return fetcher.post<null>('/sessions/backfill', { payload: transformCamelToSnake(req) });
+};
+
 const createGroup = (req: ApiCreateGroupReq): ResolvedApiResp<ApiCreateGroupData> => {
 	const payload = {
 		name: req.name,
@@ -358,10 +363,7 @@ const listBillsByMember = (
 
 	return fetcher.get<ApiListBillsByMemberData>(
 		`/groups/${groupId}/bills/members/${memberId}/stats`,
-		{
-			queries,
-			transformer,
-		},
+		{ queries, transformer },
 	);
 };
 
@@ -414,6 +416,7 @@ export const ezbiuApiClient: IApiClient = {
 	checkSession,
 	createSession,
 	fetchSessionStats,
+	sessionBackfill,
 
 	createGroup,
 	fetchGroups,

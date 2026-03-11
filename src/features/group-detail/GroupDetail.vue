@@ -8,6 +8,7 @@ import { PATH } from '@/constants/path';
 import router from '@/routes/router';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
+import { retryOnFailure } from '@/utils/helpers';
 import { useQuery } from '@tanstack/vue-query';
 import { computed, onMounted, onUnmounted, provide, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -33,22 +34,20 @@ const {
 
 const handleJoinGroup = async (refetchGroup: () => void) => {
 	const inviteKey = route.query.invite_key as string | undefined;
-	if (inviteKey) {
-		await apiClient.joinGroup(groupId.value, inviteKey);
-		router.replace({ query: { invite_key: undefined } });
-		refetchGroup();
-	}
+	if (!inviteKey) return;
+
+	await retryOnFailure(() => apiClient.joinGroup(groupId.value, inviteKey));
+
+	router.replace({ query: { invite_key: undefined } });
+	refetchGroup();
 };
 
 provide(CONTEXT_KEY.GROUP, group);
-
 watch(group, () => {
 	if (group.value) {
 		localDBStore.joinGroup(groupId.value);
-		localDBStore.updateLastOpenedGroup(groupId.value);
 	}
 });
-
 const { connect, disconnect } = useEzbiuGroupEvents(groupId);
 
 onMounted(async () => {

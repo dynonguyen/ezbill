@@ -30,7 +30,7 @@ const { isPending: isUpdating, mutateAsync: updateGroupAsync } = useMutation({
 const { isPending: isDeleting, mutateAsync: deleteCategoryAsync } = useMutation({
 	mutationFn: () => apiClient.deleteCategory(group.value.id, props.category.id),
 });
-const { refetchGroup, refetchBills } = useGroupDetailQueryControl();
+const { refetchGroup, refetchBills, refetchGroupStats } = useGroupDetailQueryControl();
 const toast = useToast();
 
 const openEdit = ref(false);
@@ -48,6 +48,7 @@ const handleDeleteCategory = async () => {
 	openEdit.value = false;
 	refetchGroup();
 	refetchBills();
+	refetchGroupStats();
 };
 
 const handleCategoryChange = async (form: CategoryFormData) => {
@@ -59,6 +60,9 @@ const handleCategoryChange = async (form: CategoryFormData) => {
 	}
 
 	openEdit.value = false;
+	refetchGroup();
+	refetchBills();
+	refetchGroupStats();
 };
 
 const handleClick = () => {

@@ -8,7 +8,6 @@ import { PATH } from '@/constants/path';
 import { useApiClient } from '@/hooks/useApiClient';
 import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { useToast } from '@/hooks/useToast';
-import { useLocalDBStore } from '@/stores/local-db';
 import { PaymentTrackingMode, type Group } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import { computed, ref, watch } from 'vue';
@@ -26,7 +25,6 @@ const importGroupMutation = useMutation({ mutationFn: apiClient.importGroup });
 
 const toast = useToast();
 const router = useRouter();
-const localDBStore = useLocalDBStore();
 const importedFile = ref<ImportedModel>(null);
 const groupFormModel = ref<GroupFormModel>();
 
@@ -56,7 +54,6 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 		importedFile.value = null;
 
 		if (resp.data?.id) {
-			localDBStore.joinGroup(resp.data.id);
 			refetchSessionStats();
 			refetchGroups();
 			inviteGroupId.value = resp.data.id;

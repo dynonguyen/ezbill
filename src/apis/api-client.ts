@@ -37,10 +37,8 @@ export type ResolvedApiResp<Data> = MustResolvedPromise<BaseApiResp<Data>>;
 // Models
 // --- Sessions ---
 export type ApiCreateSessionData = { value: string };
-
-export type ApiFetchSessionStatsData = {
-	totalHiddenGroups: number;
-};
+export type ApiSessionBackfillData = { groupIds: GroupId[] };
+export type ApiFetchSessionStatsData = { totalHiddenGroups: number };
 
 // --- Groups ---
 export type ApiCreateGroupReq = Pick<Group, 'name' | 'paymentTrackingMode'>;
@@ -131,6 +129,7 @@ export interface IApiClient {
 	checkSession(): ResolvedApiResp<null>;
 	createSession(): ResolvedApiResp<ApiCreateSessionData>;
 	fetchSessionStats(): ResolvedApiResp<ApiFetchSessionStatsData>;
+	sessionBackfill(req: ApiSessionBackfillData): ResolvedApiResp<null>;
 
 	// Groups
 	createGroup(req: ApiCreateGroupReq): ResolvedApiResp<ApiCreateGroupData>;

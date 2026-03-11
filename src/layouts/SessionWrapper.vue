@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLocalDBStore } from '@/stores/local-db';
 import { useMutation, useQuery } from '@tanstack/vue-query';
 import { ref, watch } from 'vue';
 import Feedback from '../components/Feedback.vue';
@@ -14,6 +15,7 @@ import { getImgUrl } from '../utils/get-asset';
 const MAX_RETRIES = 5;
 
 const apiClient = useApiClient();
+const localDBStore = useLocalDBStore();
 const toast = useToast();
 
 const loading = ref(true);
@@ -27,8 +29,10 @@ const sessionQuery = useQuery({
 	queryFn: apiClient.checkSession,
 	retry: false,
 });
-const { mutateAsync: createSession } = useMutation({
-	mutationFn: apiClient.createSession,
+// TODO: Switch back to createSession when migration is done
+const { mutateAsync: backfillSession } = useMutation({
+	mutationFn: () =>
+		apiClient.sessionBackfill({ groupIds: localDBStore.joinedGroups.map((g) => g.groupId) }),
 });
 
 const handleSessionReady = () => {
@@ -49,7 +53,7 @@ const handleRetryCheckSession = () => {
 };
 
 const handleCreateSession = async () => {
-	const resp = await createSession();
+	const resp = await backfillSession();
 	if (resp.success) {
 		handleSessionReady();
 		return;
