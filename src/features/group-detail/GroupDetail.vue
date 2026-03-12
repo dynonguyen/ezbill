@@ -3,65 +3,63 @@ import Feedback from '@/components/Feedback.vue';
 import Loading from '@/components/Loading.vue';
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
-import { CONTEXT_KEY, QUERY_KEY, REALTIME_EVENT } from '@/constants/key';
+import { CONTEXT_KEY, QUERY_KEY } from '@/constants/key';
 import { PATH } from '@/constants/path';
+import router from '@/routes/router';
 import { useLocalDBStore } from '@/stores/local-db';
 import { getImgUrl } from '@/utils/get-asset';
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { computed, onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { retryOnFailure } from '@/utils/helpers';
+import { useQuery } from '@tanstack/vue-query';
+import { computed, onMounted, onUnmounted, provide, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import type { IRealtimeClient } from '../../apis/realtime-client';
-import { newRealtimeClient } from '../../apis/supabase';
-import { useLegacyApiClient } from '../../hooks/useApiClient';
+import { useApiClient } from '../../hooks/useApiClient';
+import { useEzbiuGroupEvents } from '../../hooks/useEzbiuGroupEvents';
 import GroupBillDetail from './GroupBillDetail.vue';
 
 const route = useRoute();
 const groupId = computed(() => route.params.id as string);
 const localDBStore = useLocalDBStore();
-const realtimeClient = ref<IRealtimeClient | null>(null);
-const queryClient = useQueryClient();
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
+
 const {
 	data: group,
 	isPending,
 	isError,
+	refetch,
 } = useQuery({
 	queryKey: [QUERY_KEY.GROUP, groupId],
-	queryFn: () => client.fetchGroup(groupId.value),
+	queryFn: () => apiClient.fetchGroup(groupId.value).then((resp) => resp.data),
 });
 
-provide(CONTEXT_KEY.GROUP, group);
-provide(CONTEXT_KEY.REALTIME_CLIENT, realtimeClient);
+const handleJoinGroup = async (refetchGroup: () => void) => {
+	const inviteKey = route.query.invite_key as string | undefined;
+	if (!inviteKey) return;
 
+	await retryOnFailure(() => apiClient.joinGroup(groupId.value, inviteKey));
+
+	router.replace({ query: { invite_key: undefined } });
+	refetchGroup();
+};
+
+provide(CONTEXT_KEY.GROUP, group);
 watch(group, () => {
 	if (group.value) {
 		localDBStore.joinGroup(groupId.value);
-		localDBStore.updateLastOpenedGroup(groupId.value);
 	}
 });
+const { connect, disconnect } = useEzbiuGroupEvents(groupId);
 
-const realtimeEventListener = () => {
-	realtimeClient.value?.channel
-		?.on('broadcast', { event: REALTIME_EVENT.GROUP_UPDATED }, () => {
-			queryClient.invalidateQueries({ queryKey: [QUERY_KEY.GROUP, groupId.value] });
-		})
-		.on('broadcast', { event: REALTIME_EVENT.BILL_UPDATED }, () => {
-			queryClient.invalidateQueries({ queryKey: [QUERY_KEY.BILL_LIST, groupId.value] });
-		})
-		.subscribe();
-};
-
-onMounted(() => {
+onMounted(async () => {
 	document.getElementById('app-layout')?.classList.remove('h-dvh');
+	await handleJoinGroup(refetch);
 
-	realtimeClient.value = newRealtimeClient(groupId.value);
-	realtimeEventListener();
+	connect();
 });
 
 onUnmounted(() => {
 	document.getElementById('app-layout')?.classList.add('h-dvh');
-	realtimeClient.value?.channel?.unsubscribe();
+	disconnect();
 });
 </script>
 

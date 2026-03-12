@@ -17,6 +17,7 @@ import { z } from 'zod';
 import CategoryItem from '../category/CategoryItem.vue';
 import {
 	billTypeMapping,
+	getMemberAmount,
 	getTotalMemberAmount,
 	omitZeroMemberAmounts,
 	splitEqually,
@@ -80,7 +81,7 @@ const [categoryIdsField] = defineField('categoryIds');
 
 const isFormDirty = defineModel<boolean>('form-dirty', { default: false });
 
-const getDefaultMemberAmount = () => {
+const getDefaultMemberAmount = (): BillMember[] => {
 	return splitEqually(
 		0,
 		group.value.members.map((m) => m.id),
@@ -88,11 +89,13 @@ const getDefaultMemberAmount = () => {
 };
 const getAllParticipantIds = () => group.value.members.map((m) => m.id);
 
-const memberAmounts = ref<BillMember>(
-	props.mode === 'new' ? getDefaultMemberAmount() : props.defaultBill?.members || {},
+const memberAmounts = ref<BillMember[]>(
+	props.mode === 'new' ? getDefaultMemberAmount() : props.defaultBill?.members || [],
 );
 const participants = ref<MemberId[]>(
-	props.mode === 'new' ? getAllParticipantIds() : Object.keys(props.defaultBill?.members || {}),
+	props.mode === 'new'
+		? getAllParticipantIds()
+		: (props.defaultBill?.members || []).map((m) => m.memberId),
 );
 const fixAmountField = ref<{ show: boolean; amount: number }>({ show: false, amount: 0 });
 const hideNonParticipants = ref(false);
@@ -149,7 +152,9 @@ const validateMemberAmounts = (): string | null => {
 		.with(P.union(BillType.Equally, BillType.Percentage), () => null)
 		.with(BillType.Exact, () => {
 			const total = getTotalMemberAmount(memberAmounts.value);
-			const remainingMembers = participants.value.filter((id) => !memberAmounts.value[id]).length;
+			const remainingMembers = participants.value.filter(
+				(id) => !getMemberAmount(memberAmounts.value, id),
+			).length;
 
 			if (total > amountField.value || (total < amountField.value && remainingMembers === 0)) {
 				return `Tổng số tiền các thành viên <b>${toVND(total)}</b> không khớp với số tiền tổng đã nhập <b>${toVND(amountField.value)}</b>`;
@@ -183,8 +188,8 @@ const handleSubmitBill = handleSubmit(async (form) => {
 		return toast.error(memberAmountsError, { htmlMsg: true });
 	}
 
-	const members: BillMember = match(type)
-		.returnType<BillMember>()
+	const members: BillMember[] = match(type)
+		.returnType<BillMember[]>()
 		.with(BillType.Equally, () => splitEqually(amount, participants.value))
 		.with(BillType.Exact, () => splitExactly(amount, memberAmounts.value))
 		.with(BillType.Percentage, () => memberAmounts.value)

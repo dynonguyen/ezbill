@@ -16,6 +16,8 @@ export const CONTEXT_KEY = {
 	GROUP: 'group',
 	GROUP_USER: 'group-user',
 	BILLS: 'bills',
+	BILL_LIST_PARAMS: 'bill-list-params',
+	GROUP_STATS: 'group-stats',
 	REALTIME_CLIENT: 'realtime-client',
 	BILL_FORM: 'bill-form',
 	// DEPRECATED: Remove this after migration
@@ -26,12 +28,16 @@ export const CONTEXT_KEY = {
 
 export const QUERY_KEY = {
 	CHECK_SESSION: 'check-session',
+	SESSION_STATS: 'session-stats',
 	GROUPS: 'groups',
 	GROUP: 'group',
 	BILL_LIST: 'bill-list',
+	GROUP_STATS: 'group-stats',
+	BILLS_BY_MEMBER: 'bills-by-member',
+	INVITE_KEY: 'invite-key',
 };
 
 export const REALTIME_EVENT = {
-	GROUP_UPDATED: 'GROUP_UPDATED',
-	BILL_UPDATED: 'BILL_UPDATED',
+	GROUP_UPDATED: 'group_updated',
+	BILL_UPDATED: 'bill_updated',
 };

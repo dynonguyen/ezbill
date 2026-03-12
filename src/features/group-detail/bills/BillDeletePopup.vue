@@ -3,22 +3,23 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
-import type { BillId } from '@/types/entities';
+import type { BillId, GroupId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
+import { useApiClient } from '../../../hooks/useApiClient';
 import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const { group } = useGroupContext();
 const bills = useBillsContext();
 const toast = useToast();
-const { refetchBills } = useGroupQueryControl();
+const { refetchBills } = useGroupDetailQueryControl();
 
 const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
-	mutationFn: client.deleteBill,
+	mutationFn: ({ groupId, billId }: { groupId: GroupId; billId: BillId }) =>
+		apiClient.deleteBill(groupId, billId),
 });
 
 const deleteId = defineModel<BillId | null>({ default: null });
@@ -29,7 +30,7 @@ const handleDeleteBill = async () => {
 	const [error] = await to(deleteMutateAsync({ groupId: group.value.id, billId: deleteId.value }));
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
+		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Xoá bill thất bại', () => handleDeleteBill());
 	}
 

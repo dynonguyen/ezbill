@@ -1,47 +1,27 @@
 <script setup lang="ts">
+import { SortOrder, type ApiFetchGroupsReq } from '@/apis/api-client';
+import Pagination from '@/components/Pagination.vue';
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { LS_KEY, QUERY_KEY } from '@/constants/key';
-import { useApiClient, useLegacyApiClient } from '@/hooks/useApiClient';
-import { useLocalDBStore } from '@/stores/local-db';
-import type { Group } from '@/types/entities';
+import { useApiClient } from '@/hooks/useApiClient';
+import { usePagination } from '@/hooks/usePagination';
 import { getImgUrl } from '@/utils/get-asset';
 import { useQuery } from '@tanstack/vue-query';
-import { match } from 'ts-pattern';
-import { computed, ref, toRaw, watch, watchEffect } from 'vue';
-import { SortOrder, type ApiFetchGroupsReq } from '../../apis/api-client';
+import { computed, ref, watch } from 'vue';
 import RecentGroupItem from './RecentGroupItem.vue';
 import Sorting, { sortOptions } from './Sorting.vue';
 
-const client = useLegacyApiClient();
+const FIRST_PAGE_LIMIT = 10;
+
 const apiClient = useApiClient();
-const localStoreDB = useLocalDBStore();
 const showHidden = ref(Boolean(localStorage.getItem(LS_KEY.SHOW_HIDDEN_GROUPS)));
 
-const fetchOptions = ref<ApiFetchGroupsReq>({
-	offset: 0,
-	limit: 10,
-	order: SortOrder.Desc,
-	sortBy: 'created_at',
-});
-
-const { isPending: isFetchingGroups, data: groups } = useQuery({
-	queryKey: [QUERY_KEY.GROUPS, fetchOptions],
-	queryFn: () => apiClient.fetchGroups(fetchOptions.value),
-});
-
-watchEffect(() => {
-	console.log(isFetchingGroups, toRaw(groups.value));
-});
-
-const groupIds = computed(() => localStoreDB.joinedGroups.map((group) => group.groupId));
-const queryKey = computed(() => [QUERY_KEY.GROUP, groupIds]);
-const hasHiddenGroups = computed(() => localStoreDB.hiddenGroups.length > 0);
-
-const { isPending, data, isError } = useQuery({
-	queryKey,
-	queryFn: () => client.fetchGroups(groupIds.value),
+const totalRef = ref(0);
+const { page, totalPages, offset, limit } = usePagination({
+	limit: FIRST_PAGE_LIMIT,
+	total: totalRef,
 });
 
 const sortOpt = ref(
@@ -52,45 +32,39 @@ const sortOpt = ref(
 	})(),
 );
 
-// Remove not found groups from local store
+const hiddenRef = computed(() => (showHidden.value ? true : undefined));
+const fetchOpts = computed<ApiFetchGroupsReq>(() => ({
+	offset: offset.value,
+	limit,
+	sortOrder: sortOpt.value?.order === 'asc' ? SortOrder.Asc : SortOrder.Desc,
+	sortBy: sortOpt.value?.by as string,
+	includeHidden: hiddenRef.value,
+}));
+
+const queryKey = computed(() => [QUERY_KEY.GROUPS, sortOpt.value, page.value, hiddenRef.value]);
+
+const { isPending, data, isError } = useQuery({
+	queryKey,
+	queryFn: () => apiClient.fetchGroups(fetchOpts.value).then((res) => res.data),
+});
+
+const groups = computed(() => data.value?.data ?? []);
+const total = computed(() => data.value?.total ?? 0);
+
 watch(
-	() => data.value?.notFoundIds,
-	(notFoundIds) => {
-		notFoundIds?.length && localStoreDB.removeFromGroups(notFoundIds);
+	data,
+	(v) => {
+		if (v != null) totalRef.value = v.total ?? 0;
 	},
+	{ immediate: true },
 );
 
-const sortGroups = (groups: Group[]) => {
-	const { by, order } = sortOpt.value;
+const { data: sessionStats } = useQuery({
+	queryKey: [QUERY_KEY.SESSION_STATS],
+	queryFn: () => apiClient.fetchSessionStats().then((res) => res.data),
+});
 
-	const compareFn = match([by, order])
-		.returnType<((a: Group, b: Group) => number) | null>()
-		.with(
-			['createdAt', 'desc'],
-			() => (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-		)
-		.with(
-			['createdAt', 'asc'],
-			() => (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-		)
-		.with(['name', 'asc'], () => (a, b) => a.name.localeCompare(b.name))
-		.with(['name', 'desc'], () => (a, b) => b.name.localeCompare(a.name))
-		.with(
-			['updatedAt', 'desc'],
-			() => (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-		)
-		.with(['lastOpened', 'desc'], () => {
-			const lastOpened = toRaw(localStoreDB.lastOpenedGroups);
-			if (!Object.keys(lastOpened).length) return null;
-
-			return (a, b) => {
-				return (lastOpened[b.id] || 0) - (lastOpened[a.id] || 0);
-			};
-		})
-		.otherwise(() => null);
-
-	return compareFn ? [...groups].sort(compareFn) : groups;
-};
+const totalHiddenGroups = computed(() => sessionStats.value?.totalHiddenGroups ?? 0);
 
 const toggleShowHidden = () => {
 	showHidden.value = !showHidden.value;
@@ -98,26 +72,6 @@ const toggleShowHidden = () => {
 		? localStorage.setItem(LS_KEY.SHOW_HIDDEN_GROUPS, '1')
 		: localStorage.removeItem(LS_KEY.SHOW_HIDDEN_GROUPS);
 };
-
-const _groups = computed<Group[]>(() => {
-	const pinned: Group[] = [];
-	const unpinned: Group[] = [];
-	const filtered =
-		(hasHiddenGroups.value && showHidden.value) || !hasHiddenGroups.value
-			? data.value?.groups
-			: data.value?.groups.filter((g) => !localStoreDB.hiddenGroups.includes(g.id));
-
-	filtered?.forEach((g) => {
-		localStoreDB.pinnedGroups.includes(g.id) ? pinned.push(g) : unpinned.push(g);
-	});
-
-	return groups.value?.data?.data || [];
-
-	return [
-		...(sortOpt.value ? sortGroups(pinned) : pinned),
-		...(sortOpt.value ? sortGroups(unpinned) : unpinned),
-	];
-});
 </script>
 
 <template>
@@ -126,7 +80,7 @@ const _groups = computed<Group[]>(() => {
 			<Typography variant="lgSemiBold" class="text-black">Nhóm của bạn</Typography>
 			<Flex class="gap-2 shrink-0">
 				<Button
-					v-if="hasHiddenGroups"
+					v-if="totalHiddenGroups > 0"
 					variant="outlined"
 					shape="rounded"
 					color="neutral"
@@ -136,7 +90,7 @@ const _groups = computed<Group[]>(() => {
 					<span
 						class="icon"
 						:class="showHidden ? 'msi-visibility-off-rounded' : 'msi-visibility-rounded'"></span>
-					({{ localStoreDB.hiddenGroups.length }})
+					({{ totalHiddenGroups }})
 				</Button>
 				<Sorting v-model="sortOpt" />
 			</Flex>
@@ -144,16 +98,20 @@ const _groups = computed<Group[]>(() => {
 
 		<Flex v-if="isPending" stack class="gap-4 px-4">
 			<div v-for="i in 4" :key="i" class="skeleton h-24 w-full rounded-2xl"></div>
+			<Flex class="gap-2 justify-center min-h-10 items-center">
+				<div v-for="i in 5" :key="i" class="skeleton size-9 shrink-0 rounded-full"></div>
+			</Flex>
 		</Flex>
 		<Typography v-else-if="isError" variant="smMedium" class="text-red-400 text-center">
 			Đã có lỗi xảy ra, vui lòng thử lại sau
 		</Typography>
 		<img
-			v-else-if="!_groups.length"
+			v-else-if="!groups?.length"
 			:src="getImgUrl('no-groups.svg')"
 			class="size-[300px] mx-auto" />
 		<Flex v-else stack class="gap-4 px-4 pb-4 overflow-auto">
-			<RecentGroupItem v-for="group in _groups" :key="group.id" :group="group" />
+			<RecentGroupItem v-for="group in groups" :key="group.id" :group="group" />
+			<Pagination v-if="totalPages > 1" v-model:page="page" :total="total" :limit="limit" />
 		</Flex>
 	</Flex>
 </template>

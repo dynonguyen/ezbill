@@ -28,16 +28,16 @@ const generalInfo = computed(() => [
 ]);
 
 const memberDetails = computed(() => {
-	return Object.entries(props.bill.members)
-		.map(([memId, amount]) => {
+	return props.bill.members
+		.map((m) => {
 			const payInfo: PaymentTracking | undefined =
-				props.bill.createdBy === memId
-					? { createdAt: props.bill.createdAt, memberId: memId }
-					: props.bill.paymentTracking.find((p) => p.memberId === memId);
+				props.bill.createdBy === m.memberId
+					? { createdAt: props.bill.createdAt, memberId: m.memberId }
+					: props.bill.paymentTracking.find((p) => p.memberId === m.memberId);
 			return {
-				id: memId,
-				amount,
-				member: group.value.members.find((m) => m.id === memId)!,
+				id: m.memberId,
+				amount: m.shareAmount,
+				member: group.value.members.find((mem) => mem.id === m.memberId)!,
 				payInfo,
 				isPaid: Boolean(payInfo),
 			};

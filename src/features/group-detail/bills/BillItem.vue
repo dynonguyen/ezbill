@@ -21,7 +21,7 @@ const getBillInfo = (bill: Bill) => {
 	return [
 		['msi-calendar-month-rounded', dayjs(bill.createdAt).format('DD/MM/YYYY HH:mm')],
 		['msi-payments', group.value.members?.find((m) => m.id === bill.createdBy)?.name || 'Unknown'],
-		['msi-group', Object.keys(bill.members).length],
+		['msi-group', bill.members.length],
 		...(isAccountantMode.value ? [] : [['msi-list-alt-check-rounded', getPaidStatus(bill)]]),
 	];
 };

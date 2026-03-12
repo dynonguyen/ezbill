@@ -5,13 +5,11 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { PATH } from '@/constants/path';
-import { useApiClient, useLegacyApiClient } from '@/hooks/useApiClient';
+import { useApiClient } from '@/hooks/useApiClient';
+import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { useToast } from '@/hooks/useToast';
-import { useLocalDBStore } from '@/stores/local-db';
 import { PaymentTrackingMode, type Group } from '@/types/entities';
-import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
-import to from 'await-to-js';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import GroupForm, { type GroupFormModel } from './GroupForm.vue';
@@ -20,14 +18,13 @@ import ImportBackupFile, { type ImportedModel } from './ImportBackupFile.vue';
 const open = defineModel<boolean>({ default: false });
 const inviteGroupId = ref('');
 
-const client = useLegacyApiClient();
 const apiClient = useApiClient();
+const { refetchGroups, refetchSessionStats } = useGroupsQueryControl();
 const createGroupMutation = useMutation({ mutationFn: apiClient.createGroup });
-const importGroupMutation = useMutation({ mutationFn: client.importGroup });
+const importGroupMutation = useMutation({ mutationFn: apiClient.importGroup });
 
 const toast = useToast();
 const router = useRouter();
-const localDBStore = useLocalDBStore();
 const importedFile = ref<ImportedModel>(null);
 const groupFormModel = ref<GroupFormModel>();
 
@@ -40,17 +37,15 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 	const { name, paymentTrackingMode } = form;
 
 	if (importedFile.value) {
-		const groupId = generateUUID();
+		const { group: importedGroup, bills } = importedFile.value.data;
 
-		const [error] = await to(
-			importGroupMutation.mutateAsync({
-				imported: importedFile.value.data,
-				newGroupInfo: { name, id: groupId, paymentTrackingMode },
-			}),
-		);
+		const resp = await importGroupMutation.mutateAsync({
+			group: { ...importedGroup, name, paymentTrackingMode },
+			bills,
+		});
 
-		if (error) {
-			void client.createErrorLog({ error: error?.message });
+		if (!resp.success) {
+			void apiClient.createErrorLog({ error: resp.message });
 			return toast.errorWithRetry('Tạo nhóm thất bại', () => {
 				handleAddGroup(form);
 			});
@@ -58,12 +53,17 @@ const handleAddGroup = async (form: Pick<Group, 'name' | 'paymentTrackingMode'>)
 
 		importedFile.value = null;
 
-		localDBStore.joinGroup(groupId);
-		inviteGroupId.value = groupId;
+		if (resp.data?.id) {
+			refetchSessionStats();
+			refetchGroups();
+			inviteGroupId.value = resp.data.id;
+		}
 	} else {
 		const resp = await createGroupMutation.mutateAsync({ name, paymentTrackingMode });
 		if (resp.success) {
-			console.log(`☕ DYNO DEBUG ~ NewGroupPopup.vue:66 🦫\n`, resp);
+			refetchGroups();
+			handleClose();
+			return;
 		}
 	}
 };

@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
+import { useApiClient } from '@/hooks/useApiClient';
 import { useToast } from '@/hooks/useToast';
 import type { Member, MemberBankInfo } from '@/types/entities';
+import type { ApiUpdateMemberReq } from '@/apis/api-client';
 import { saveFileAs } from '@/utils/helpers';
 import { buildVietQRData, buildVietQRUrl } from '@/utils/vietqr';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref, watch } from 'vue';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
 import BankInfoDetail from '../BankInfoDetail.vue';
 import BankInfoPopup from '../BankInfoPopup.vue';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 
 const props = defineProps<{
 	bankInfo?: MemberBankInfo;
@@ -21,22 +22,23 @@ const props = defineProps<{
 	isAccounting?: boolean;
 }>();
 
+const apiClient = useApiClient();
 const qrBase64 = ref('');
 const open = ref(false);
 
-const client = useLegacyApiClient();
-const { mutateAsync: updateMutateAsync } = useMutation({ mutationFn: client.updateMember });
+const { mutateAsync: updateMutateAsync } = useMutation({
+	mutationFn: (form: ApiUpdateMemberReq) =>
+		apiClient.updateMember(group.value.id, props.member.id, form),
+});
 const toast = useToast();
 const { group } = useGroupContext();
-const { refetchGroup } = useGroupQueryControl();
+const { refetchGroup } = useGroupDetailQueryControl();
 
 const handleUpdateBankInfo = async (form?: MemberBankInfo) => {
-	const [error] = await to(
-		updateMutateAsync({
-			groupId: group.value.id,
-			newValue: { ...props.member, bankInfo: form },
-		}),
-	);
+	const payload: ApiUpdateMemberReq = form
+		? { bankInfo: form }
+		: { unsetBankInfo: true };
+	const [error] = await to(updateMutateAsync(payload));
 
 	if (error) {
 		return toast.errorWithRetry(error.message || 'Không thể cập nhật thông tin', () =>

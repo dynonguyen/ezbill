@@ -2,23 +2,15 @@
 import Flex from '@/components/ui/Flex.vue';
 import type { CategoryId } from '@/types/entities';
 import { computed } from 'vue';
-import { useBillsContext } from '../hooks/useBillsContext';
 import { useGroupContext } from '../hooks/useGroupContext';
+import { useGroupStatsContext } from '../hooks/useGroupStatsContext';
 import CategoryItem from './CategoryItem.vue';
 
 const { group } = useGroupContext();
-const bills = useBillsContext();
+const groupStats = useGroupStatsContext();
 
 const countBillMap = computed<Record<CategoryId, number>>(() => {
-	return bills.value.reduce(
-		(acc, bill) => {
-			bill.categoryIds?.forEach((id) => {
-				acc[id] = (acc[id] ?? 0) + 1;
-			});
-			return acc;
-		},
-		{} as Record<CategoryId, number>,
-	);
+	return groupStats.value?.categoryBillCounts ?? {};
 });
 </script>
 

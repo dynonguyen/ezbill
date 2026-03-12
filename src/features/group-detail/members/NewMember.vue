@@ -3,29 +3,26 @@ import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Member } from '@/types/entities';
-import { generateUUID } from '@/utils/helpers';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { ref } from 'vue';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
+import { useApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
 import MemberForm, { type MemberFormData } from './MemberForm.vue';
 
 const open = ref(false);
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const { group } = useGroupContext();
 const toast = useToast();
-const { isPending, mutateAsync } = useMutation({ mutationFn: client.addMember });
-const { refetchGroup } = useGroupQueryControl();
+const { isPending, mutateAsync } = useMutation({
+	mutationFn: (form: MemberFormData) => apiClient.addMember(group.value.id, form),
+});
+const { refetchGroup } = useGroupDetailQueryControl();
 
 const handleAddMember = async (form: MemberFormData) => {
-	const id = generateUUID();
-	const newMember: Member = { ...form, id };
-
-	const [error] = await to(mutateAsync({ groupId: group.value.id, member: newMember }));
+	const [error] = await to(mutateAsync(form));
 
 	if (error) {
 		return toast.errorWithRetry(error.message || 'Thêm thành viên thất bại', () =>

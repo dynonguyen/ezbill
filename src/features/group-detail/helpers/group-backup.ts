@@ -2,6 +2,7 @@ import type { Bill, BillMember, Group, Member, MemberId } from '@/types/entities
 import { getGroupLink, saveFileAs } from '@/utils/helpers';
 import dayjs from 'dayjs';
 import { Workbook, type Column, type Font } from 'exceljs';
+import { getMemberAmount } from './utils';
 
 const BACKUP_SHEET_NAME = 'Backup';
 
@@ -109,8 +110,8 @@ const generateOverviewSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 			rows[bill.createdBy].paid += bill.amount;
 		}
 
-		Object.entries(bill.members).forEach(([id, amount]) => {
-			if (rows[id]) rows[id].spent += amount;
+		bill.members.forEach((m) => {
+			if (rows[m.memberId]) rows[m.memberId].spent += m.shareAmount;
 		});
 	});
 
@@ -219,10 +220,13 @@ const generateDetailSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 			createdAt: new Date(bill.createdAt),
 			amount: bill.amount,
 			createdBy: groupMember[bill.createdBy],
-			...group.members.reduce((acc, { id }) => {
-				acc[id] = bill.members[id] ?? 0;
-				return acc;
-			}, {} as BillMember),
+			...group.members.reduce(
+				(acc, { id }) => {
+					acc[id] = getMemberAmount(bill.members, id);
+					return acc;
+				},
+				{} as Record<MemberId, number>,
+			),
 		}).height = ROW_HEIGHT;
 
 		if (bill.note) {
@@ -256,19 +260,58 @@ const generateBackupSheet = (wb: Workbook, group: Group, bills: Bill[]) => {
 	ws.getCell('A2').value = JSON.stringify(bills || []);
 };
 
-export const exportGroupToExcel = async (group: Group, bills: Bill[]) => {
+type FetchBillsPage = (
+	offset: number,
+	limit: number,
+) => Promise<{
+	total: number;
+	limit: number;
+	data: Bill[];
+}>;
+
+export const exportGroupToExcel = async (group: Group, fetchBillsPage: FetchBillsPage) => {
 	const wb = new Workbook();
 
-	generateOverviewSheet(wb, group, bills);
-	generateDetailSheet(wb, group, bills);
+	const PAGE_SIZE = 500;
+	let offset = 0;
+	const allBills: Bill[] = [];
+
+	const first = await fetchBillsPage(offset, PAGE_SIZE);
+	allBills.push(...first.data);
+
+	const total = first.total ?? allBills.length;
+
+	while (allBills.length < total && first.data.length === PAGE_SIZE) {
+		offset += PAGE_SIZE;
+		const page = await fetchBillsPage(offset, PAGE_SIZE);
+		allBills.push(...page.data);
+		if (page.data.length < PAGE_SIZE) break;
+	}
+
+	generateOverviewSheet(wb, group, allBills);
+	generateDetailSheet(wb, group, allBills);
 	generateInformationSheet(wb, group);
-	generateBackupSheet(wb, group, bills);
+	generateBackupSheet(wb, group, allBills);
 
 	const buffer = await wb.xlsx.writeBuffer();
 	saveFileAs(new Blob([buffer]), `${group.name}.xlsx`);
 };
 
 export type ImportedBackup = { group: Group; bills: Bill[] };
+
+const normalizeBillMembers = (members: BillMember[] | Record<MemberId, number>): BillMember[] => {
+	if (Array.isArray(members)) return members;
+	return Object.entries(members).map(([memberId, shareAmount]) => ({
+		memberId,
+		shareAmount,
+	}));
+};
+
+const normalizeBill = (bill: Bill): Bill => ({
+	...bill,
+	members: normalizeBillMembers(bill.members),
+});
+
 export async function readBackupFromExcel(file: File): Promise<ImportedBackup> {
 	const wb = new Workbook();
 
@@ -284,8 +327,8 @@ export async function readBackupFromExcel(file: File): Promise<ImportedBackup> {
 
 	try {
 		const group = typeof groupCell === 'string' ? JSON.parse(groupCell) : {};
-		const bills = typeof billsCell === 'string' ? JSON.parse(billsCell) : [];
-		return { group, bills };
+		const bills: Bill[] = typeof billsCell === 'string' ? JSON.parse(billsCell) : [];
+		return { group, bills: bills.map(normalizeBill) };
 	} catch {
 		throw new Error('Invalid backup data format');
 	}

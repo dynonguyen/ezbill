@@ -3,7 +3,7 @@ import Button from '@/components/ui/Button.vue';
 import Flex from '@/components/ui/Flex.vue';
 import FormControl from '@/components/ui/FormControl.vue';
 import { PATH } from '@/constants/path';
-import { useLegacyApiClient } from '@/hooks/useApiClient';
+import { useApiClient } from '@/hooks/useApiClient';
 import { useToast } from '@/hooks/useToast';
 import { getEnv } from '@/utils/get-env';
 import { veeValidateFocusOnError } from '@/utils/helpers';
@@ -15,7 +15,7 @@ import { z } from 'zod';
 
 const emit = defineEmits<{ close: [] }>();
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const router = useRouter();
 const toast = useToast();
 const schema = z.object({
@@ -32,22 +32,22 @@ const handleJoinGroup = handleSubmit(async ({ inviteLink }) => {
 	const linkOrId = inviteLink.trim();
 
 	const showErrorMessage = () => {
-		toast.error('Link hoặc id nhóm hợp lệ');
+		toast.error('Link hoặc id nhóm không hợp lệ');
 	};
 
 	if (!linkOrId) return showErrorMessage();
 
 	const baseUrl = getEnv('VITE_BASE_URL');
-	let groupId = linkOrId;
 
 	if (linkOrId.startsWith(baseUrl)) {
 		const isValid = linkOrId.includes(`${baseUrl}${PATH.GROUP.replace(':id', '')}`);
 		if (!isValid) return showErrorMessage();
-
-		groupId = linkOrId.split('/').pop()!;
 	}
 
-	const [error] = await to(client.fetchGroup(groupId));
+	const groupId = linkOrId.split('?')[0]?.split('/').pop() ?? '';
+	const inviteKey = linkOrId.split('?')[1]?.split('=')[1] ?? '';
+
+	const [error] = await to(apiClient.joinGroup(groupId, inviteKey));
 	if (error) return showErrorMessage();
 
 	router.push(PATH.GROUP.replace(':id', groupId));
@@ -64,14 +64,14 @@ const [inviteLink, inviteLinkProps] = defineField('inviteLink');
 <template>
 	<Flex stack class="gap-4" as="form" @submit="handleJoinGroup">
 		<FormControl
-			label="ID nhóm hoặc link mời"
+			label="Link mời"
 			html-for="inviteLink"
 			:error="Boolean(errors.inviteLink)"
 			:helper-text="errors.inviteLink">
 			<input
 				type="text"
 				class="input input-bordered w-full"
-				placeholder="Nhập ID nhóm hoặc link mời tham gia."
+				placeholder="Nhập link mời tham gia."
 				v-model="inviteLink"
 				v-bind="inviteLinkProps"
 				name="inviteLink"

@@ -40,48 +40,52 @@ export function billTypeMapping(type: BillType): BillTypeMappingResult {
 		.exhaustive();
 }
 
-export function splitEqually(amount: number, participants: MemberId[]): BillMember {
+export function splitEqually(amount: number, participants: MemberId[]): BillMember[] {
 	const len = participants.length;
-	return participants.reduce((acc, id) => {
-		acc[id] = amount / len;
-		return acc;
-	}, {} as BillMember);
+	const shareAmount = len > 0 ? amount / len : 0;
+	return participants.map((memberId) => ({ memberId, shareAmount }));
 }
 
-export function getTotalMemberAmount(memberAmounts: BillMember): number {
-	return Object.values(memberAmounts).reduce((acc, amount) => acc + (amount || 0), 0);
+export function getTotalMemberAmount(memberAmounts: BillMember[]): number {
+	return memberAmounts.reduce((acc, m) => acc + (m.shareAmount || 0), 0);
 }
 
-export function omitZeroMemberAmounts(memberAmounts: BillMember): BillMember {
-	return Object.fromEntries(
-		Object.entries(memberAmounts).filter(([_, amount]) => amount !== 0),
-	) as BillMember;
+export function omitZeroMemberAmounts(memberAmounts: BillMember[]): BillMember[] {
+	return memberAmounts.filter((m) => m.shareAmount !== 0);
 }
 
-export function splitExactly(amount: number, memberAmounts: BillMember): BillMember {
-	const result = { ...memberAmounts };
-
-	const remaining = Object.values(result).reduce(
-		(acc, amount) => {
-			if (!amount) acc.nMember++;
-			else acc.amount -= amount;
-
+export function splitExactly(amount: number, memberAmounts: BillMember[]): BillMember[] {
+	const remaining = memberAmounts.reduce(
+		(acc, m) => {
+			if (!m.shareAmount) acc.nMember++;
+			else acc.amount -= m.shareAmount;
 			return acc;
 		},
 		{ amount, nMember: 0 },
 	);
 
-	if (remaining.nMember) {
-		const remainingAmount = remaining.amount / remaining.nMember;
+	const remainingAmount = remaining.nMember > 0 ? remaining.amount / remaining.nMember : 0;
 
-		Object.keys(result).forEach((id) => {
-			if (!result[id]) {
-				result[id] = remainingAmount;
-			}
-		});
+	return memberAmounts.map((m) => ({
+		memberId: m.memberId,
+		shareAmount: m.shareAmount || remainingAmount,
+	}));
+}
+
+export function getMemberAmount(memberAmounts: BillMember[], memberId: MemberId): number {
+	return memberAmounts.find((m) => m.memberId === memberId)?.shareAmount ?? 0;
+}
+
+export function setMemberAmount(
+	memberAmounts: BillMember[],
+	memberId: MemberId,
+	shareAmount: number,
+): BillMember[] {
+	const existing = memberAmounts.find((m) => m.memberId === memberId);
+	if (existing) {
+		return memberAmounts.map((m) => (m.memberId === memberId ? { ...m, shareAmount } : m));
 	}
-
-	return result;
+	return [...memberAmounts, { memberId, shareAmount }];
 }
 
 export function focusOnToggleForDesktop(id: string) {
@@ -97,14 +101,15 @@ export const isMemberPaid = (bill: Bill, memberId: string): boolean => {
 };
 
 export const isAllPaid = (bill: Bill): boolean => {
-	return Object.entries(bill.members).every(([memberId, amount]) => {
-		return amount <= 0 || memberId === bill.createdBy || isMemberPaid(bill, memberId);
+	const paidMemberIds = new Set(bill.paymentTracking.map((t) => t.memberId));
+	return bill.members.every((m) => {
+		return m.shareAmount <= 0 || m.memberId === bill.createdBy || paidMemberIds.has(m.memberId);
 	});
 };
 
 export const getPaidStatus = (bill: Bill): string => {
-	const total = Object.keys(bill.members).reduce((acc, id) => {
-		if (bill.createdBy === id) return acc;
+	const total = bill.members.reduce((acc, m) => {
+		if (bill.createdBy === m.memberId) return acc;
 		return acc + 1;
 	}, 0);
 	const paidCount = bill.paymentTracking.length;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Flex from '@/components/ui/Flex.vue';
-import type { BillMember } from '@/types/entities';
 import { watch } from 'vue';
+import { getMemberAmount, splitEqually } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
@@ -11,12 +11,7 @@ const { participants, amount, memberAmounts } = useBillFormContext();
 const { group } = useGroupContext();
 
 watch([() => participants.value.length, amount], () => {
-	const nParticipants = participants.value.length;
-
-	memberAmounts.value = participants.value.reduce((acc, id) => {
-		acc[id] = (amount.value || 0) / nParticipants;
-		return acc;
-	}, {} as BillMember);
+	memberAmounts.value = splitEqually(amount.value || 0, participants.value);
 });
 </script>
 
@@ -27,7 +22,7 @@ watch([() => participants.value.length, amount], () => {
 			:key="m.id"
 			:member="m">
 			<template #action>
-				<CustomCurrencyText :amount="memberAmounts[m.id] || 0" />
+				<CustomCurrencyText :amount="getMemberAmount(memberAmounts, m.id)" />
 			</template>
 		</SplittingMemberItem>
 	</Flex>

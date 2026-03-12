@@ -3,42 +3,39 @@ import MemberAvatar from '@/components/MemberAvatar.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
-import type { Member } from '@/types/entities';
+import type { Member, MemberId } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
-import { useLegacyApiClient } from '../../../hooks/useApiClient';
-import { useBillsContext } from '../hooks/useBillsContext';
+import { useApiClient } from '../../../hooks/useApiClient';
 import { useGroupContext } from '../hooks/useGroupContext';
-import { useGroupQueryControl } from '../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../hooks/useGroupDetailQueryControl';
+import { useGroupStatsContext } from '../hooks/useGroupStatsContext';
 import AccountingIcon from './AccountingIcon.vue';
 import MemberEditingForm from './MemberEditingPopup.vue';
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const props = defineProps<{ member: Member; index: number }>();
 const { group, isAccountantMode } = useGroupContext();
-const bills = useBillsContext();
+const groupStats = useGroupStatsContext();
 const { mutateAsync: removeMutateAsync, isPending: isRemoving } = useMutation({
-	mutationFn: client.removeMember,
+	mutationFn: (memberId: MemberId) => apiClient.removeMember(group.value.id, memberId),
 });
 
 const toast = useToast();
-const { refetchGroup } = useGroupQueryControl();
+const { refetchGroup } = useGroupDetailQueryControl();
 
 const editing = ref(false);
 
-const disabledDelete = computed(
-	() =>
-		isRemoving.value ||
-		bills.value.some((bill) => bill.members[props.member.id] || bill.createdBy === props.member.id),
-);
+const disabledDelete = computed(() => {
+	if (isRemoving.value) return true;
+	return (groupStats.value?.memberBillCounts?.[props.member.id] ?? 0) > 0;
+});
 
 const handleDelete = async () => {
 	if (disabledDelete.value) return;
 
-	const [error] = await to(
-		removeMutateAsync({ groupId: group.value.id, memberId: props.member.id }),
-	);
+	const [error] = await to(removeMutateAsync(props.member.id));
 
 	if (error) {
 		return toast.errorWithRetry(error.message || 'Không thể Xoá thành viên', () => handleDelete());

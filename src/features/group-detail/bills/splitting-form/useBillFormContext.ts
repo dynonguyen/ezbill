@@ -4,7 +4,7 @@ import { inject, type Ref } from 'vue';
 
 export type BillFormContextValue = {
 	amount: Ref<number, number>;
-	memberAmounts: Ref<BillMember>;
+	memberAmounts: Ref<BillMember[]>;
 	participants: Ref<MemberId[]>;
 	hideNonParticipants: Ref<boolean>;
 	toggleParticipant(id: MemberId): void;

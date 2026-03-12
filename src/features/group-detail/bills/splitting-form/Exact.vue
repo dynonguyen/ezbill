@@ -5,7 +5,12 @@ import type { BillMember } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
 import { debounce } from 'es-toolkit';
 import { computed, watch } from 'vue';
-import { focusOnToggleForDesktop, getTotalMemberAmount } from '../../helpers/utils';
+import {
+	focusOnToggleForDesktop,
+	getMemberAmount,
+	getTotalMemberAmount,
+	setMemberAmount,
+} from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
 import CustomCurrencyText from './CustomCurrencyText.vue';
 import SplittingMemberItem from './SplittingMemberItem.vue';
@@ -15,17 +20,16 @@ const { participants, memberAmounts, amount } = useBillFormContext();
 const { group } = useGroupContext();
 
 watch([() => participants.value.length], () => {
-	const newMemberAmount: BillMember = {};
+	const newMemberAmounts: BillMember[] = participants.value.map((memberId) => ({
+		memberId,
+		shareAmount: getMemberAmount(memberAmounts.value, memberId),
+	}));
 
-	participants.value.map((id) => {
-		newMemberAmount[id] = memberAmounts.value[id] || 0;
-	});
-
-	memberAmounts.value = newMemberAmount;
+	memberAmounts.value = newMemberAmounts;
 });
 
 const handleMemberAmountChange = debounce((id: string, value: number) => {
-	memberAmounts.value[id] = value;
+	memberAmounts.value = setMemberAmount(memberAmounts.value, id, value);
 }, 350);
 
 const handleToggle = (enabled: boolean, id: string) => {
@@ -35,11 +39,13 @@ const handleToggle = (enabled: boolean, id: string) => {
 };
 
 const remaining = computed(() => {
-	const nRemainingMembers = participants.value.filter((id) => !memberAmounts.value[id]).length;
+	const nRemainingMembers = participants.value.filter(
+		(id) => !getMemberAmount(memberAmounts.value, id),
+	).length;
 
 	if (nRemainingMembers === 0) return 0;
 
-	const total = getTotalMemberAmount(memberAmounts.value || {});
+	const total = getTotalMemberAmount(memberAmounts.value || []);
 	const totalRemaining = total > (amount.value ?? 0) ? 0 : (amount.value ?? 0) - total;
 
 	return totalRemaining / nRemainingMembers;
@@ -60,7 +66,7 @@ const remaining = computed(() => {
 				<CurrencyInput
 					v-if="m.checked"
 					@change="(v: any) => handleMemberAmountChange(m.id, Number(v))"
-					:model-value="m.checked ? memberAmounts[m.id] || 0 : 0"
+					:model-value="m.checked ? getMemberAmount(memberAmounts, m.id) : 0"
 					:input-props="{
 						id: `${m.id}-exact-amount`,
 						class: 'h-10 w-40 shrink-0',

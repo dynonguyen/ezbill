@@ -1,54 +1,74 @@
 <script setup lang="ts">
+import {
+	SortOrder,
+	type ApiListBillsByMemberReq,
+	type BillByMemberStatus,
+} from '@/apis/api-client';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
+import { QUERY_KEY } from '@/constants/key';
 import type { BillId, MemberId } from '@/types/entities';
+import { useQuery } from '@tanstack/vue-query';
 import { match, P } from 'ts-pattern';
 import { computed, ref } from 'vue';
+import { useApiClient } from '../../../../hooks/useApiClient';
 import BillDetailPopup from '../../bills/BillDetailPopup.vue';
 import BillItem from '../../bills/BillItem.vue';
-import { isAllPaid, isMemberPaid } from '../../helpers/utils';
-import { useBillsContext } from '../../hooks/useBillsContext';
-
-type Tab = 'to-pay' | 'received' | 'transferred';
+import { getMemberAmount } from '../../helpers/utils';
+import { useGroupContext } from '../../hooks/useGroupContext';
 
 const props = defineProps<{ id: MemberId }>();
-const bills = useBillsContext();
-const activeTab = ref<Tab>('to-pay');
+const activeTab = ref<BillByMemberStatus>('to_pay');
 const detailId = ref<BillId | null>(null);
 
-const memberBills = computed(() => {
-	return bills.value
-		.filter((b) => {
-			return match(activeTab.value)
-				.with(
-					'to-pay',
-					() => b.createdBy !== props.id && b.members[props.id] > 0 && !isMemberPaid(b, props.id),
-				)
-				.with('received', () => b.createdBy === props.id && !isAllPaid(b))
-				.with(
-					'transferred',
-					() => b.createdBy !== props.id && b.members[props.id] > 0 && isMemberPaid(b, props.id),
-				)
-				.exhaustive();
-		})
-		.map((b) => {
-			const amount = match(activeTab.value)
-				.with(P.union('to-pay', 'transferred'), () => -b.members[props.id])
-				.with('received', () =>
-					Object.entries(b.members).reduce((sum, [id, amount]) => {
-						if (id === props.id || isMemberPaid(b, id)) return sum;
-						return sum + amount;
-					}, 0),
-				)
-				.exhaustive();
-			return { ...b, amount };
-		});
+const apiClient = useApiClient();
+const { group } = useGroupContext();
+
+const fetchOptions = computed<ApiListBillsByMemberReq>(() => ({
+	offset: 0,
+	limit: 100,
+	sortBy: 'created_at',
+	sortOrder: SortOrder.Desc,
+	status: activeTab.value,
+}));
+
+const billsByMemberQueryKey = computed(() => [
+	QUERY_KEY.BILLS_BY_MEMBER,
+	group.value.id,
+	props.id,
+	activeTab.value,
+]);
+
+const { data: billsByMember } = useQuery({
+	queryKey: billsByMemberQueryKey,
+	queryFn: () =>
+		apiClient
+			.listBillsByMember(group.value.id, props.id, fetchOptions.value)
+			.then((res) => res.data),
 });
 
-const tabs: Array<{ value: Tab; label: string }> = [
-	{ value: 'to-pay', label: 'Cần trả' },
-	{ value: 'received', label: 'Nhận lại' },
-	{ value: 'transferred', label: 'Đã trả' },
+const memberBills = computed(() => {
+	const bills = billsByMember.value?.data ?? [];
+	return bills.map((b) => {
+		const amount = match<BillByMemberStatus, number>(activeTab.value)
+			.with(P.union('to_pay', 'paid'), () => -getMemberAmount(b.members, props.id))
+			.with('to_receive', () => {
+				const paidMemberIds = new Set(b.paymentTracking.map((t) => t.memberId));
+				return b.members.reduce((sum, m) => {
+					if (m.memberId === props.id || paidMemberIds.has(m.memberId)) return sum;
+					return sum + m.shareAmount;
+				}, 0);
+			})
+			.otherwise(() => 0);
+
+		return { ...b, amount } as typeof b & { amount: number };
+	});
+});
+
+const tabs: Array<{ value: BillByMemberStatus; label: string }> = [
+	{ value: 'to_pay', label: 'Cần trả' },
+	{ value: 'to_receive', label: 'Nhận lại' },
+	{ value: 'paid', label: 'Đã trả' },
 ];
 </script>
 

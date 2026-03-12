@@ -1,40 +1,39 @@
 <script setup lang="ts">
+import { SortOrder } from '@/apis/api-client';
 import InviteLink from '@/components/InviteLink.vue';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
 import Typography from '@/components/ui/Typography.vue';
 import { PATH } from '@/constants/path';
+import { useGroupsQueryControl } from '@/hooks/useGroupsQueryControl';
 import { useToast } from '@/hooks/useToast';
-import { useLocalDBStore } from '@/stores/local-db';
 import type { Group } from '@/types/entities';
 import { useMutation } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
 import to from 'await-to-js';
 import { ref, useId, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
-import { useLegacyApiClient } from '../../hooks/useApiClient';
+import { useApiClient } from '../../hooks/useApiClient';
 import GroupForm from '../new-group/GroupForm.vue';
-import { useBillsContext } from './hooks/useBillsContext';
 import { useGroupContext } from './hooks/useGroupContext';
-import { useGroupQueryControl } from './hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from './hooks/useGroupDetailQueryControl';
 
-const client = useLegacyApiClient();
+const apiClient = useApiClient();
 const { group } = useGroupContext();
-const bills = useBillsContext();
 const toast = useToast();
 const actionId = useId();
 const router = useRouter();
-const localDBStore = useLocalDBStore();
+const { refetchGroups } = useGroupsQueryControl();
 const outsideClickTarget = useTemplateRef('menu-target');
 
 const { isPending: isUpdating, mutateAsync: updateMutateAsync } = useMutation({
-	mutationFn: client.updateGroup,
+	mutationFn: (form: Partial<Group>) => apiClient.updateGroup(group.value.id, form),
 });
-const { isPending: isDeleting, mutateAsync: deleteMutateAsync } = useMutation({
-	mutationFn: client.deleteGroup,
+const { isPending: isLeaving, mutateAsync: leaveGroupMutateAsync } = useMutation({
+	mutationFn: () => apiClient.leaveGroup(group.value.id),
 });
-const { refetchGroup } = useGroupQueryControl();
+const { refetchGroup, refetchGroupStats } = useGroupDetailQueryControl();
 
 const open = ref(false);
 const openShareGroup = ref(false);
@@ -47,35 +46,43 @@ const handleClose = () => {
 
 const exportGroup = () => {
 	import('./helpers/group-backup').then(({ exportGroupToExcel }) => {
-		exportGroupToExcel(group.value, bills.value);
+		exportGroupToExcel(group.value, (offset, limit) =>
+			apiClient
+				.fetchBills(group.value.id, {
+					offset,
+					limit,
+					sortBy: 'created_at',
+					sortOrder: SortOrder.Desc,
+				})
+				.then((res) => res.data ?? { total: 0, limit, data: [] }),
+		);
 	});
 };
 
 const handleEditGroup = async (form: Partial<Group>) => {
-	const [error] = await to(updateMutateAsync({ updated: form, id: group.value.id }));
+	const [error] = await to(updateMutateAsync({ ...form, id: group.value.id }));
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
+		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Chỉnh sửa thất bại', () => handleEditGroup(form));
 	}
 
 	openEditGroupName.value = false;
 
 	refetchGroup();
+	refetchGroupStats();
 };
 
-const handleDeleteGroup = async () => {
-	const [error] = await to(deleteMutateAsync(group.value.id));
-	localDBStore.unhideRecentGroup(group.value.id);
+const handleLeaveGroup = async () => {
+	const [error] = await to(leaveGroupMutateAsync());
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
-		return toast.errorWithRetry('Xoá nhóm thất bại', () => handleDeleteGroup());
+		void apiClient.createErrorLog({ error: error?.message });
+		return toast.errorWithRetry('Rời nhóm thất bại', () => handleLeaveGroup());
 	}
 
-	localDBStore.removeFromGroup(group.value.id);
+	refetchGroups();
 	confirmDelete.value = false;
-	refetchGroup();
 
 	router.push(PATH.HOME);
 };
@@ -102,7 +109,7 @@ const items = ref<
 		action: exportGroup,
 	},
 	{
-		label: 'Xoá nhóm',
+		label: 'Rời nhóm',
 		icon: 'icon msi-delete size-5',
 		itemClass: '[&>*]:!text-red-500',
 		action: () => (confirmDelete.value = true),
@@ -166,13 +173,13 @@ const items = ref<
 		<InviteLink v-if="openShareGroup" :id="group.id" />
 	</Dialog>
 
-	<Dialog v-model:open="confirmDelete" header="Xoá nhóm">
+	<Dialog v-model:open="confirmDelete" header="Rời nhóm">
 		<Typography variant="smRegular" class="text-center">
-			Bạn có chắc chắn muốn xoá nhóm không? Thao tác không thể hoàn tác.
+			Bạn có chắc chắn muốn rời nhóm không? Thao tác không thể hoàn tác.
 		</Typography>
 
 		<template #action>
-			<Button color="danger" @click="handleDeleteGroup" :loading="isDeleting">Xoá</Button>
+			<Button color="danger" @click="handleLeaveGroup" :loading="isLeaving">Rời nhóm</Button>
 		</template>
 	</Dialog>
 </template>

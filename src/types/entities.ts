@@ -37,6 +37,8 @@ export type PaymentTracking = {
 	memberId: MemberId;
 };
 
+export type GroupPreference = Partial<{ isHidden: boolean; isPinned: boolean }>;
+
 export type Group = {
 	id: string;
 	name: string;
@@ -46,7 +48,7 @@ export type Group = {
 	createdAt: string;
 	updatedAt: string;
 	categories?: Category[];
-};
+} & GroupPreference;
 export type GroupId = Group['id'];
 
 export enum BillType {
@@ -55,18 +57,50 @@ export enum BillType {
 	Percentage = 'percentage',
 	Share = 'share',
 }
-export type BillMember = Record<MemberId, number>;
+export type BillMember = {
+	memberId: MemberId;
+	shareAmount: number;
+};
+
 export type Bill = {
-	id: number;
+	id: string;
 	name: string;
 	groupId: GroupId;
 	type: BillType;
 	amount: number;
 	note?: string | null;
 	createdAt: string;
-	members: BillMember;
+	members: BillMember[];
 	createdBy: MemberId;
 	paymentTracking: PaymentTracking[];
 	categoryIds?: CategoryId[];
 };
 export type BillId = Bill['id'];
+
+export type MemberBalanceAccounting = {
+	balance: number;
+	totalOwed: number;
+	totalPaid: number;
+};
+
+export type MemberBalanceTracking = {
+	toPay: number;
+	toReceive: number;
+};
+
+export type MemberBalance = MemberBalanceAccounting | MemberBalanceTracking;
+
+export type GroupMemberStats = {
+	memberId: MemberId;
+	name: string;
+} & MemberBalance;
+
+export type GroupStats = {
+	groupId: GroupId;
+	paymentTrackingMode: PaymentTrackingMode;
+	totalSpent: number;
+	members: GroupMemberStats[];
+	totalBills: number;
+	memberBillCounts: Record<MemberId, number>;
+	categoryBillCounts: Record<CategoryId, number>;
+};

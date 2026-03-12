@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import {
+	SortOrder,
+	type ApiListBillsByMemberReq,
+	type ApiMarkBillsAsPaidReq,
+} from '@/apis/api-client';
 import Button from '@/components/ui/Button.vue';
 import Dialog from '@/components/ui/Dialog.vue';
 import Flex from '@/components/ui/Flex.vue';
@@ -6,39 +11,59 @@ import Typography from '@/components/ui/Typography.vue';
 import { useToast } from '@/hooks/useToast';
 import type { BillId, Member, MemberId } from '@/types/entities';
 import { toVND } from '@/utils/helpers';
-import { useMutation } from '@tanstack/vue-query';
+import { useMutation, useQuery } from '@tanstack/vue-query';
 import to from 'await-to-js';
 import { computed, ref } from 'vue';
-import { useLegacyApiClient } from '../../../../hooks/useApiClient';
+import { QUERY_KEY } from '../../../../constants/key';
+import { useApiClient } from '../../../../hooks/useApiClient';
 import BillItem from '../../bills/BillItem.vue';
-import { isMemberPaid } from '../../helpers/utils';
-import { useBillsContext } from '../../hooks/useBillsContext';
+import { getMemberAmount } from '../../helpers/utils';
 import { useGroupContext } from '../../hooks/useGroupContext';
-import { useGroupQueryControl } from '../../hooks/useGroupQueryControl';
+import { useGroupDetailQueryControl } from '../../hooks/useGroupDetailQueryControl';
 import BankQR from '../BankQR.vue';
 
 const memberId = defineModel<string>('memberId', { default: '' });
 
-const client = useLegacyApiClient();
-const bills = useBillsContext();
+const apiClient = useApiClient();
 const toast = useToast();
-const { isPending: updating, mutateAsync } = useMutation({ mutationFn: client.markBillsAsPaid });
-const { refetchBills } = useGroupQueryControl();
+const { isPending: updating, mutateAsync } = useMutation({
+	mutationFn: (req: ApiMarkBillsAsPaidReq) => apiClient.markBillsAsPaid(req),
+});
+const { refetchBills } = useGroupDetailQueryControl();
 const { group } = useGroupContext();
 
 const selected = ref<Set<BillId>>(new Set());
 const showDetail = ref(false);
 const confirmMarkPaid = ref(false);
 
+const fetchOptions = computed<ApiListBillsByMemberReq>(() => ({
+	offset: 0,
+	limit: 100,
+	sortBy: 'created_at',
+	sortOrder: SortOrder.Desc,
+	status: 'to_pay',
+}));
+
+const billsByMemberQueryKey = computed(() => [
+	QUERY_KEY.BILLS_BY_MEMBER,
+	group.value.id,
+	memberId.value,
+	'to_pay',
+]);
+
+const { data: billsByMember } = useQuery({
+	queryKey: billsByMemberQueryKey,
+	enabled: computed(() => Boolean(memberId.value)),
+	queryFn: () =>
+		apiClient
+			.listBillsByMember(group.value.id, memberId.value as MemberId, fetchOptions.value)
+			.then((res) => res.data),
+});
+
 const memberBills = computed(() => {
-	return bills.value
-		.filter(
-			(b) =>
-				b.createdBy !== memberId.value &&
-				b.members[memberId.value] > 0 &&
-				!isMemberPaid(b, memberId.value),
-		)
-		.map((b) => ({ ...b, amount: -b.members[memberId.value] }))
+	const bills = billsByMember.value?.data ?? [];
+	return bills
+		.map((b) => ({ ...b, amount: -getMemberAmount(b.members, memberId.value) }))
 		.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 });
 
@@ -99,7 +124,7 @@ const handleMarkAsPaid = async () => {
 	);
 
 	if (error) {
-		void client.createErrorLog({ error: error?.message });
+		void apiClient.createErrorLog({ error: error?.message });
 		return toast.errorWithRetry('Cập nhật thất bại', () => handleMarkAsPaid());
 	}
 
